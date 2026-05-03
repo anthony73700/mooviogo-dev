@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}{{ city_name }} | Mooviogo{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-7xl px-4 py-12">
+  <div class="mb-8 flex items-center gap-4">
+    <a href="/villes/" class="text-sm text-white/40 hover:text-white transition-colors">← Toutes les villes</a>
+    <span class="text-white/20">/</span>
+    <h1 class="text-3xl font-bold text-white">{{ city_name }}</h1>
+  </div>
+
+  {# Sub-nav #}
+  <div class="mb-8 flex flex-wrap gap-2">
+    <a href="/ville/{{ city_slug }}/" class="rounded-full border {% if active_tab == 'all' %}border-brand/40 bg-brand/10 text-brand{% else %}border-white/10 bg-white/5 text-white/70 hover:text-white{% endif %} px-4 py-1.5 text-sm transition-colors">Tout</a>
+    <a href="/ville/{{ city_slug }}/sorties/" class="rounded-full border {% if active_tab == 'sorties' %}border-brand/40 bg-brand/10 text-brand{% else %}border-white/10 bg-white/5 text-white/70 hover:text-white{% endif %} px-4 py-1.5 text-sm transition-colors">Sorties</a>
+    <a href="/ville/{{ city_slug }}/restaurants/" class="rounded-full border {% if active_tab == 'restaurants' %}border-brand/40 bg-brand/10 text-brand{% else %}border-white/10 bg-white/5 text-white/70 hover:text-white{% endif %} px-4 py-1.5 text-sm transition-colors">Restaurants</a>
+    <a href="/ville/{{ city_slug }}/evenements/" class="rounded-full border {% if active_tab == 'evenements' %}border-brand/40 bg-brand/10 text-brand{% else %}border-white/10 bg-white/5 text-white/70 hover:text-white{% endif %} px-4 py-1.5 text-sm transition-colors">Événements</a>
+  </div>
+
+  {% if sorties %}
+  <section class="mb-12">
+    <h2 class="mb-4 text-xl font-semibold text-white">Sorties</h2>
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {% for sortie in sorties %}
+      <a href="/sorties/{{ sortie.id }}/" class="card p-5 hover:border-white/15 transition-all block group">
+        <h3 class="font-semibold text-white group-hover:text-brand transition-colors">{{ sortie.title }}</h3>
+        <p class="mt-2 text-xs text-white/40">{% if sortie.is_free %}Gratuit{% else %}{{ sortie.price|floatformat:2 }} €{% endif %}</p>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  {% if restaurants %}
+  <section class="mb-12">
+    <h2 class="mb-4 text-xl font-semibold text-white">Restaurants</h2>
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {% for venue in restaurants %}
+      <a href="/restaurants/{{ venue.city_slug }}/{{ venue.slug }}/" class="card p-5 hover:border-white/15 transition-all block group">
+        <h3 class="font-semibold text-white group-hover:text-brand transition-colors">{{ venue.name }}</h3>
+        {% if venue.cuisine_type %}<p class="mt-1 text-xs text-white/40">{{ venue.cuisine_type }}</p>{% endif %}
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  {% if events %}
+  <section>
+    <h2 class="mb-4 text-xl font-semibold text-white">Événements</h2>
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {% for event in events %}
+      <a href="/evenements/{{ event.slug }}/" class="card p-5 hover:border-white/15 transition-all block group">
+        <h3 class="font-semibold text-white group-hover:text-brand transition-colors">{{ event.title }}</h3>
+        {% if event.starts_at %}<p class="mt-1 text-xs text-white/40">{{ event.starts_at|date:"d M Y" }}</p>{% endif %}
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  {% if not sorties and not restaurants and not events %}
+  <div class="rounded-2xl border border-white/[0.06] bg-white/[0.02] py-20 text-center">
+    <p class="text-white/40">Rien à afficher pour {{ city_name }} pour le moment.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

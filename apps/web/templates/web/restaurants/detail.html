@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}{{ venue.name }} | Mooviogo{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-3xl px-4 py-12">
+  <a href="/restaurants/" class="mb-6 inline-flex items-center gap-2 text-sm text-white/40 hover:text-white transition-colors">← Retour aux restaurants</a>
+
+  {% if venue.cover_image_url %}
+  <div class="mb-8 overflow-hidden rounded-2xl" style="height:280px">
+    <img src="{{ venue.cover_image_url }}" alt="{{ venue.name }}" class="h-full w-full object-cover" />
+  </div>
+  {% endif %}
+
+  <div class="card p-8">
+    <h1 class="text-3xl font-bold text-white">{{ venue.name }}</h1>
+    <p class="mt-2 text-white/50">📍 {{ venue.address|default:venue.city_label }}</p>
+    {% if venue.cuisine_type %}<p class="mt-1 text-sm text-white/40">{{ venue.cuisine_type }}</p>{% endif %}
+    {% if venue.description %}<p class="mt-5 text-white/70 leading-relaxed">{{ venue.description }}</p>{% endif %}
+
+    <h2 class="mt-8 mb-4 text-lg font-semibold text-white">Créneaux disponibles</h2>
+    {% if slots %}
+    <div class="grid gap-3 sm:grid-cols-2">
+      {% for slot in slots %}
+      {% if slot.confirmed_count < slot.capacity %}
+      <form method="post" action="/restaurants/{{ venue.city_slug }}/{{ venue.slug }}/reserver/">
+        {% csrf_token %}
+        <input type="hidden" name="slot_id" value="{{ slot.id }}" />
+        <button type="submit" class="w-full rounded-xl border border-white/10 bg-white/[0.03] p-4 text-left hover:border-brand/30 hover:bg-brand/5 transition-all group">
+          <p class="font-medium text-white group-hover:text-brand transition-colors">{{ slot.date|date:"d M Y" }} à {{ slot.time|time:"H:i" }}</p>
+          <p class="mt-1 text-xs text-white/40">{{ slot.capacity|add:"-"|add:slot.confirmed_count }} places restantes</p>
+        </button>
+      </form>
+      {% endif %}
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-white/40">Aucun créneau disponible pour le moment.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

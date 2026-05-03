@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Partenaires | Mooviogo{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-7xl px-4 py-12">
+  <h1 class="mb-2 text-3xl font-bold text-white">Partenaires</h1>
+  <p class="mb-8 text-white/50">Restaurants, organisateurs, lieux — nos partenaires vérifiés</p>
+  {% if partners %}
+  <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    {% for partner in partners %}
+    <a href="/partenaires/{{ partner.slug|default:partner.id }}/" class="card p-5 hover:border-white/15 transition-all block group">
+      <div class="mb-3 flex items-center gap-3">
+        <div class="flex h-10 w-10 items-center justify-center rounded-full bg-brand/10 text-brand font-bold text-lg">
+          {{ partner.owner.display_name|default:partner.owner.username|first|upper }}
+        </div>
+        <div>
+          <h3 class="font-semibold text-white group-hover:text-brand transition-colors">{{ partner.owner.display_name|default:partner.owner.username }}</h3>
+          {% if partner.is_verified %}<span class="text-xs text-green-400">✓ Vérifié</span>{% endif %}
+        </div>
+      </div>
+      {% if partner.description %}<p class="text-sm text-white/50 line-clamp-2">{{ partner.description }}</p>{% endif %}
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="rounded-2xl border border-white/[0.06] bg-white/[0.02] py-20 text-center">
+    <p class="text-white/40">Aucun partenaire pour le moment</p>
+    <a href="/devenir-partenaire/" class="mt-4 inline-block btn-brand text-sm">Devenir partenaire</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

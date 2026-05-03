@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Modifier mon profil | Mooviogo{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-xl px-4 py-12">
+  <a href="/profil/" class="mb-6 inline-flex items-center gap-2 text-sm text-white/40 hover:text-white transition-colors">← Retour</a>
+  <h1 class="mb-8 text-2xl font-bold text-white">Modifier mon profil</h1>
+  <div class="card p-8">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="space-y-5">
+        <div>
+          <label class="mb-2 block text-sm text-white/60">Nom affiché</label>
+          <input type="text" name="display_name" value="{{ user.display_name|default:'' }}" class="input" placeholder="Ton prénom ou pseudo" />
+        </div>
+        <div>
+          <label class="mb-2 block text-sm text-white/60">Bio</label>
+          <textarea name="bio" rows="3" class="input py-3 h-auto resize-none" placeholder="Quelques mots sur toi...">{{ user.bio|default:'' }}</textarea>
+        </div>
+        <div>
+          <label class="mb-2 block text-sm text-white/60">Ville</label>
+          <input type="text" name="city" value="{{ user.city|default:'' }}" class="input" placeholder="Paris" />
+        </div>
+        <div>
+          <label class="mb-2 block text-sm text-white/60">URL de l'avatar</label>
+          <input type="url" name="avatar_url" value="{{ user.avatar_url|default:'' }}" class="input" placeholder="https://..." />
+        </div>
+      </div>
+      <button type="submit" class="btn-brand mt-8 w-full py-3">Enregistrer</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

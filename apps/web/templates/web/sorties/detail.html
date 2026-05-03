@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}{{ sortie.title }} | Mooviogo{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-3xl px-4 py-12">
+  <a href="/sorties/" class="mb-6 inline-flex items-center gap-2 text-sm text-white/40 hover:text-white transition-colors">← Retour aux sorties</a>
+
+  <div class="card p-8">
+    <div class="mb-4 flex flex-wrap items-center gap-3">
+      <span class="rounded-full bg-brand/10 px-3 py-1 text-xs font-medium text-brand">{{ sortie.get_type_display }}</span>
+      <span class="rounded-full px-3 py-1 text-xs
+        {% if sortie.status == 'OPEN' %}bg-green-500/10 text-green-400
+        {% elif sortie.status == 'FULL' %}bg-yellow-500/10 text-yellow-400
+        {% else %}bg-white/5 text-white/40{% endif %}">
+        {{ sortie.get_status_display }}
+      </span>
+    </div>
+
+    <h1 class="text-3xl font-bold text-white">{{ sortie.title }}</h1>
+    <p class="mt-2 text-white/50">📍 {{ sortie.city }}</p>
+
+    {% if sortie.description %}
+    <p class="mt-6 text-white/70 leading-relaxed">{{ sortie.description }}</p>
+    {% endif %}
+
+    <div class="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3">
+      <div class="rounded-xl bg-white/[0.04] p-4 text-center">
+        <p class="text-xs text-white/40 mb-1">Prix</p>
+        <p class="font-semibold text-white">{% if sortie.is_free %}Gratuit{% else %}{{ sortie.price|floatformat:2 }} €{% endif %}</p>
+      </div>
+      <div class="rounded-xl bg-white/[0.04] p-4 text-center">
+        <p class="text-xs text-white/40 mb-1">Participants</p>
+        <p class="font-semibold text-white">{{ participant_count }}/{{ sortie.max_participants|default:"∞" }}</p>
+      </div>
+      {% if sortie.starts_at %}
+      <div class="rounded-xl bg-white/[0.04] p-4 text-center">
+        <p class="text-xs text-white/40 mb-1">Date</p>
+        <p class="font-semibold text-white">{{ sortie.starts_at|date:"d M Y H:i" }}</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="mt-8">
+      {% if user.is_authenticated %}
+        {% if is_participant %}
+        <form method="post" action="/sorties/{{ sortie.id }}/quitter/">
+          {% csrf_token %}
+          <button type="submit" class="btn-ghost w-full py-3">Quitter la sortie</button>
+        </form>
+        {% elif sortie.status == 'OPEN' %}
+        <form method="post" action="/sorties/{{ sortie.id }}/rejoindre/">
+          {% csrf_token %}
+          <button type="submit" class="btn-brand w-full py-3 text-base">Rejoindre la sortie</button>
+        </form>
+        {% else %}
+        <button disabled class="btn-ghost w-full py-3 opacity-50 cursor-not-allowed">Sortie complète ou fermée</button>
+        {% endif %}
+      {% else %}
+      <a href="/connexion/?next=/sorties/{{ sortie.id }}/" class="btn-brand block w-full py-3 text-center text-base">Se connecter pour rejoindre</a>
+      {% endif %}
+    </div>
+  </div>
+
+  {# Participants #}
+  {% if participants %}
+  <div class="mt-8">
+    <h2 class="mb-4 text-lg font-semibold text-white">Participants ({{ participant_count }})</h2>
+    <div class="flex flex-wrap gap-3">
+      {% for p in participants %}
+      <a href="/profil/{{ p.user.id }}/" class="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white/70 hover:text-white transition-colors">
+        {% if p.user.avatar_url %}
+        <img src="{{ p.user.avatar_url }}" class="h-5 w-5 rounded-full object-cover" />
+        {% else %}
+        <span class="flex h-5 w-5 items-center justify-center rounded-full bg-brand/20 text-xs text-brand">{{ p.user.display_name|default:p.user.username|first|upper }}</span>
+        {% endif %}
+        {{ p.user.display_name|default:p.user.username }}
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Devenir partenaire | Mooviogo{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-3xl px-4 py-16 text-center">
+  <h1 class="text-4xl font-bold text-white md:text-5xl">Rejoins Mooviogo<br><span class="text-brand">en tant que partenaire</span></h1>
+  <p class="mx-auto mt-5 max-w-xl text-lg text-white/55">Restaurateurs, organisateurs d'événements, lieux — touche des milliers d'utilisateurs actifs.</p>
+
+  <div class="mt-12 grid gap-6 sm:grid-cols-3 text-left">
+    <div class="card p-6">
+      <div class="mb-3 text-3xl">👥</div>
+      <h3 class="font-semibold text-white">Visibilité</h3>
+      <p class="mt-1 text-sm text-white/50">Apparais dans le feed de milliers d'utilisateurs qui cherchent quoi faire ce soir.</p>
+    </div>
+    <div class="card p-6">
+      <div class="mb-3 text-3xl">📊</div>
+      <h3 class="font-semibold text-white">Tableau de bord</h3>
+      <p class="mt-1 text-sm text-white/50">Gère tes événements, créneaux, réservations et revenus depuis un seul endroit.</p>
+    </div>
+    <div class="card p-6">
+      <div class="mb-3 text-3xl">💳</div>
+      <h3 class="font-semibold text-white">Paiements</h3>
+      <p class="mt-1 text-sm text-white/50">Encaisse directement via Stripe. Zéro paperasse, tout est automatisé.</p>
+    </div>
+  </div>
+
+  <div class="mt-12">
+    {% if user.is_authenticated %}
+    <a href="/pro/inscription/" class="btn-brand px-10 py-4 text-lg">Déposer ma candidature</a>
+    {% else %}
+    <a href="/inscription/?next=/pro/inscription/" class="btn-brand px-10 py-4 text-lg">Commencer gratuitement</a>
+    <p class="mt-3 text-sm text-white/30">Pas encore de compte ? L'inscription est gratuite.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

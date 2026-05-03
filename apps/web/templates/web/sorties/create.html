@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Créer une sortie | Mooviogo{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-xl px-4 py-12">
+  <a href="/sorties/" class="mb-6 inline-flex items-center gap-2 text-sm text-white/40 hover:text-white transition-colors">← Retour</a>
+  <h1 class="mb-8 text-3xl font-bold text-white">Créer une sortie</h1>
+
+  <div class="card p-8">
+    <form method="post">
+      {% csrf_token %}
+      <div class="space-y-5">
+        <div>
+          <label class="mb-2 block text-sm text-white/60">Titre *</label>
+          <input type="text" name="title" value="{{ form.title.value|default:'' }}" required class="input" placeholder="Ex: Balade au Parc de la Tête d'Or" />
+          {% if form.title.errors %}<p class="mt-1 text-xs text-red-400">{{ form.title.errors.0 }}</p>{% endif %}
+        </div>
+        <div>
+          <label class="mb-2 block text-sm text-white/60">Description</label>
+          <textarea name="description" rows="4" class="input py-3 h-auto resize-none" placeholder="Décris ta sortie...">{{ form.description.value|default:'' }}</textarea>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="mb-2 block text-sm text-white/60">Ville *</label>
+            <input type="text" name="city" value="{{ form.city.value|default:'' }}" required class="input" placeholder="Lyon" />
+          </div>
+          <div>
+            <label class="mb-2 block text-sm text-white/60">Type *</label>
+            <select name="type" class="input">
+              <option value="COMMUNAUTAIRE" {% if form.type.value == "COMMUNAUTAIRE" %}selected{% endif %}>Communautaire</option>
+              <option value="PARTENAIRE" {% if form.type.value == "PARTENAIRE" %}selected{% endif %}>Partenaire</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="mb-2 block text-sm text-white/60">Date et heure</label>
+            <input type="datetime-local" name="starts_at" value="{{ form.starts_at.value|default:'' }}" class="input" />
+          </div>
+          <div>
+            <label class="mb-2 block text-sm text-white/60">Participants max</label>
+            <input type="number" name="max_participants" value="{{ form.max_participants.value|default:'' }}" min="2" class="input" placeholder="10" />
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <input type="checkbox" name="is_free" id="is_free" {% if form.is_free.value %}checked{% endif %} class="h-4 w-4 accent-brand" />
+          <label for="is_free" class="text-sm text-white/70">Sortie gratuite</label>
+        </div>
+        <div id="price-field">
+          <label class="mb-2 block text-sm text-white/60">Prix (€)</label>
+          <input type="number" name="price" value="{{ form.price.value|default:'0' }}" min="0" step="0.01" class="input" placeholder="0.00" />
+        </div>
+      </div>
+      <button type="submit" class="btn-brand mt-8 w-full py-3 text-base">Créer la sortie</button>
+    </form>
+  </div>
+</div>
+<script>
+const checkbox = document.getElementById('is_free');
+const priceField = document.getElementById('price-field');
+function togglePrice() { priceField.style.display = checkbox.checked ? 'none' : 'block'; }
+checkbox.addEventListener('change', togglePrice);
+togglePrice();
+</script>
+{% endblock %}

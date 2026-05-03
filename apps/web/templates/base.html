@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Mooviogo{% endblock %}</title>
+  <meta name="description" content="{% block description %}Mooviogo t'aide à trouver quoi faire ce soir et réserver un restaurant rapidement.{% endblock %}" />
+  {% block meta_extra %}{% endblock %}
+
+  {# Tailwind CDN for dev — swap for compiled CSS in production #}
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { DEFAULT: '#FF6A4D', light: '#FF8A66', dark: '#E05030' },
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    body { background: #0C0F16; color: #F8FAFC; }
+    .glass { background: linear-gradient(180deg,rgba(20,24,33,0.92),rgba(12,15,22,0.98)); border: 1px solid rgba(255,255,255,0.08); }
+    .btn-brand { background: #FF6A4D; color: #fff; border-radius: 22px; padding: 0.6rem 1.4rem; font-weight: 600; transition: background 0.2s; }
+    .btn-brand:hover { background: #E05030; }
+    .btn-ghost { border: 1px solid rgba(255,255,255,0.12); border-radius: 22px; padding: 0.6rem 1.4rem; font-weight: 500; color: rgba(255,255,255,0.8); transition: all 0.2s; }
+    .btn-ghost:hover { border-color: rgba(255,255,255,0.25); color: #fff; }
+    .card { background: linear-gradient(180deg,rgba(20,24,33,0.85),rgba(12,15,22,0.95)); border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; }
+    .input { min-height: 3.5rem; width: 100%; border-radius: 22px; border: 1px solid rgba(255,255,255,0.1); background: linear-gradient(180deg,rgba(20,24,33,0.92),rgba(12,15,22,0.98)); padding: 0 1rem; color: #F8FAFC; outline: none; transition: all 0.2s; }
+    .input:focus { border-color: rgba(255,138,102,0.32); box-shadow: 0 0 0 4px rgba(255,106,77,0.08); }
+    .input::placeholder { color: #7C8595; }
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="min-h-screen font-sans antialiased">
+
+  {# ── Navbar ── #}
+  <nav class="sticky top-0 z-50 w-full border-b border-white/[0.06] backdrop-blur-xl" style="background:rgba(12,15,22,0.88)">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
+      <a href="/" class="flex items-center gap-2 font-bold text-lg tracking-tight text-white">
+        <span class="text-brand">●</span> Mooviogo
+      </a>
+      <div class="hidden md:flex items-center gap-6 text-sm text-white/70">
+        <a href="/sorties/" class="hover:text-white transition-colors">Sorties</a>
+        <a href="/restaurants/" class="hover:text-white transition-colors">Restaurants</a>
+        <a href="/evenements/" class="hover:text-white transition-colors">Événements</a>
+        <a href="/villes/" class="hover:text-white transition-colors">Villes</a>
+        <a href="/partenaires/" class="hover:text-white transition-colors">Partenaires</a>
+      </div>
+      <div class="flex items-center gap-3">
+        {% if user.is_authenticated %}
+          <a href="/profil/" class="btn-ghost text-sm">{{ user.display_name|default:user.username }}</a>
+          <form method="post" action="/deconnexion/" style="display:inline">{% csrf_token %}<button type="submit" class="btn-ghost text-sm">Déconnexion</button></form>
+        {% else %}
+          <a href="/connexion/" class="btn-ghost text-sm">Connexion</a>
+          <a href="/inscription/" class="btn-brand text-sm">Inscription</a>
+        {% endif %}
+      </div>
+    </div>
+  </nav>
+
+  {# ── Flash messages ── #}
+  {% if messages %}
+  <div class="mx-auto max-w-7xl px-4 pt-4">
+    {% for message in messages %}
+    <div class="mb-2 rounded-xl px-4 py-3 text-sm font-medium
+      {% if message.tags == 'error' %}bg-red-500/10 text-red-400 border border-red-500/20
+      {% elif message.tags == 'success' %}bg-green-500/10 text-green-400 border border-green-500/20
+      {% else %}bg-white/5 text-white/80 border border-white/10{% endif %}">
+      {{ message }}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {# ── Main content ── #}
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  {# ── Footer ── #}
+  <footer class="mt-24 border-t border-white/[0.06] py-12 text-sm text-white/40">
+    <div class="mx-auto max-w-7xl px-4">
+      <div class="grid grid-cols-2 gap-8 md:grid-cols-4">
+        <div>
+          <p class="mb-3 font-semibold text-white/70">Mooviogo</p>
+          <ul class="space-y-2">
+            <li><a href="/a-propos/" class="hover:text-white/70 transition-colors">À propos</a></li>
+            <li><a href="/contact/" class="hover:text-white/70 transition-colors">Contact</a></li>
+            <li><a href="/faq/" class="hover:text-white/70 transition-colors">FAQ</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="mb-3 font-semibold text-white/70">Explorer</p>
+          <ul class="space-y-2">
+            <li><a href="/sorties/" class="hover:text-white/70 transition-colors">Sorties</a></li>
+            <li><a href="/restaurants/" class="hover:text-white/70 transition-colors">Restaurants</a></li>
+            <li><a href="/evenements/" class="hover:text-white/70 transition-colors">Événements</a></li>
+            <li><a href="/villes/" class="hover:text-white/70 transition-colors">Villes</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="mb-3 font-semibold text-white/70">Partenaires</p>
+          <ul class="space-y-2">
+            <li><a href="/devenir-partenaire/" class="hover:text-white/70 transition-colors">Devenir partenaire</a></li>
+            <li><a href="/partenaires/" class="hover:text-white/70 transition-colors">Partenaires</a></li>
+            <li><a href="/pro/connexion/" class="hover:text-white/70 transition-colors">Espace pro</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="mb-3 font-semibold text-white/70">Légal</p>
+          <ul class="space-y-2">
+            <li><a href="/cgu/" class="hover:text-white/70 transition-colors">CGU</a></li>
+            <li><a href="/confidentialite/" class="hover:text-white/70 transition-colors">Confidentialité</a></li>
+            <li><a href="/mentions-legales/" class="hover:text-white/70 transition-colors">Mentions légales</a></li>
+            <li><a href="/cookies/" class="hover:text-white/70 transition-colors">Cookies</a></li>
+          </ul>
+        </div>
+      </div>
+      <p class="mt-10 text-center">© {% now "Y" %} Mooviogo. Tous droits réservés.</p>
+    </div>
+  </footer>
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Connexion | Mooviogo{% endblock %}
+
+{% block content %}
+<div class="flex min-h-[80vh] items-center justify-center px-4 py-16">
+  <div class="w-full max-w-sm">
+    <div class="mb-8 text-center">
+      <a href="/" class="text-2xl font-bold text-white"><span class="text-brand">●</span> Mooviogo</a>
+      <p class="mt-3 text-white/50">Bon retour parmi nous 👋</p>
+    </div>
+
+    <div class="card p-8">
+      {% if error %}
+      <div class="mb-5 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">{{ error }}</div>
+      {% endif %}
+
+      <form method="post">
+        {% csrf_token %}
+        <div class="space-y-4">
+          <div>
+            <label class="mb-2 block text-sm text-white/60">Email ou nom d'utilisateur</label>
+            <input type="text" name="username" autofocus required class="input" placeholder="toi@example.com" />
+          </div>
+          <div>
+            <label class="mb-2 block text-sm text-white/60">Mot de passe</label>
+            <input type="password" name="password" required class="input" placeholder="••••••••" />
+          </div>
+        </div>
+        <button type="submit" class="btn-brand mt-6 w-full py-3 text-base">Se connecter</button>
+      </form>
+
+      <p class="mt-6 text-center text-sm text-white/40">
+        Pas encore de compte ?
+        <a href="/inscription/" class="text-brand hover:underline">S'inscrire</a>
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}
