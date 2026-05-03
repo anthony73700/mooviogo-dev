@@ -1,73 +1,505 @@
 {% extends "base.html" %}
 {% block title %}Sorties | Mooviogo{% endblock %}
+{% block description %}Rejoins une sortie entre membres ou un event d'établissement partenaire près de chez toi.{% endblock %}
+
+{% block extra_head %}
+<style>
+/* ══ RESET ══ */
+body { background:#fff !important; }
+
+/* ══ HERO ══ */
+.sl-hero {
+  position:relative; overflow:hidden;
+  background:#0E0B07;
+  padding:5rem 0 4rem;
+}
+.sl-hero-bg {
+  pointer-events:none;
+  position:absolute; inset:0;
+  background:
+    radial-gradient(ellipse 80% 60% at 15% 40%, rgba(255,106,77,0.28) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 70% at 85% 20%, rgba(249,115,22,0.15) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 50% at 60% 90%, rgba(99,102,241,0.1) 0%, transparent 50%);
+}
+.sl-hero-grid {
+  pointer-events:none;
+  position:absolute; inset:0;
+  background-image:linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size:60px 60px;
+  mask-image:linear-gradient(to bottom, transparent, rgba(0,0,0,0.4) 20%, rgba(0,0,0,0.4) 80%, transparent);
+}
+
+/* ══ LIVE DOT ══ */
+.dp { width:8px; height:8px; border-radius:50%; background:#22C55E; flex-shrink:0; animation:dpulse 2s ease infinite; }
+@keyframes dpulse { 0%,100%{ box-shadow:0 0 0 0 rgba(34,197,94,.6); } 60%{ box-shadow:0 0 0 9px rgba(34,197,94,0); } }
+
+/* ══ TYPE TOGGLE STRIP ══ */
+.tt-strip {
+  background:#fff;
+  border-bottom:2px solid #F3EEE8;
+  padding:0;
+}
+.tt-btn {
+  flex:1; padding:1.15rem 1rem;
+  display:flex; flex-direction:column; align-items:center; gap:0.55rem;
+  cursor:pointer; border:none; background:transparent;
+  position:relative; transition:all .2s;
+  text-decoration:none;
+}
+.tt-btn::after {
+  content:''; position:absolute; bottom:-2px; left:0; right:0; height:3px; border-radius:999px;
+  background:transparent; transition:background .2s;
+}
+.tt-btn:hover { background:#FAFAF9; }
+.tt-btn.on-com::after { background:#6366F1; }
+.tt-btn.on-par::after { background:#FF6A4D; }
+.tt-icon-com { width:44px; height:44px; border-radius:14px; background:linear-gradient(135deg,#EEF2FF,#C7D2FE); display:flex; align-items:center; justify-content:center; transition:all .2s; }
+.tt-icon-par { width:44px; height:44px; border-radius:14px; background:linear-gradient(135deg,#FFF7ED,#FED7AA); display:flex; align-items:center; justify-content:center; transition:all .2s; }
+.tt-btn.on-com .tt-icon-com { background:linear-gradient(135deg,#6366F1,#4F46E5); box-shadow:0 6px 18px rgba(99,102,241,0.35); }
+.tt-btn.on-par .tt-icon-par { background:linear-gradient(135deg,#FF6A4D,#F97316); box-shadow:0 6px 18px rgba(249,115,22,0.35); }
+
+/* ══ STICKY FILTER BAR ══ */
+.sl-bar {
+  position:sticky; top:0; z-index:40;
+  background:rgba(255,255,255,0.97);
+  backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid #F0EBE3;
+  box-shadow:0 1px 16px rgba(0,0,0,0.07);
+  padding:0.55rem 0;
+}
+.ftab {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:.46rem 1rem; border-radius:999px;
+  font-size:0.74rem; font-weight:700; cursor:pointer;
+  border:1.5px solid #E5DFD8; background:#fff; color:#6B6560;
+  text-decoration:none; transition:all 0.18s; white-space:nowrap;
+}
+.ftab:hover { border-color:#FF6A4D; color:#FF4F2A; }
+.ftab.on { background:linear-gradient(135deg,#FF6A4D,#F97316); border-color:transparent; color:#fff; box-shadow:0 4px 14px rgba(249,115,22,0.3); }
+.ftab.on-gr { background:linear-gradient(135deg,#22C55E,#16A34A); border-color:transparent; color:#fff; box-shadow:0 4px 14px rgba(34,197,94,0.3); }
+
+/* ══ SECTION LABEL ══ */
+.sec-sep {
+  display:flex; align-items:center; gap:0.8rem;
+  margin:2.5rem 0 1.25rem;
+}
+.sec-line { flex:1; height:1px; background:#F0EBE3; }
+.sec-lbl {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:4px 14px; border-radius:999px; font-size:0.7rem; font-weight:800;
+  letter-spacing:.06em; text-transform:uppercase; white-space:nowrap;
+}
+.sec-lbl-com { background:#EEF2FF; color:#4338CA; border:1px solid #C7D2FE; }
+.sec-lbl-par { background:linear-gradient(135deg,#FFF7ED,#FFEDD5); color:#C2410C; border:1px solid #FED7AA; }
+
+/* ══ CARD ══ */
+.sc {
+  display:block; text-decoration:none;
+  border-radius:20px; overflow:hidden;
+  background:#fff;
+  box-shadow:0 2px 0 #F0EBE3, 0 4px 20px rgba(0,0,0,0.06);
+  transition:transform .25s cubic-bezier(.22,1,.36,1), box-shadow .25s;
+  position:relative;
+}
+.sc:hover { transform:translateY(-7px); }
+.sc.com-card:hover { box-shadow:0 24px 55px rgba(99,102,241,0.13),0 2px 0 #C7D2FE; }
+.sc.par-card:hover { box-shadow:0 24px 55px rgba(255,106,77,0.13),0 2px 0 #FED7AA; }
+/* top color stripe */
+.sc.com-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,#6366F1,#8B5CF6); border-radius:20px 20px 0 0; z-index:1; }
+.sc.par-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,#FF6A4D,#FBBF24); border-radius:20px 20px 0 0; z-index:1; }
+
+/* IMAGE */
+.sc-imgw { position:relative; overflow:hidden; }
+.sc-img { width:100%; height:195px; object-fit:cover; display:block; transition:transform .5s cubic-bezier(.22,1,.36,1); }
+.sc:hover .sc-img { transform:scale(1.06); }
+.sc-ph { width:100%; height:195px; display:flex; align-items:center; justify-content:center; }
+.sc-ph-com { background:linear-gradient(135deg,#EEF2FF 0%,#E0E7FF 100%); }
+.sc-ph-par { background:linear-gradient(135deg,#FFF7ED 0%,#FFEDD5 100%); }
+/* FEATURED */
+.sc.feat { grid-column:span 2; }
+.sc.feat .sc-img,.sc.feat .sc-ph { height:300px; }
+@media(max-width:660px){ .sc.feat{grid-column:span 1;} .sc.feat .sc-img,.sc.feat .sc-ph{height:220px;} }
+
+/* STATUS BADGE */
+.sc-status {
+  position:absolute; bottom:10px; left:10px;
+  display:inline-flex; align-items:center; gap:4px;
+  border-radius:999px; padding:4px 10px;
+  font-size:0.59rem; font-weight:800; letter-spacing:.04em; text-transform:uppercase;
+  box-shadow:0 2px 8px rgba(0,0,0,0.15);
+}
+.ss-open { background:#fff; color:#16A34A; }
+.ss-full { background:#fff; color:#CA8A04; }
+/* DATE CHIP */
+.dc {
+  position:absolute; bottom:10px; right:10px;
+  background:rgba(0,0,0,0.58); backdrop-filter:blur(8px);
+  border-radius:8px; padding:3px 9px;
+  font-size:0.59rem; font-weight:700; color:#fff;
+  display:flex; align-items:center; gap:4px;
+}
+/* ORGANIZER RIBBON */
+.sc-org {
+  padding:7px 14px;
+  display:flex; align-items:center; gap:7px;
+  font-size:0.67rem; font-weight:700; border-bottom:1px solid;
+}
+.sc-org-com { background:#F5F3FF; color:#4338CA; border-color:#E0E7FF; }
+.sc-org-par { background:#FFF7ED; color:#9A3412; border-color:#FED7AA; }
+/* AVATAR */
+.av { width:22px; height:22px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:0.6rem; font-weight:800; color:#fff; }
+.av-com { background:linear-gradient(135deg,#6366F1,#8B5CF6); }
+.av-par { background:linear-gradient(135deg,#FF6A4D,#F97316); }
+
+/* PROGRESS */
+.pb-bg { width:100%; height:4px; border-radius:999px; background:#F0EBE3; overflow:hidden; margin-top:5px; }
+.pb-fill-com { height:100%; border-radius:999px; background:linear-gradient(90deg,#6366F1,#8B5CF6); transition:width .4s; }
+.pb-fill-par { height:100%; border-radius:999px; background:linear-gradient(90deg,#FF6A4D,#FBBF24); transition:width .4s; }
+
+/* LAST SPOTS */
+.last-spots { font-size:0.58rem; font-weight:900; color:#DC2626; letter-spacing:.05em; text-transform:uppercase; animation:blink .9s ease infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+/* CTA BTN ON CARD */
+.sc-go-com { display:inline-flex; align-items:center; gap:4px; padding:.38rem .85rem; border-radius:999px; background:#6366F1; color:#fff; font-size:0.7rem; font-weight:800; transition:all .18s; flex-shrink:0; }
+.sc:hover .sc-go-com { background:#4338CA; transform:translateX(2px); }
+.sc-go-par { display:inline-flex; align-items:center; gap:4px; padding:.38rem .85rem; border-radius:999px; background:linear-gradient(135deg,#FF6A4D,#F97316); color:#fff; font-size:0.7rem; font-weight:800; transition:all .18s; flex-shrink:0; }
+.sc:hover .sc-go-par { filter:brightness(1.07); transform:translateX(2px); }
+
+/* GRID */
+.sc-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1.25rem; }
+@media(max-width:900px){ .sc-grid{ grid-template-columns:repeat(2,1fr); } }
+@media(max-width:540px){ .sc-grid{ grid-template-columns:1fr; } }
+
+/* SEARCH */
+.sl-sinp { padding:0.42rem 0.7rem 0.42rem 1.9rem !important; font-size:0.76rem !important; border-radius:10px !important; border:1.5px solid #E5DFD8 !important; background:#fff !important; color:#2A2520 !important; max-width:170px; min-height:2.1rem; }
+.sl-sinp:focus { outline:none !important; border-color:#FF6A4D !important; box-shadow:0 0 0 3px rgba(255,106,77,0.1) !important; }
+.sl-swrap { position:relative; }
+.sl-sico { position:absolute; left:8px; top:50%; transform:translateY(-50%); pointer-events:none; color:#A09890; }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="mx-auto max-w-7xl px-4 py-12">
-  <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
-    <div>
-      <h1 class="text-3xl font-bold text-white">Sorties</h1>
-      <p class="mt-1 text-white/50">Rejoins une sortie communautaire près de chez toi</p>
-    </div>
-    {% if user.is_authenticated %}
-    <a href="/sorties/creer/" class="btn-brand">+ Créer une sortie</a>
-    {% endif %}
-  </div>
 
-  {# Filters #}
-  <form method="get" class="mb-8 flex flex-wrap gap-3">
-    <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Rechercher..." class="input max-w-xs" />
-    <input type="text" name="city" value="{{ request.GET.city }}" placeholder="Ville..." class="input max-w-xs" />
-    <select name="type" class="input max-w-xs">
-      <option value="">Tous les types</option>
-      <option value="COMMUNAUTAIRE" {% if request.GET.type == "COMMUNAUTAIRE" %}selected{% endif %}>Communautaire</option>
-      <option value="PARTENAIRE" {% if request.GET.type == "PARTENAIRE" %}selected{% endif %}>Partenaire</option>
-    </select>
-    <button type="submit" class="btn-ghost">Filtrer</button>
-  </form>
+{# ══ HERO ══ #}
+<div class="sl-hero">
+  <div class="sl-hero-bg"></div>
+  <div class="sl-hero-grid"></div>
+  <div class="mx-auto max-w-7xl px-4" style="position:relative;z-index:2">
+
+    <div style="display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:999px;padding:5px 14px;font-size:0.65rem;font-weight:800;color:#4ADE80;letter-spacing:.09em;text-transform:uppercase;margin-bottom:1.5rem">
+      <span class="dp"></span>
+      {{ total_count }} sortie{{ total_count|pluralize }} disponible{{ total_count|pluralize }}
+    </div>
+
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:1.5rem;margin-bottom:2.5rem">
+      <div>
+        <h1 style="font-size:clamp(2.4rem,5.5vw,3.8rem);font-weight:900;color:#fff;letter-spacing:-0.045em;line-height:1.02;margin-bottom:0.9rem">
+          Ce soir,<br>
+          <span style="background:linear-gradient(90deg,#FF6A4D,#FBBF24);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">que fais-tu&nbsp;?</span>
+        </h1>
+        <p style="font-size:0.95rem;color:rgba(255,255,255,0.48);max-width:480px;line-height:1.7">Sorties entre membres ou events d'établissements partenaires — trouve ta vibe ce soir.</p>
+      </div>
+      <div style="display:flex;gap:0.6rem;flex-wrap:wrap;align-items:center">
+        {% if user.is_authenticated %}
+        <a href="/sorties/creer/" class="btn-brand" style="font-size:0.9rem;padding:0.85rem 1.7rem;border-radius:14px;display:flex;align-items:center;gap:6px">
+          <svg xmlns="http://www.w3.org/2000/svg" style="width:.9rem;height:.9rem" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+          Créer une sortie
+        </a>
+        {% else %}
+        <a href="/inscription/" class="btn-brand" style="font-size:0.9rem;padding:0.85rem 1.7rem;border-radius:14px">Rejoindre gratuitement →</a>
+        <a href="/connexion/" style="font-size:0.82rem;color:rgba(255,255,255,0.35);text-decoration:none">Se connecter</a>
+        {% endif %}
+      </div>
+    </div>
+
+    {# Stats #}
+    <div style="display:flex;gap:0;flex-wrap:wrap">
+      <div style="padding:.8rem 1.6rem .8rem 0;display:flex;align-items:center;gap:8px;border-right:1px solid rgba(255,255,255,0.1);margin-right:1.6rem">
+        <span style="font-size:1.5rem;font-weight:900;color:#fff">{{ total_count }}</span>
+        <span style="font-size:0.7rem;color:rgba(255,255,255,0.32);line-height:1.3">sorties<br>ouvertes</span>
+      </div>
+      <div style="padding:.8rem 1.6rem .8rem 0;display:flex;align-items:center;gap:8px;border-right:1px solid rgba(255,255,255,0.1);margin-right:1.6rem">
+        <span style="font-size:1.5rem;font-weight:900;color:#4ADE80">30s</span>
+        <span style="font-size:0.7rem;color:rgba(255,255,255,0.32);line-height:1.3">pour<br>rejoindre</span>
+      </div>
+      <div style="padding:.8rem 0;display:flex;align-items:center;gap:8px">
+        <span style="font-size:1.5rem;font-weight:900;color:#FF8A66">15K+</span>
+        <span style="font-size:0.7rem;color:rgba(255,255,255,0.32);line-height:1.3">membres<br>actifs</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{# ══ TYPE TOGGLE STRIP ══ #}
+<div class="tt-strip">
+  <div class="mx-auto max-w-7xl px-4">
+    <div style="display:flex;align-items:stretch">
+
+      {# ALL #}
+      <button onclick="setFilter('type','');setFilter('free','')" class="tt-btn {% if not request.GET.type %}on-com{% endif %}" style="max-width:160px;{% if not request.GET.type %}background:#FAFAF9{% endif %}">
+        <div style="width:44px;height:44px;border-radius:14px;background:{% if not request.GET.type %}linear-gradient(135deg,#1A1510,#3D3530){% else %}#F3EEE8{% endif %};display:flex;align-items:center;justify-content:center;transition:all .2s">
+          <svg xmlns="http://www.w3.org/2000/svg" style="width:1.2rem;height:1.2rem;color:{% if not request.GET.type %}#fff{% else %}#9B8F85{% endif %}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+        </div>
+        <span style="font-size:0.72rem;font-weight:800;color:{% if not request.GET.type %}#1A1510{% else %}#9B8F85{% endif %}">Toutes</span>
+      </button>
+
+      <div style="width:1px;background:#F3EEE8;flex-shrink:0"></div>
+
+      {# COMMUNAUTAIRE #}
+      <button onclick="setFilter('type','COMMUNAUTAIRE');setFilter('free','')" class="tt-btn {% if request.GET.type == 'COMMUNAUTAIRE' %}on-com{% endif %}" style="flex:1">
+        <div class="tt-icon-com">
+          <svg xmlns="http://www.w3.org/2000/svg" style="width:1.2rem;height:1.2rem;color:{% if request.GET.type == 'COMMUNAUTAIRE' %}#fff{% else %}#6366F1{% endif %}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        </div>
+        <div style="text-align:center">
+          <p style="font-size:0.78rem;font-weight:800;color:{% if request.GET.type == 'COMMUNAUTAIRE' %}#312E81{% else %}#3D3530{% endif %};margin-bottom:1px">Entre membres</p>
+          <p style="font-size:0.65rem;color:#9B8F85;line-height:1.4">Tu organises,<br>tes amis rejoignent</p>
+        </div>
+      </button>
+
+      <div style="width:1px;background:#F3EEE8;flex-shrink:0"></div>
+
+      {# PARTENAIRE #}
+      <button onclick="setFilter('type','PARTENAIRE');setFilter('free','')" class="tt-btn {% if request.GET.type == 'PARTENAIRE' %}on-par{% endif %}" style="flex:1">
+        <div class="tt-icon-par">
+          <svg xmlns="http://www.w3.org/2000/svg" style="width:1.2rem;height:1.2rem;color:{% if request.GET.type == 'PARTENAIRE' %}#fff{% else %}#EA580C{% endif %}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+        </div>
+        <div style="text-align:center">
+          <p style="font-size:0.78rem;font-weight:800;color:{% if request.GET.type == 'PARTENAIRE' %}#9A3412{% else %}#3D3530{% endif %};margin-bottom:1px">Établissements</p>
+          <p style="font-size:0.65rem;color:#9B8F85;line-height:1.4">Events publiés par<br>les lieux partenaires</p>
+        </div>
+      </button>
+
+      <div style="width:1px;background:#F3EEE8;flex-shrink:0"></div>
+
+      {# SEARCH #}
+      <div style="flex:1;display:flex;align-items:center;justify-content:flex-end;gap:0.4rem;padding:0 0.5rem">
+        <form method="get" style="display:flex;align-items:center;gap:0.4rem">
+          <input type="hidden" name="type" value="{{ request.GET.type }}" />
+          <input type="hidden" name="free" value="{{ request.GET.free }}" />
+          <div class="sl-swrap">
+            <svg class="sl-sico" xmlns="http://www.w3.org/2000/svg" style="width:.75rem;height:.75rem" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Rechercher…" class="sl-sinp" />
+          </div>
+          <div class="sl-swrap">
+            <svg class="sl-sico" xmlns="http://www.w3.org/2000/svg" style="width:.75rem;height:.75rem" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            <input type="text" name="city" value="{{ request.GET.city }}" placeholder="Ville…" class="sl-sinp" />
+          </div>
+          <button type="submit" style="display:flex;align-items:center;justify-content:center;width:2.05rem;height:2.05rem;border-radius:10px;background:linear-gradient(135deg,#FF6A4D,#F97316);border:none;color:#fff;cursor:pointer;flex-shrink:0;box-shadow:0 4px 10px rgba(249,115,22,0.3)" title="Filtrer">
+            <svg xmlns="http://www.w3.org/2000/svg" style="width:.78rem;height:.78rem" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          </button>
+          {% if request.GET.q or request.GET.city %}
+          <a href="/sorties/?type={{ request.GET.type }}&free={{ request.GET.free }}" style="font-size:0.68rem;color:#B0A89E;text-decoration:none">✕</a>
+          {% endif %}
+        </form>
+        <button class="ftab {% if request.GET.free == '1' %}on-gr{% endif %}" onclick="setFilter('free','{% if request.GET.free == "1" %}{% else %}1{% endif %}')" style="margin-left:0.3rem">
+          ✓ Gratuit
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{# ══ CONTENT ══ #}
+<div class="mx-auto max-w-7xl px-4" style="padding-top:1.5rem;padding-bottom:6rem">
 
   {% if sorties %}
-  <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+
+  {# ── TRUST BAR ── #}
+  <div style="display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;margin-bottom:2.5rem;padding:.75rem 1.2rem;background:#FFFBF8;border:1px solid #F0E8DF;border-radius:14px">
+    <span style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:#6B6560">
+      <span class="dp" style="width:7px;height:7px"></span>
+      <strong style="color:#1A1510">{{ total_count }}</strong> sortie{{ total_count|pluralize }} en ce moment
+    </span>
+    <span style="width:1px;height:14px;background:#E8E0D8;flex-shrink:0"></span>
+    <span style="font-size:0.75rem;color:#6B6560">Rejoins en <strong style="color:#FF6A4D">30 secondes</strong></span>
+    <span style="width:1px;height:14px;background:#E8E0D8;flex-shrink:0"></span>
+    <span style="font-size:0.75rem;color:#22C55E;font-weight:700;display:flex;align-items:center;gap:4px">
+      <svg xmlns="http://www.w3.org/2000/svg" style="width:.7rem;height:.7rem" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+      Annulation gratuite
+    </span>
+    <span style="width:1px;height:14px;background:#E8E0D8;flex-shrink:0"></span>
+    <span style="font-size:0.75rem;color:#6366F1;font-weight:700;display:flex;align-items:center;gap:4px">
+      <svg xmlns="http://www.w3.org/2000/svg" style="width:.7rem;height:.7rem" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+      Paiement sécurisé
+    </span>
+  </div>
+
+  {# ── GRID ── #}
+  <div class="sc-grid">
     {% for sortie in sorties %}
-    <a href="/sorties/{{ sortie.id }}/" class="card p-5 hover:border-white/15 transition-all block group">
-      <div class="mb-3 flex items-center justify-between">
-        <span class="rounded-full bg-brand/10 px-2.5 py-0.5 text-xs font-medium text-brand">{{ sortie.get_type_display }}</span>
-        <span class="rounded-full px-2 py-0.5 text-xs
-          {% if sortie.status == 'OPEN' %}bg-green-500/10 text-green-400
-          {% elif sortie.status == 'FULL' %}bg-yellow-500/10 text-yellow-400
-          {% else %}bg-white/5 text-white/40{% endif %}">
-          {{ sortie.get_status_display }}
-        </span>
+    <a href="/sorties/{{ sortie.id }}/" class="sc {% if sortie.type == 'PARTENAIRE' %}par-card{% else %}com-card{% endif %} {% if forloop.first %}feat{% endif %}">
+
+      {# IMAGE #}
+      <div class="sc-imgw">
+        {% if sortie.cover_image_url %}
+        <img src="{{ sortie.cover_image_url }}" alt="{{ sortie.title }}" class="sc-img" loading="{% if forloop.first %}eager{% else %}lazy{% endif %}" />
+        {% else %}
+        <div class="sc-ph {% if sortie.type == 'PARTENAIRE' %}sc-ph-par{% else %}sc-ph-com{% endif %}">
+          {% if sortie.type == 'PARTENAIRE' %}
+          <svg xmlns="http://www.w3.org/2000/svg" style="width:3rem;height:3rem;color:rgba(255,106,77,0.18)" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="0.8"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+          {% else %}
+          <svg xmlns="http://www.w3.org/2000/svg" style="width:3rem;height:3rem;color:rgba(99,102,241,0.18)" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="0.8"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          {% endif %}
+        </div>
+        {% endif %}
+
+        {# Status #}
+        {% if sortie.status == 'OPEN' %}
+        <span class="sc-status ss-open"><span class="dp" style="width:5px;height:5px"></span>Ouverte</span>
+        {% elif sortie.status == 'FULL' %}
+        <span class="sc-status ss-full">Complet</span>
+        {% endif %}
+
+        {# Date chip #}
+        {% if sortie.starts_at %}
+        <div class="dc">
+          <svg xmlns="http://www.w3.org/2000/svg" style="width:.56rem;height:.56rem" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          {{ sortie.starts_at|date:"d M · H:i" }}
+        </div>
+        {% endif %}
       </div>
-      <h3 class="font-semibold text-white group-hover:text-brand transition-colors">{{ sortie.title }}</h3>
-      <p class="mt-1 text-sm text-white/50 line-clamp-2">{{ sortie.description }}</p>
-      <div class="mt-4 flex items-center justify-between text-xs text-white/40">
-        <span>📍 {{ sortie.city }}</span>
-        <span>{% if sortie.is_free %}Gratuit{% else %}{{ sortie.price|floatformat:2 }} €{% endif %}</span>
+
+      {# ORGANIZER RIBBON #}
+      {% if sortie.type == 'PARTENAIRE' %}
+      <div class="sc-org sc-org-par">
+        <div class="av av-par">
+          <svg xmlns="http://www.w3.org/2000/svg" style="width:.68rem;height:.68rem" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16"/></svg>
+        </div>
+        <div>
+          <span style="opacity:0.65;font-weight:600">Organisé par</span>
+          <strong style="margin-left:3px">{{ sortie.location|default:"l'établissement" }}</strong>
+        </div>
+        <span style="margin-left:auto;font-size:0.6rem;background:#FED7AA;color:#9A3412;border-radius:5px;padding:2px 7px;font-weight:800;letter-spacing:.04em;text-transform:uppercase">Rejoin seul.</span>
+      </div>
+      {% else %}
+      <div class="sc-org sc-org-com">
+        <div class="av av-com">
+          {% if sortie.creator %}{{ sortie.creator.first_name|first|upper|default:"?" }}{% else %}?{% endif %}
+        </div>
+        <div>
+          <span style="opacity:0.65;font-weight:600">Organisé par</span>
+          <strong style="margin-left:3px">{% if sortie.creator %}{{ sortie.creator.get_full_name|default:sortie.creator.username }}{% else %}un membre{% endif %}</strong>
+        </div>
+        <span style="margin-left:auto;font-size:0.6rem;background:#E0E7FF;color:#312E81;border-radius:5px;padding:2px 7px;font-weight:800;letter-spacing:.04em;text-transform:uppercase">Membre</span>
+      </div>
+      {% endif %}
+
+      {# BODY #}
+      <div style="padding:1rem 1.15rem 1.25rem">
+        <p style="font-size:{% if forloop.first %}1.08rem{% else %}0.93rem{% endif %};font-weight:800;color:#1A1510;line-height:1.3;margin-bottom:0.3rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">{{ sortie.title }}</p>
+        <p style="font-size:0.69rem;color:#B0A89E;display:flex;align-items:center;gap:4px;margin-bottom:0.9rem">
+          <svg xmlns="http://www.w3.org/2000/svg" style="width:.62rem;height:.62rem;flex-shrink:0;color:#FF6A4D" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          {{ sortie.city }}
+        </p>
+
+        {# Progress #}
+        {% if sortie.max_participants %}
+          {% widthratio sortie.participant_count|default:0 sortie.max_participants 100 as fill_pct %}
+          <div style="margin-bottom:0.9rem">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+              <span style="font-size:0.61rem;color:#B0A89E">
+                <strong style="color:#3D3530">{{ sortie.participant_count|default:0 }}</strong> / {{ sortie.max_participants }} places
+              </span>
+              {% if fill_pct >= 80 %}<span class="last-spots">⚡ Dernières places</span>{% endif %}
+            </div>
+            <div class="pb-bg">
+              {% if sortie.type == 'PARTENAIRE' %}<div class="pb-fill-par" style="width:{{ fill_pct }}%"></div>
+              {% else %}<div class="pb-fill-com" style="width:{{ fill_pct }}%"></div>{% endif %}
+            </div>
+          </div>
+        {% else %}
+          <div style="margin-bottom:0.9rem;font-size:0.61rem;color:#B0A89E">
+            <strong style="color:#3D3530">{{ sortie.participant_count|default:0 }}</strong> participant{{ sortie.participant_count|default:0|pluralize }}
+          </div>
+        {% endif %}
+
+        {# Footer #}
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem">
+          <span style="font-size:{% if forloop.first %}1.2rem{% else %}1rem{% endif %};font-weight:900;color:{% if sortie.is_free %}#16A34A{% else %}#1A1510{% endif %};letter-spacing:-0.02em">
+            {% if sortie.is_free %}Gratuit{% else %}{{ sortie.price|floatformat:2 }} €{% endif %}
+          </span>
+          {% if sortie.type == 'PARTENAIRE' %}
+          <span class="sc-go-par">Réserver <svg xmlns="http://www.w3.org/2000/svg" style="width:.63rem;height:.63rem" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg></span>
+          {% else %}
+          <span class="sc-go-com">Rejoindre <svg xmlns="http://www.w3.org/2000/svg" style="width:.63rem;height:.63rem" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg></span>
+          {% endif %}
+        </div>
       </div>
     </a>
     {% endfor %}
   </div>
 
-  {# Pagination #}
+  {# PAGINATION #}
   {% if is_paginated %}
-  <div class="mt-10 flex justify-center gap-2">
+  <div style="margin-top:4rem;display:flex;justify-content:center;align-items:center;gap:0.5rem">
     {% if page_obj.has_previous %}
-    <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="btn-ghost text-sm">← Précédent</a>
+    <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.free %}&free={{ request.GET.free }}{% endif %}" style="display:inline-flex;align-items:center;gap:5px;padding:.65rem 1.2rem;border-radius:12px;border:1.5px solid #E5DFD8;background:#fff;font-size:0.82rem;font-weight:600;color:#6B6560;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,0.05)">← Précédent</a>
     {% endif %}
-    <span class="flex items-center px-4 text-sm text-white/40">Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+    <span style="padding:.65rem 1rem;font-size:0.78rem;color:#9B8F85">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
     {% if page_obj.has_next %}
-    <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="btn-ghost text-sm">Suivant →</a>
+    <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.free %}&free={{ request.GET.free }}{% endif %}" style="display:inline-flex;align-items:center;gap:5px;padding:.65rem 1.3rem;border-radius:12px;background:linear-gradient(135deg,#FF6A4D,#F97316);font-size:0.82rem;font-weight:700;color:#fff;text-decoration:none;box-shadow:0 4px 14px rgba(249,115,22,0.3)">Suivant →</a>
     {% endif %}
   </div>
   {% endif %}
 
+  {# CTA #}
+  {% if user.is_authenticated %}
+  <div style="margin-top:4.5rem;border-radius:24px;background:#fff;border:1.5px solid #EDE9E2;box-shadow:0 4px 20px rgba(0,0,0,0.06);padding:2.25rem 2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1.5rem">
+    <div style="display:flex;align-items:center;gap:1rem">
+      <div style="width:50px;height:50px;border-radius:14px;background:linear-gradient(135deg,#FFF7ED,#FFEDD5);border:1.5px solid #FED7AA;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg xmlns="http://www.w3.org/2000/svg" style="width:1.3rem;height:1.3rem;color:#FF6A4D" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+      </div>
+      <div>
+        <p style="font-size:1rem;font-weight:900;color:#1A1510;margin-bottom:0.15rem">Tu as une idée de sortie&nbsp;?</p>
+        <p style="font-size:0.78rem;color:#9B8F85">Lance-toi — crée ta sortie entre membres en 2 minutes.</p>
+      </div>
+    </div>
+    <a href="/sorties/creer/" class="btn-brand" style="font-size:0.88rem;padding:0.8rem 1.6rem;border-radius:14px;white-space:nowrap">Créer ma sortie →</a>
+  </div>
   {% else %}
-  <div class="rounded-2xl border border-white/[0.06] bg-white/[0.02] py-20 text-center">
-    <p class="text-xl text-white/40">Aucune sortie trouvée</p>
-    {% if user.is_authenticated %}
-    <a href="/sorties/creer/" class="mt-5 inline-block btn-brand">Créer la première</a>
-    {% endif %}
+  <div style="margin-top:4.5rem;border-radius:24px;position:relative;overflow:hidden;background:#0E0B07;padding:3.5rem 2rem;text-align:center">
+    <div style="pointer-events:none;position:absolute;inset:0;background:radial-gradient(ellipse 80% 70% at 50% 50%,rgba(255,106,77,0.18) 0%,transparent 65%)"></div>
+    <div style="position:relative;z-index:1">
+      <p style="font-size:1.6rem;font-weight:900;color:#fff;letter-spacing:-0.025em;margin-bottom:0.6rem">Prêt à sortir ce soir&nbsp;?</p>
+      <p style="font-size:0.9rem;color:rgba(255,255,255,0.4);margin-bottom:2rem;max-width:380px;margin-left:auto;margin-right:auto;line-height:1.65">Rejoins 15 000+ membres — compte gratuit, réservation en 30 secondes.</p>
+      <a href="/inscription/" class="btn-brand" style="font-size:1rem;padding:1rem 2.5rem;border-radius:14px;font-weight:800">Créer un compte gratuit →</a>
+      <p style="margin-top:0.75rem;font-size:0.75rem;color:rgba(255,255,255,0.2)">Déjà inscrit ? <a href="/connexion/" style="color:rgba(255,255,255,0.4);text-decoration:none;font-weight:600">Se connecter</a></p>
+    </div>
   </div>
   {% endif %}
+
+  {% else %}
+
+  {# EMPTY STATE #}
+  <div style="background:#fff;border:1.5px solid #EDE9E2;border-radius:28px;padding:7rem 2rem;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,0.04)">
+    <div style="width:70px;height:70px;border-radius:20px;background:linear-gradient(135deg,#FFF7ED,#FFEDD5);border:1.5px solid #FED7AA;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem">
+      <svg xmlns="http://www.w3.org/2000/svg" style="width:1.7rem;height:1.7rem;color:#FF8A66" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+    </div>
+    <p style="font-size:1.2rem;font-weight:900;color:#1A1510;margin-bottom:0.45rem">Aucune sortie par ici</p>
+    <p style="font-size:0.86rem;color:#9B8F85;max-width:340px;margin:0 auto 2rem;line-height:1.7">Essaie d'autres filtres ou sois le premier à lancer une sortie dans ta ville&nbsp;!</p>
+    <div style="display:flex;align-items:center;justify-content:center;gap:0.7rem;flex-wrap:wrap">
+      <a href="/sorties/" style="padding:.7rem 1.35rem;border-radius:12px;border:1.5px solid #EDE9E2;font-size:0.84rem;font-weight:600;color:#6B6560;text-decoration:none;background:#fff">Voir toutes les sorties</a>
+      {% if user.is_authenticated %}
+      <a href="/sorties/creer/" class="btn-brand" style="font-size:0.84rem;padding:.7rem 1.35rem;border-radius:12px">Créer la première →</a>
+      {% else %}
+      <a href="/inscription/" class="btn-brand" style="font-size:0.84rem;padding:.7rem 1.35rem;border-radius:12px">Rejoindre →</a>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
 </div>
+
+<script>
+function setFilter(key, val) {
+  const p = new URLSearchParams(window.location.search);
+  if (val === '' || val === null) { p.delete(key); } else { p.set(key, val); }
+  p.delete('page');
+  window.location.href = '/sorties/?' + p.toString();
+}
+</script>
 {% endblock %}

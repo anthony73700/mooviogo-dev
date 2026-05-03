@@ -3,497 +3,1021 @@
 
 {% block extra_head %}
 <style>
-  /* ── hero ── */
-  .hero-bg {
-    background: linear-gradient(160deg, rgba(255,106,77,0.22) 0%, rgba(12,15,22,0) 45%),
-                linear-gradient(0deg, #0C0F16 0%, rgba(12,15,22,0.55) 60%, rgba(12,15,22,0) 100%),
-                url('https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?w=1600&q=80') center/cover no-repeat;
-    min-height: 92vh;
-  }
-  /* ── search bar ── */
-  .search-pill {
-    display: flex;
-    align-items: center;
-    background: rgba(20,24,33,0.95);
-    border: 1px solid rgba(255,255,255,0.10);
-    border-radius: 999px;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.55);
-    overflow: hidden;
-  }
-  .search-pill .seg { flex:1; padding: 0.85rem 1.5rem; cursor: pointer; transition: background 0.15s; border-right: 1px solid rgba(255,255,255,0.07); }
-  .search-pill .seg:last-of-type { border-right:none; }
-  .search-pill .seg:hover { background: rgba(255,255,255,0.04); }
-  .search-pill label { display:block; font-size:0.68rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:rgba(255,255,255,0.4); margin-bottom:2px; }
-  .search-pill input, .search-pill select {
-    background: transparent; border: none; outline: none; color: #F8FAFC; font-size: 0.9rem; font-weight: 500; width: 100%;
-  }
-  .search-pill select option { background: #1a1e28; }
-  /* ── category pills ── */
-  .cat-pill { display:flex; flex-direction:column; align-items:center; gap:6px; cursor:pointer; }
-  .cat-pill .icon { width:56px; height:56px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.4rem; border:2px solid rgba(255,255,255,0.08); background:rgba(20,24,33,0.9); transition:all 0.2s; }
-  .cat-pill:hover .icon { border-color: #FF6A4D; background: rgba(255,106,77,0.12); }
-  .cat-pill span { font-size:0.72rem; color:rgba(255,255,255,0.6); font-weight:500; white-space:nowrap; }
-  /* ── sortie card ── */
-  .sortie-card { position:relative; border-radius:20px; overflow:hidden; background:#14181F; border:1px solid rgba(255,255,255,0.07); transition:transform 0.2s, box-shadow 0.2s; }
-  .sortie-card:hover { transform:translateY(-3px); box-shadow:0 16px 48px rgba(0,0,0,0.5); }
-  .sortie-card .thumb { width:100%; height:200px; object-fit:cover; background: linear-gradient(135deg,#1a1e28,#2a2033); }
-  .sortie-card .thumb-placeholder { width:100%; height:200px; display:flex; align-items:center; justify-content:center; font-size:3rem; background:linear-gradient(135deg,#1a1e28 0%,#2a1f30 100%); }
-  .sortie-card .badge { position:absolute; top:12px; left:12px; background:rgba(12,15,22,0.85); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.1); border-radius:999px; padding:3px 10px; font-size:0.7rem; font-weight:600; color:#FF6A4D; }
-  .sortie-card .fav { position:absolute; top:12px; right:12px; width:32px; height:32px; border-radius:50%; background:rgba(12,15,22,0.7); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; font-size:0.9rem; }
-  /* ── resto card ── */
-  .resto-card { border-radius:20px; overflow:hidden; border:1px solid rgba(255,255,255,0.07); background:#14181F; transition:transform 0.2s, box-shadow 0.2s; }
-  .resto-card:hover { transform:translateY(-3px); box-shadow:0 16px 48px rgba(0,0,0,0.5); }
-  .resto-card .thumb { width:100%; height:220px; object-fit:cover; background:linear-gradient(135deg,#1e1a28,#281e1a); }
-  .resto-card .thumb-placeholder { width:100%; height:220px; display:flex; align-items:center; justify-content:center; font-size:3.5rem; background:linear-gradient(135deg,#1e1a28 0%,#282018 100%); }
-  /* ── city card ── */
-  .city-card { position:relative; border-radius:16px; overflow:hidden; height:180px; cursor:pointer; transition:transform 0.2s; }
-  .city-card:hover { transform:scale(1.02); }
-  .city-card .overlay { position:absolute; inset:0; background:linear-gradient(0deg,rgba(12,15,22,0.85) 0%,rgba(12,15,22,0.1) 60%); }
-  /* ── section header ── */
-  .sec-hd { display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:1.5rem; }
-  .sec-hd h2 { font-size:1.5rem; font-weight:700; color:#F8FAFC; }
-  .sec-hd a { font-size:0.85rem; color:#FF6A4D; font-weight:600; border-bottom:1px solid transparent; transition:border-color 0.15s; }
-  .sec-hd a:hover { border-color:#FF6A4D; }
-  /* ── trust bar ── */
-  .trust-bar { border-top:1px solid rgba(255,255,255,0.06); border-bottom:1px solid rgba(255,255,255,0.06); }
-  /* ── tag ── */
-  .tag { display:inline-block; background:rgba(255,106,77,0.12); color:#FF8A66; border-radius:999px; padding:2px 10px; font-size:0.7rem; font-weight:600; }
+/* ═══════════ ANIMATIONS ═══════════ */
+@keyframes float-orb {
+  0%,100% { transform: translateY(0) scale(1); }
+  50%      { transform: translateY(-30px) scale(1.06); }
+}
+@keyframes float-orb2 {
+  0%,100% { transform: translateY(0) scale(1); }
+  50%      { transform: translateY(25px) scale(0.94); }
+}
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+@keyframes slide-up {
+  from { opacity:0; transform:translateY(28px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes glow-pulse {
+  0%,100% { box-shadow: 0 0 30px 4px rgba(192,132,252,0.30), 0 0 80px 10px rgba(255,106,77,0.15); }
+  50%      { box-shadow: 0 0 60px 12px rgba(192,132,252,0.55), 0 0 120px 20px rgba(255,106,77,0.28); }
+}
+/* ═══════════ HERO ═══════════ */
+.hero-section {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+  padding: 5rem 1rem 6rem;
+  background: #070a12;
+}
+.hero-bg-img {
+  position: absolute; inset: 0;
+  background: url('https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=1800&q=85') center/cover no-repeat;
+  opacity: 0.18;
+  transform: scale(1.04);
+}
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+}
+.orb-1 {
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(192,132,252,0.45) 0%, transparent 70%);
+  top: -100px; left: -150px;
+  animation: float-orb 8s ease-in-out infinite;
+}
+.orb-2 {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(255,106,77,0.38) 0%, transparent 70%);
+  bottom: -80px; right: -100px;
+  animation: float-orb2 10s ease-in-out infinite;
+}
+.orb-3 {
+  width: 350px; height: 350px;
+  background: radial-gradient(circle, rgba(244,114,182,0.28) 0%, transparent 70%);
+  top: 40%; left: 55%;
+  animation: float-orb 13s ease-in-out infinite reverse;
+}
+/* gradient text shimmer */
+.grad-text {
+  background: linear-gradient(90deg, #FF6A4D 0%, #C084FC 45%, #F472B6 75%, #FF6A4D 100%);
+  background-size: 800px 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 4s linear infinite;
+}
+/* slide-up anim on children */
+.hero-anim-1 { animation: slide-up 0.6s cubic-bezier(0.22,1,0.36,1) both; }
+.hero-anim-2 { animation: slide-up 0.6s 0.12s cubic-bezier(0.22,1,0.36,1) both; }
+.hero-anim-3 { animation: slide-up 0.6s 0.22s cubic-bezier(0.22,1,0.36,1) both; }
+.hero-anim-4 { animation: slide-up 0.6s 0.34s cubic-bezier(0.22,1,0.36,1) both; }
+.hero-anim-5 { animation: slide-up 0.6s 0.46s cubic-bezier(0.22,1,0.36,1) both; }
+/* CTA principal */
+.cta-main {
+  position: relative;
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 1rem 2.5rem;
+  border-radius: 999px;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #fff;
+  background: linear-gradient(135deg, #FF6A4D 0%, #C084FC 60%, #F472B6 100%);
+  box-shadow: 0 8px 40px rgba(192,132,252,0.45), 0 2px 12px rgba(0,0,0,0.4);
+  animation: glow-pulse 3s ease-in-out infinite;
+  transition: transform 0.2s, box-shadow 0.2s;
+  text-decoration: none;
+}
+.cta-main:hover { transform: scale(1.04) translateY(-2px); }
+.cta-secondary {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 1rem 2rem;
+  border-radius: 999px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.85);
+  border: 1.5px solid rgba(255,255,255,0.15);
+  backdrop-filter: blur(8px);
+  background: rgba(255,255,255,0.05);
+  transition: all 0.2s;
+  text-decoration: none;
+}
+.cta-secondary:hover { border-color:rgba(192,132,252,0.5); color:#fff; background:rgba(192,132,252,0.08); }
+/* stat pill */
+.stat-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 999px;
+  padding: 0.45rem 1rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.7);
+  backdrop-filter: blur(6px);
+}
+.stat-pill strong { color: #fff; }
+/* ═══════════ SEARCH BAR ═══════════ */
+.search-pill {
+  display: flex; align-items: center;
+  background: rgba(8,5,18,0.88);
+  border: 1px solid rgba(192,132,252,0.22);
+  border-radius: 999px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.65), 0 0 0 1px rgba(192,132,252,0.06);
+  overflow: hidden;
+}
+.search-pill .seg { flex:1; padding:0.85rem 1.5rem; cursor:pointer; transition:background 0.15s; border-right:1px solid rgba(255,255,255,0.05); }
+.search-pill .seg:last-of-type { border-right:none; }
+.search-pill .seg:hover { background:rgba(192,132,252,0.07); }
+.search-pill label { display:block; font-size:0.65rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:rgba(192,132,252,0.65); margin-bottom:2px; }
+.search-pill input, .search-pill select { background:transparent; border:none; outline:none; color:#F8FAFC; font-size:0.9rem; font-weight:500; width:100%; }
+.search-pill select option { background:#100820; }
+/* ═══ SECTION HEADER ═══ */
+.sh { display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:2rem; gap:1rem; }
+.sh h2 { font-size:clamp(1.35rem,2.5vw,1.85rem); font-weight:800; color:#111827; letter-spacing:-0.03em; line-height:1.1; }
+.sh-label { display:flex; align-items:center; gap:6px; font-size:0.68rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; margin-bottom:0.45rem; }
+.sh-sub { margin-top:0.2rem; font-size:0.82rem; color:#9CA3AF; }
+.sh-link { white-space:nowrap; display:inline-flex; align-items:center; gap:5px; font-size:0.82rem; font-weight:700; text-decoration:none; transition:gap 0.2s; }
+.sh-link:hover { gap:9px; }
+/* ═══ LIVE DOT ═══ */
+.live-dot { position:relative; width:8px; height:8px; flex-shrink:0; display:inline-block; top:1px; }
+.live-dot::before { content:''; position:absolute; inset:0; border-radius:50%; background:currentColor; opacity:0.35; animation:live-ping 1.8s ease-in-out infinite; }
+.live-dot::after { content:''; position:absolute; top:1px; left:1px; width:6px; height:6px; border-radius:50%; background:currentColor; }
+@keyframes live-ping { 0%{transform:scale(1);opacity:0.35} 70%{transform:scale(2.5);opacity:0} 100%{transform:scale(2.5);opacity:0} }
+/* ═══ CARTES ═══ */
+.kard {
+  display:block; text-decoration:none;
+  background:#fff;
+  border-radius:16px;
+  overflow:hidden;
+  border:1px solid rgba(0,0,0,0.07);
+  box-shadow:0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.05);
+  transition:box-shadow 0.35s cubic-bezier(0.22,1,0.36,1), transform 0.35s cubic-bezier(0.22,1,0.36,1);
+  flex-shrink:0;
+  will-change:transform;
+}
+.kard:hover { box-shadow:0 24px 64px rgba(0,0,0,0.13), 0 6px 20px rgba(0,0,0,0.07); }
+.kard-img-wrap { overflow:hidden; position:relative; }
+.kard-img { width:100%; height:210px; object-fit:cover; display:block; transition:transform 0.6s cubic-bezier(0.22,1,0.36,1); }
+.kard:hover .kard-img { transform:scale(1.05); }
+.kard-no-img { width:100%; height:210px; display:flex; align-items:center; justify-content:center; background:#F8F9FA; }
+.kard-body { padding:0.9rem 1rem 1rem; }
+.kard-chip { display:inline-block; border-radius:6px; padding:2px 8px; font-size:0.65rem; font-weight:700; letter-spacing:.03em; margin-bottom:0.4rem; }
+.kard-title { font-size:0.9rem; font-weight:700; color:#111827; line-height:1.35; }
+.kard-meta { margin-top:0.25rem; font-size:0.72rem; color:#9CA3AF; display:flex; align-items:center; gap:3px; }
+.kard-row { margin-top:0.65rem; display:flex; align-items:center; justify-content:space-between; }
+.kard-price { font-size:0.9rem; font-weight:800; color:#111827; }
+.kard-price.free { color:#059669; }
+.kard-badge { position:absolute; top:12px; left:12px; border-radius:6px; padding:4px 10px; font-size:0.65rem; font-weight:800; letter-spacing:.05em; color:#fff; text-transform:uppercase; }
+.kard-save { position:absolute; top:10px; right:10px; width:34px; height:34px; border-radius:50%; background:rgba(255,255,255,0.92); backdrop-filter:blur(8px); display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,0.10); transition:transform 0.2s; }
+.kard:hover .kard-save { transform:scale(1.1); }
+/* ═══ CARTE VOIR TOUT ═══ */
+.kard-all {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  background:#FAFAFA;
+  border-radius:16px;
+  border:1.5px dashed #E5E7EB;
+  text-decoration:none;
+  flex-shrink:0;
+  transition:all 0.28s cubic-bezier(0.22,1,0.36,1);
+}
+.kard-all:hover { border-color:#FF6A4D; background:#FFF5F3; transform:translateY(-4px); box-shadow:0 14px 36px rgba(255,106,77,0.10); }
+.kard-all-icon { width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin-bottom:0.75rem; background:#F3F4F6; transition:background 0.2s, transform 0.2s; }
+.kard-all:hover .kard-all-icon { background:#FFE8E3; transform:scale(1.1); }
+/* ═══ BOUTONS CAROUSEL ═══ */
+.crsl-btn {
+  position:absolute; top:50%; z-index:10;
+  width:42px; height:42px;
+  background:#fff; border:1px solid #E5E7EB; border-radius:50%;
+  display:none; align-items:center; justify-content:center;
+  box-shadow:0 2px 12px rgba(0,0,0,0.09);
+  cursor:pointer; color:#374151;
+  transition:all 0.2s;
+}
+@media(min-width:768px){ .crsl-btn { display:flex; } }
+.crsl-btn:hover { box-shadow:0 6px 24px rgba(0,0,0,0.14); }
+.crsl-btn-l { left:0; transform:translate(-50%,-50%); }
+.crsl-btn-r { right:0; transform:translate(50%,-50%); }
+.crsl-btn-l:hover { transform:translate(-50%,-50%) scale(1.06); }
+.crsl-btn-r:hover { transform:translate(50%,-50%) scale(1.06); }
+/* ═══ MARQUEE LIVE ═══ */
+@keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+.mqstrip { overflow:hidden; padding:0.85rem 0; background:#F8F9FA; border-top:1px solid #EFEFEF; border-bottom:1px solid #EFEFEF; }
+.mqtrack { display:flex; white-space:nowrap; width:max-content; animation:marquee 42s linear infinite; }
+.mqtrack:hover { animation-play-state:paused; }
+.mqi { display:inline-flex; align-items:center; gap:0.5rem; padding:0 2.25rem; font-size:0.77rem; color:#9CA3AF; }
+.mqi strong { color:#6B7280; font-weight:600; }
+/* ═══ SCROLL REVEALS ═══ */
+.reveal { opacity:0; transform:translateY(26px); transition:opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1); }
+.reveal.vis { opacity:1; transform:translateY(0); }
+.rd1 { transition-delay:0.08s; }
+.rd2 { transition-delay:0.16s; }
+.rd3 { transition-delay:0.24s; }
+/* ═══ TRUST STRIP ═══ */
+.trust-strip { background:#111827; padding:3.5rem 0; }
+.trust-num { font-size:2.4rem; font-weight:900; letter-spacing:-0.04em; color:#fff; line-height:1; }
+.trust-label { margin-top:0.4rem; font-size:0.68rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,0.28); }
+.trust-bar { height:2px; border-radius:2px; margin-top:0.75rem; width:32px; }
+/* ═══ COMMENT ÇA MARCHE ═══ */
+.how-grid { display:grid; gap:1px; background:rgba(255,255,255,0.055); border-radius:24px; overflow:hidden; }
+@media(min-width:640px){ .how-grid { grid-template-columns:repeat(3,1fr); } }
+.how-step { position:relative; padding:2.75rem 2.25rem 2.5rem; background:#0D1018; overflow:hidden; transition:background 0.3s cubic-bezier(0.22,1,0.36,1); }
+.how-step:hover { background:#121820; }
+.how-big-num { position:absolute; top:0.75rem; right:1.25rem; font-size:6rem; font-weight:900; letter-spacing:-0.04em; line-height:1; color:rgba(255,255,255,0.04); pointer-events:none; user-select:none; }
+.how-icon { width:50px; height:50px; border-radius:14px; display:flex; align-items:center; justify-content:center; margin-bottom:1.5rem; transition:transform 0.3s cubic-bezier(0.22,1,0.36,1); }
+.how-step:hover .how-icon { transform:scale(1.1); }
+.how-label { font-size:0.6rem; font-weight:800; letter-spacing:.13em; text-transform:uppercase; margin-bottom:0.55rem; }
+/* ═══ SECTION PRO (light) ═══ */
+.pro-feat { display:flex; align-items:flex-start; gap:1rem; padding:1.35rem 1.6rem; border-radius:16px; background:#fff; border:1px solid rgba(0,0,0,0.07); box-shadow:0 1px 4px rgba(0,0,0,0.05); transition:all 0.28s cubic-bezier(0.22,1,0.36,1); text-decoration:none; }
+.pro-feat:hover { box-shadow:0 8px 28px rgba(0,0,0,0.1); border-color:rgba(0,0,0,0.12); transform:translateX(4px); }
+.pro-feat-icon { width:42px; height:42px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:2px; }
+.pro-quote { padding:1.35rem 1.5rem; border-radius:16px; background:#fff; border:1px solid rgba(0,0,0,0.07); margin-top:1.75rem; box-shadow:0 1px 4px rgba(0,0,0,0.05); }
+/* ─── SCROLL PROGRESS ─── */
+#spbar { position:fixed; top:0; left:0; height:2px; width:0%; z-index:9999; pointer-events:none; background:linear-gradient(90deg,#FF6A4D,#C084FC,#F472B6); }
+/* ─── CARD CTA BUTTON ─── */
+.kard-cta { display:flex; align-items:center; justify-content:center; gap:5px; border-radius:12px; padding:0.65rem 1rem; font-size:0.79rem; font-weight:700; margin-top:0.9rem; transition:filter 0.18s cubic-bezier(0.22,1,0.36,1), transform 0.18s cubic-bezier(0.22,1,0.36,1); }
+.kard:hover .kard-cta { filter:brightness(1.12); transform:translateY(-1px); }
+/* ─── FEATURED CARD ─── */
+.kf { display:block; text-decoration:none; border-radius:18px; overflow:hidden; position:relative; flex-shrink:0; box-shadow:0 4px 20px rgba(0,0,0,0.09), 0 8px 32px rgba(0,0,0,0.09); transition:box-shadow 0.4s cubic-bezier(0.22,1,0.36,1), transform 0.4s cubic-bezier(0.22,1,0.36,1); will-change:transform; }
+.kf:hover { box-shadow:0 20px 60px rgba(0,0,0,0.18); }
+.kf-img { width:100%; height:295px; object-fit:cover; display:block; transition:transform 0.6s cubic-bezier(0.22,1,0.36,1); }
+.kf:hover .kf-img { transform:scale(1.04); }
+.kf-no-img { width:100%; height:295px; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,#1a0533,#2d1b69); }
+.kf-overlay { position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,0) 20%, rgba(0,0,0,0.74) 100%); }
+.kf-body { position:absolute; bottom:0; left:0; right:0; padding:1.35rem 1.25rem; }
+.kf-badge { display:inline-flex; align-items:center; gap:4px; border-radius:6px; padding:3px 9px; font-size:0.62rem; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:#fff; backdrop-filter:blur(8px); }
+.kf-title { font-size:1.05rem; font-weight:800; color:#fff; line-height:1.25; letter-spacing:-0.01em; }
+.kf-meta { margin-top:0.3rem; font-size:0.73rem; color:rgba(255,255,255,0.55); }
+.kf-row { margin-top:0.7rem; display:flex; align-items:center; justify-content:space-between; }
+.kf-price { font-size:0.95rem; font-weight:800; color:#fff; }
+.kf-price.free { color:#86EFAC; }
+.kf-seats { display:inline-flex; align-items:center; gap:4px; background:rgba(255,255,255,0.13); border:1px solid rgba(255,255,255,0.2); backdrop-filter:blur(8px); border-radius:999px; padding:3px 10px; font-size:0.7rem; font-weight:600; color:rgba(255,255,255,0.82); }
+/* ─── DOT PATTERN background ─── */
+.dotbg { background-color:#FAFAFA; background-image:radial-gradient(circle, #E5E7EB 1.5px, transparent 1.5px); background-size:22px 22px; }
 </style>
 {% endblock %}
 
 {% block content %}
+<div id="spbar"></div>
 
 {# ═══════════════════════════════════════════ HERO ════════════════════════════════════════════ #}
-<section class="hero-bg relative flex flex-col items-center justify-center px-4 pt-20 pb-16 text-center">
-  {# overlay gradient bottom #}
-  <div class="pointer-events-none absolute inset-x-0 bottom-0 h-32" style="background:linear-gradient(0deg,#0C0F16,transparent)"></div>
+<section class="hero-section">
+  <div class="hero-bg-img"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="pointer-events-none absolute inset-x-0 bottom-0 h-64" style="background:linear-gradient(0deg,#070a12 0%,transparent 100%)"></div>
 
-  <p class="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/30 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-white/60 backdrop-blur-sm">
-    ✦ Discover · Book · Live
-  </p>
-  <h1 class="mx-auto max-w-4xl text-5xl font-bold leading-[1.1] tracking-tight text-white drop-shadow-lg md:text-7xl">
-    Trouve ta prochaine<br>
-    <span style="background:linear-gradient(90deg,#FF6A4D,#FF9A6A);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">sortie ce soir.</span>
-  </h1>
-  <p class="mx-auto mt-5 max-w-lg text-lg text-white/60 drop-shadow">
-    Sorties communautaires, restaurants branchés et soirées — tout en un seul endroit.
-  </p>
+  <div class="relative z-10 flex flex-col items-center w-full max-w-5xl mx-auto px-4">
 
-  {# ── Search bar ── #}
-  <div class="relative z-10 mx-auto mt-10 w-full max-w-3xl">
-    <form action="/sorties/" method="get" class="search-pill">
-      <div class="seg">
-        <label>Ville</label>
-        <input type="text" name="city" placeholder="Paris, Lyon, Marseille…" autocomplete="off" />
-      </div>
-      <div class="seg">
-        <label>Type</label>
-        <select name="type">
-          <option value="">Tout</option>
-          <option value="COMMUNAUTAIRE">Sortie</option>
-          <option value="PARTENAIRE">Soirée partenaire</option>
-        </select>
-      </div>
-      <div class="seg" style="flex:0.7">
-        <label>Budget</label>
-        <select name="free">
-          <option value="">Peu importe</option>
-          <option value="1">Gratuit</option>
-          <option value="0">Payant</option>
-        </select>
-      </div>
-      <button type="submit" class="m-1.5 shrink-0 rounded-full px-6 py-3 font-semibold text-white text-sm" style="background:#FF6A4D">
-        🔍 Rechercher
-      </button>
-    </form>
-  </div>
-
-  {# ── Stats ── #}
-  <div class="relative z-10 mt-10 flex flex-wrap items-center justify-center gap-8 text-sm text-white/50">
-    <span><strong class="text-white font-bold">2 400+</strong> sorties organisées</span>
-    <span class="hidden sm:inline text-white/20">|</span>
-    <span><strong class="text-white font-bold">180+</strong> restaurants partenaires</span>
-    <span class="hidden sm:inline text-white/20">|</span>
-    <span><strong class="text-white font-bold">12</strong> villes</span>
-  </div>
-</section>
-
-{# ═══════════════════════════════════════════ CATEGORIES ═════════════════════════════════════ #}
-<section class="mx-auto max-w-7xl px-4 py-10">
-  <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
-
-    {# Sorties #}
-    <a href="/sorties/" class="group relative overflow-hidden rounded-2xl" style="height:300px">
-      <img src="https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=700&q=85" alt="Sorties"
-        class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
-      <div class="absolute inset-0 transition-opacity duration-300" style="background:linear-gradient(180deg,rgba(12,15,22,0.0) 35%,rgba(12,15,22,0.9) 100%)"></div>
-      <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style="background:rgba(255,106,77,0.12)"></div>
-      <div class="absolute inset-x-0 bottom-0 p-5">
-        <p class="text-center text-base font-bold text-white tracking-wide drop-shadow">Sorties</p>
-        <p class="text-center text-xs text-white/60 mt-0.5">Ce soir &amp; ce week-end</p>
-      </div>
-    </a>
-
-    {# Restaurants #}
-    <a href="/restaurants/" class="group relative overflow-hidden rounded-2xl" style="height:300px">
-      <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=700&q=85" alt="Restaurants"
-        class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
-      <div class="absolute inset-0 transition-opacity duration-300" style="background:linear-gradient(180deg,rgba(12,15,22,0.0) 35%,rgba(12,15,22,0.9) 100%)"></div>
-      <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style="background:rgba(255,106,77,0.12)"></div>
-      <div class="absolute inset-x-0 bottom-0 p-5">
-        <p class="text-center text-base font-bold text-white tracking-wide drop-shadow">Restaurants</p>
-        <p class="text-center text-xs text-white/60 mt-0.5">Tables disponibles</p>
-      </div>
-    </a>
-
-    {# Soirées #}
-    <a href="/sorties/?type=PARTENAIRE" class="group relative overflow-hidden rounded-2xl" style="height:300px">
-      <img src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=700&q=85" alt="Soirées"
-        class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
-      <div class="absolute inset-0 transition-opacity duration-300" style="background:linear-gradient(180deg,rgba(12,15,22,0.0) 35%,rgba(12,15,22,0.9) 100%)"></div>
-      <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style="background:rgba(255,106,77,0.12)"></div>
-      <div class="absolute inset-x-0 bottom-0 p-5">
-        <p class="text-center text-base font-bold text-white tracking-wide drop-shadow">Soirées</p>
-        <p class="text-center text-xs text-white/60 mt-0.5">Clubs &amp; événements</p>
-      </div>
-    </a>
-
-    {# Événements #}
-    <a href="/evenements/" class="group relative overflow-hidden rounded-2xl" style="height:300px">
-      <img src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=700&q=85" alt="Événements"
-        class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
-      <div class="absolute inset-0 transition-opacity duration-300" style="background:linear-gradient(180deg,rgba(12,15,22,0.0) 35%,rgba(12,15,22,0.9) 100%)"></div>
-      <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style="background:rgba(255,106,77,0.12)"></div>
-      <div class="absolute inset-x-0 bottom-0 p-5">
-        <p class="text-center text-base font-bold text-white tracking-wide drop-shadow">Événements</p>
-        <p class="text-center text-xs text-white/60 mt-0.5">Officiels Mooviogo</p>
-      </div>
-    </a>
-
-    {# Villes #}
-    <a href="/villes/" class="group relative overflow-hidden rounded-2xl col-span-2 sm:col-span-1" style="height:300px">
-      <img src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=700&q=85" alt="Villes"
-        class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
-      <div class="absolute inset-0 transition-opacity duration-300" style="background:linear-gradient(180deg,rgba(12,15,22,0.0) 35%,rgba(12,15,22,0.9) 100%)"></div>
-      <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style="background:rgba(255,106,77,0.12)"></div>
-      <div class="absolute inset-x-0 bottom-0 p-5">
-        <p class="text-center text-base font-bold text-white tracking-wide drop-shadow">Villes</p>
-        <p class="text-center text-xs text-white/60 mt-0.5">Près de chez toi</p>
-      </div>
-    </a>
-
-  </div>
-</section>
-
-{# ═══════════════════════════════════════════ LIVE SORTIES ═══════════════════════════════════ #}
-<section class="mx-auto max-w-7xl px-4 pb-16">
-  <div class="sec-hd">
-    <div>
-      <h2>Sorties ouvertes maintenant</h2>
-      <p class="mt-1 text-sm text-white/40">Rejoins une sortie ce soir ou cette semaine</p>
+    {# ── Badge : L'Airbnb des sorties ── #}
+    <div class="hero-anim-1 mb-7 inline-flex items-center gap-2.5 rounded-full px-5 py-2" style="background:rgba(192,132,252,0.10);border:1px solid rgba(192,132,252,0.30);backdrop-filter:blur(12px)">
+      <span class="relative flex h-2 w-2">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style="background:#A855F7"></span>
+        <span class="relative inline-flex rounded-full h-2 w-2" style="background:#C084FC"></span>
+      </span>
+      <span class="text-xs font-bold uppercase tracking-widest" style="color:#D8B4FE">L&apos;Airbnb des sorties &mdash; gratuit</span>
     </div>
-    <a href="/sorties/">Tout voir →</a>
+
+    {# ── C'EST QUOI ── #}
+    <h1 class="hero-anim-2 text-center font-black leading-[1.0] tracking-tighter text-white" style="font-size:clamp(2.8rem,8.5vw,6rem)">
+      Tu cherches quoi faire<br>
+      <span class="grad-text">ce soir&nbsp;?</span>
+    </h1>
+
+    {# ── POURQUOI — valeur immédiate ── #}
+    <p class="hero-anim-3 mt-5 text-center text-lg font-medium max-w-xl" style="color:rgba(255,255,255,0.52);line-height:1.65">
+      Mooviogo trouve pour toi les meilleures <strong class="text-white/80">sorties</strong>,
+      <strong class="text-white/80">restaurants</strong> et <strong class="text-white/80">soirées</strong>
+      &mdash; dans ta ville, réservables en 30&nbsp;secondes.
+    </p>
+
+    {# ── COMMENT — 3 catégories visuelles ── #}
+    <div class="hero-anim-3 mt-10 grid grid-cols-3 gap-3 w-full max-w-2xl">
+      <a href="/sorties/" class="group relative overflow-hidden rounded-2xl" style="height:120px">
+        <img src="https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=500&q=80"
+             alt="Sorties" class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+        <div class="absolute inset-0" style="background:linear-gradient(180deg,rgba(0,0,0,0.05) 0%,rgba(10,5,25,0.82) 100%)"></div>
+        <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style="background:rgba(168,85,247,0.18)"></div>
+        <div class="absolute inset-0 flex flex-col items-center justify-end p-3">
+          <span class="text-2xl mb-1">🎉</span>
+          <span class="text-sm font-bold text-white">Sorties</span>
+          <span class="text-xs" style="color:rgba(255,255,255,0.45)">Ce soir &amp; week-end</span>
+        </div>
+      </a>
+      <a href="/restaurants/" class="group relative overflow-hidden rounded-2xl" style="height:120px">
+        <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=500&q=80"
+             alt="Restaurants" class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+        <div class="absolute inset-0" style="background:linear-gradient(180deg,rgba(0,0,0,0.05) 0%,rgba(20,8,5,0.82) 100%)"></div>
+        <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style="background:rgba(255,106,77,0.18)"></div>
+        <div class="absolute inset-0 flex flex-col items-center justify-end p-3">
+          <span class="text-2xl mb-1">🍽️</span>
+          <span class="text-sm font-bold text-white">Restaurants</span>
+          <span class="text-xs" style="color:rgba(255,255,255,0.45)">Tables disponibles</span>
+        </div>
+      </a>
+      <a href="/evenements/" class="group relative overflow-hidden rounded-2xl" style="height:120px">
+        <img src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=500&q=80"
+             alt="Soirées" class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+        <div class="absolute inset-0" style="background:linear-gradient(180deg,rgba(0,0,0,0.05) 0%,rgba(15,5,20,0.82) 100%)"></div>
+        <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style="background:rgba(244,114,182,0.18)"></div>
+        <div class="absolute inset-0 flex flex-col items-center justify-end p-3">
+          <span class="text-2xl mb-1">🎶</span>
+          <span class="text-sm font-bold text-white">Soirées</span>
+          <span class="text-xs" style="color:rgba(255,255,255,0.45)">Clubs &amp; événements</span>
+        </div>
+      </a>
+    </div>
+
+    {# ── JE REJOINS — CTA + preuve sociale humaine ── #}
+    <div class="hero-anim-4 mt-10 flex flex-col items-center gap-5">
+      <a href="/sorties/" class="cta-main" style="font-size:1.15rem;padding:1.1rem 2.8rem">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        Je veux sortir ce soir
+      </a>
+
+      {# Avatars + social proof #}
+      <div class="flex items-center gap-3">
+        <div class="flex -space-x-2">
+          <img src="https://i.pravatar.cc/40?img=47" alt="" class="w-8 h-8 rounded-full" style="outline:2px solid #070a12">
+          <img src="https://i.pravatar.cc/40?img=32" alt="" class="w-8 h-8 rounded-full" style="outline:2px solid #070a12">
+          <img src="https://i.pravatar.cc/40?img=12" alt="" class="w-8 h-8 rounded-full" style="outline:2px solid #070a12">
+          <img src="https://i.pravatar.cc/40?img=65" alt="" class="w-8 h-8 rounded-full" style="outline:2px solid #070a12">
+          <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold" style="background:rgba(192,132,252,0.22);color:#C084FC;outline:2px solid #070a12">+</div>
+        </div>
+        <p class="text-sm" style="color:rgba(255,255,255,0.40)">
+          <strong class="text-white">15&nbsp;000+</strong> membres qui ne s&apos;ennuient plus le vendredi soir
+        </p>
+      </div>
+    </div>
+
+    {# ── Barre de recherche ── #}
+    <div class="hero-anim-5 mt-10 w-full max-w-3xl">
+      <form action="/sorties/" method="get" class="search-pill">
+        <div class="seg">
+          <label>Ville</label>
+          <input type="text" name="city" placeholder="Paris, Lyon, Marseille…" autocomplete="off">
+        </div>
+        <div class="seg">
+          <label>Type</label>
+          <select name="type">
+            <option value="">Tout</option>
+            <option value="COMMUNAUTAIRE">Sortie</option>
+            <option value="PARTENAIRE">Soirée</option>
+          </select>
+        </div>
+        <div class="seg" style="flex:0.7">
+          <label>Budget</label>
+          <select name="free">
+            <option value="">Peu importe</option>
+            <option value="1">Gratuit</option>
+            <option value="0">Payant</option>
+          </select>
+        </div>
+        <button type="submit" class="m-1.5 shrink-0 rounded-full px-7 py-3 text-sm font-bold text-white"
+                style="background:linear-gradient(135deg,#FF6A4D,#C084FC);box-shadow:0 4px 20px rgba(192,132,252,0.35)">
+          Rechercher
+        </button>
+      </form>
+    </div>
+
   </div>
+</section>
 
-  {% if sorties %}
-  {# ── Carousel wrapper ── #}
-  <div class="relative">
-    <div id="sorties-carousel" class="flex gap-4 overflow-x-auto pb-3 scroll-smooth" style="scrollbar-width:none;-ms-overflow-style:none;">
+{# ══ TRANSITION hero → blanc ══ #}
+<div style="height:80px;background:linear-gradient(180deg,#070a12 0%,#ffffff 100%)"></div>
 
-      {% for sortie in sorties|slice:":9" %}
-      <a href="/sorties/{{ sortie.id }}/" class="sortie-card group block flex-shrink-0" style="width:260px">
-        <span class="badge">{{ sortie.get_type_display }}</span>
-        <span class="fav">🤍</span>
-        {% if sortie.cover_image_url %}
-          <img src="{{ sortie.cover_image_url }}" alt="{{ sortie.title }}" class="thumb" loading="lazy" />
-        {% else %}
-          <div class="thumb-placeholder">
-            {% if sortie.type == "PARTENAIRE" %}🎶{% else %}🎉{% endif %}
-          </div>
-        {% endif %}
-        <div class="p-4">
-          <div class="flex items-center justify-between">
-            <span class="text-xs text-white/40">📍 {{ sortie.city }}</span>
-            {% if sortie.starts_at %}<span class="text-xs text-white/40">{{ sortie.starts_at|date:"d M" }}</span>{% endif %}
-          </div>
-          <h3 class="mt-2 font-semibold text-white leading-tight group-hover:text-brand transition-colors line-clamp-2">{{ sortie.title }}</h3>
-          <p class="mt-1.5 text-xs text-white/50 line-clamp-2">{{ sortie.description|default:"Rejoins cette sortie !" }}</p>
-          <div class="mt-3 flex items-center justify-between">
-            <div class="flex items-center gap-1.5">
-              <div class="flex -space-x-1">
-                <div class="w-5 h-5 rounded-full bg-brand/30 border border-brand/40 flex items-center justify-center text-[9px]">👤</div>
-                <div class="w-5 h-5 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-[9px]">+</div>
+{# ══════════════════════ SORTIES ══════════════════════ #}
+<section id="section-sorties" style="background:#fff;padding:0 0 5rem">
+  <div class="mx-auto max-w-7xl px-4">
+    <div class="sh reveal">
+      <div>
+        <span class="sh-label" style="color:#FF6A4D">
+          <span class="live-dot" style="color:#22C55E"></span>
+          Ouvert maintenant
+        </span>
+        <h2>Ce soir &amp; ce week-end</h2>
+      </div>
+      <a href="/sorties/" class="sh-link" style="color:#FF6A4D">
+        Tout voir
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+      </a>
+    </div>
+
+    {% if sorties %}
+    <div class="relative">
+      <div id="sorties-carousel" class="flex gap-4 overflow-x-auto pb-2 scroll-smooth" style="scrollbar-width:none;-ms-overflow-style:none">
+        {% for sortie in sorties|slice:":8" %}
+        <a href="/sorties/{{ sortie.id }}/" class="kard" style="width:300px">
+          <div class="kard-img-wrap">
+            {% if sortie.cover_image_url %}
+              <img class="kard-img" src="{{ sortie.cover_image_url }}" alt="{{ sortie.title }}" loading="lazy" style="height:200px">
+            {% else %}
+              <div class="kard-no-img" style="height:200px">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-9 h-9" style="color:#D1D5DB" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
               </div>
-              <span class="text-xs text-white/40">{{ sortie.max_participants|default:"∞" }} max</span>
-            </div>
-            <span class="font-semibold text-sm {% if sortie.is_free %}text-emerald-400{% else %}text-white{% endif %}">
-              {% if sortie.is_free %}Gratuit{% else %}{{ sortie.price }}€{% endif %}
+            {% endif %}
+            <span class="kard-badge" style="background:rgba(255,106,77,0.88)">{{ sortie.get_type_display }}</span>
+            {% if sortie.starts_at %}<span style="position:absolute;top:12px;right:12px;background:rgba(0,0,0,0.58);color:#fff;border-radius:6px;padding:3px 9px;font-size:0.62rem;font-weight:700;backdrop-filter:blur(8px)">{{ sortie.starts_at|date:"d M" }}</span>{% endif %}
+            <span class="kard-save">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" style="color:#9CA3AF" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
             </span>
           </div>
-        </div>
-      </a>
-      {% endfor %}
-
-      {# ── 10e carte : Voir tout ── #}
-      <a href="/sorties/" class="group flex-shrink-0 flex flex-col items-center justify-center rounded-2xl border border-white/10 hover:border-brand/50 transition-all duration-300 hover:bg-brand/5" style="width:260px;min-height:340px">
-        <div class="w-14 h-14 rounded-full flex items-center justify-center mb-4 transition-all duration-300 group-hover:scale-110" style="background:rgba(255,106,77,0.15);border:1.5px solid rgba(255,106,77,0.3)">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-          </svg>
-        </div>
-        <p class="text-sm font-bold text-white">Voir toutes les sorties</p>
-        <p class="mt-1 text-xs text-white/40 text-center px-6">Découvrir les {{ sorties|length }}+ sorties disponibles</p>
-      </a>
-
+          <div class="kard-body" style="text-align:center;padding:1rem 1rem 1.25rem">
+            <p class="kard-title" style="font-size:0.92rem;font-weight:800;line-height:1.3">{{ sortie.title }}</p>
+            <p class="kard-meta" style="justify-content:center;margin-top:0.35rem">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+              {{ sortie.city }}{% if sortie.starts_at %}&nbsp;&middot;&nbsp;{{ sortie.starts_at|date:"d M" }}{% endif %}
+            </p>
+            <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:0.65rem;flex-wrap:wrap">
+              <span style="display:inline-flex;align-items:center;gap:4px;font-size:0.7rem;color:#6B7280;background:#F3F4F6;border-radius:999px;padding:3px 10px">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                {{ sortie.participant_count|default:0 }}&nbsp;/&nbsp;{{ sortie.max_participants|default:"∞" }}
+              </span>
+              <span class="kard-price {% if sortie.is_free %}free{% endif %}" style="font-size:1rem;font-weight:900">
+                {% if sortie.is_free %}Gratuit{% else %}{% widthratio sortie.price 100 1 %}&nbsp;€{% endif %}
+              </span>
+            </div>
+            <span class="kard-cta" style="background:linear-gradient(135deg,#FF6A4D,#F97316);color:#fff">
+              Rejoindre la sortie
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+            </span>
+          </div>
+        </a>
+        {% endfor %}
+        <a href="/sorties/" class="kard-all" style="width:300px;min-height:370px">
+          <div class="kard-all-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" style="color:#FF6A4D" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+          </div>
+          <p style="font-size:0.88rem;font-weight:700;color:#111827">Toutes les sorties</p>
+          <p style="font-size:0.72rem;color:#9CA3AF;margin-top:4px;text-align:center;padding:0 1.5rem">Explorer toutes les sorties disponibles</p>
+        </a>
+      </div>
+      <button onclick="document.getElementById('sorties-carousel').scrollBy({left:-316,behavior:'smooth'})" class="crsl-btn crsl-btn-l">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+      </button>
+      <button onclick="document.getElementById('sorties-carousel').scrollBy({left:316,behavior:'smooth'})" class="crsl-btn crsl-btn-r">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+      </button>
     </div>
-
-    {# ── Boutons navigation ── #}
-    <button onclick="document.getElementById('sorties-carousel').scrollBy({left:-280,behavior:'smooth'})"
-      class="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 hidden md:flex w-9 h-9 items-center justify-center rounded-full border border-white/15 bg-[#0c0f16]/90 text-white hover:border-brand/50 hover:text-brand transition-all z-10">
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-    </button>
-    <button onclick="document.getElementById('sorties-carousel').scrollBy({left:280,behavior:'smooth'})"
-      class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 hidden md:flex w-9 h-9 items-center justify-center rounded-full border border-white/15 bg-[#0c0f16]/90 text-white hover:border-brand/50 hover:text-brand transition-all z-10">
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-    </button>
+    {% else %}
+    <div class="flex flex-col items-center justify-center rounded-2xl border border-dashed py-20 text-center" style="border-color:#E5E7EB">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 mb-3" style="color:#D1D5DB" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+      <p style="color:#9CA3AF;font-size:0.88rem">Aucune sortie ouverte pour le moment.</p>
+      <a href="/sorties/creer/" class="mt-4 btn-brand text-sm">Créer la première sortie</a>
+    </div>
+    {% endif %}
   </div>
-
-  {% else %}
-  <div class="flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 py-20 text-center">
-    <span class="text-5xl">🎉</span>
-    <p class="mt-4 text-white/40">Aucune sortie ouverte pour le moment.</p>
-    <a href="/sorties/creer/" class="mt-5 btn-brand text-sm">Créer la première sortie</a>
-  </div>
-  {% endif %}
 </section>
 
-{# ═══════════════════════════════════════════ TRUST BAR ══════════════════════════════════════ #}
-<div class="trust-bar py-8 mb-8">
+{# ══ MARQUEE LIVE ACTIVITY ══ #}
+<div class="mqstrip">
+  <div class="mqtrack">
+    <span class="mqi"><span style="color:#22C55E;font-size:0.7rem">●</span> <strong>Sophie</strong> rejoint Karting vendredi · Paris</span>
+    <span class="mqi" style="color:#D1D5DB">·</span>
+    <span class="mqi"><span style="color:#22C55E;font-size:0.7rem">●</span> <strong>Thomas</strong> réserve au Bistrot du Marché · Lyon</span>
+    <span class="mqi" style="color:#D1D5DB">·</span>
+    <span class="mqi"><span style="color:#F59E0B;font-size:0.7rem">●</span> <strong>3 nouvelles soirées</strong> ouvertes ce soir</span>
+    <span class="mqi" style="color:#D1D5DB">·</span>
+    <span class="mqi"><span style="color:#22C55E;font-size:0.7rem">●</span> <strong>Léa</strong> organise un Escape Game · Marseille</span>
+    <span class="mqi" style="color:#D1D5DB">·</span>
+    <span class="mqi"><span style="color:#EF4444;font-size:0.7rem">●</span> Rooftop électro — <strong>8 places</strong> restantes</span>
+    <span class="mqi" style="color:#D1D5DB">·</span>
+    <span class="mqi"><span style="color:#22C55E;font-size:0.7rem">●</span> <strong>+47 inscriptions</strong> Mooviogo ce soir</span>
+    <span class="mqi" style="color:#D1D5DB">·</span>
+    <span class="mqi"><span style="color:#22C55E;font-size:0.7rem">●</span> <strong>Julie</strong> rejoint Soirée Salsa · Paris</span>
+    <span class="mqi" style="color:#D1D5DB">·</span>
+    <span class="mqi"><span style="color:#22C55E;font-size:0.7rem">●</span> <strong>Marc</strong> réserve au Comptoir · Bordeaux</span>
+    <span class="mqi" style="color:#D1D5DB">·</span>
+    {# ─ DUPLICATE for seamless loop ─ #}
+    <span class="mqi"><span style="color:#22C55E;font-size:0.7rem">●</span> <strong>Sophie</strong> rejoint Karting vendredi · Paris</span>
+    <span class="mqi" style="color:#D1D5DB">·</span>
+    <span class="mqi"><span style="color:#22C55E;font-size:0.7rem">●</span> <strong>Thomas</strong> réserve au Bistrot du Marché · Lyon</span>
+    <span class="mqi" style="color:#D1D5DB">·</span>
+    <span class="mqi"><span style="color:#F59E0B;font-size:0.7rem">●</span> <strong>3 nouvelles soirées</strong> ouvertes ce soir</span>
+    <span class="mqi" style="color:#D1D5DB">·</span>
+    <span class="mqi"><span style="color:#22C55E;font-size:0.7rem">●</span> <strong>Léa</strong> organise un Escape Game · Marseille</span>
+    <span class="mqi" style="color:#D1D5DB">·</span>
+    <span class="mqi"><span style="color:#EF4444;font-size:0.7rem">●</span> Rooftop électro — <strong>8 places</strong> restantes</span>
+    <span class="mqi" style="color:#D1D5DB">·</span>
+    <span class="mqi"><span style="color:#22C55E;font-size:0.7rem">●</span> <strong>+47 inscriptions</strong> Mooviogo ce soir</span>
+    <span class="mqi" style="color:#D1D5DB">·</span>
+    <span class="mqi"><span style="color:#22C55E;font-size:0.7rem">●</span> <strong>Julie</strong> rejoint Soirée Salsa · Paris</span>
+    <span class="mqi" style="color:#D1D5DB">·</span>
+    <span class="mqi"><span style="color:#22C55E;font-size:0.7rem">●</span> <strong>Marc</strong> réserve au Comptoir · Bordeaux</span>
+    <span class="mqi" style="color:#D1D5DB">·</span>
+  </div>
+</div>
+
+{# ══ TRUST STRIP ══ #}
+<div class="trust-strip">
   <div class="mx-auto max-w-7xl px-4">
-    <div class="grid grid-cols-2 gap-6 md:grid-cols-4 text-center">
-      <div>
-        <p class="text-2xl font-bold text-white">2 400+</p>
-        <p class="mt-1 text-xs text-white/40 uppercase tracking-wide">Sorties organisées</p>
+    <div class="grid grid-cols-2 gap-8 md:grid-cols-4 reveal">
+      <div class="text-center">
+        <p class="trust-num" data-target="2400" data-suffix="+">2 400+</p>
+        <p class="trust-label">Sorties organisées</p>
+        <div class="trust-bar mx-auto" style="background:#FF6A4D"></div>
       </div>
-      <div>
-        <p class="text-2xl font-bold text-white">180+</p>
-        <p class="mt-1 text-xs text-white/40 uppercase tracking-wide">Restaurants</p>
+      <div class="text-center">
+        <p class="trust-num" data-target="180" data-suffix="+">180+</p>
+        <p class="trust-label">Restaurants partenaires</p>
+        <div class="trust-bar mx-auto" style="background:#EA580C"></div>
       </div>
-      <div>
-        <p class="text-2xl font-bold text-white">15K+</p>
-        <p class="mt-1 text-xs text-white/40 uppercase tracking-wide">Membres actifs</p>
+      <div class="text-center">
+        <p class="trust-num" data-target="15000" data-suffix="+">15 000+</p>
+        <p class="trust-label">Membres actifs</p>
+        <div class="trust-bar mx-auto" style="background:#22C55E"></div>
       </div>
-      <div>
-        <p class="text-2xl font-bold text-white">⭐ 4.9</p>
-        <p class="mt-1 text-xs text-white/40 uppercase tracking-wide">Note moyenne</p>
+      <div class="text-center">
+        <p class="trust-num">4.9 / 5</p>
+        <p class="trust-label">Note moyenne</p>
+        <div class="trust-bar mx-auto" style="background:#F59E0B"></div>
       </div>
     </div>
   </div>
 </div>
 
-{# ═══════════════════════════════════════════ RESTAURANTS ════════════════════════════════════ #}
+{# ══ RESTAURANTS ══ #}
 {% if restaurants %}
-<section class="mx-auto max-w-7xl px-4 pb-16">
-  <div class="sec-hd">
-    <div>
-      <h2>Restaurants à réserver</h2>
-      <p class="mt-1 text-sm text-white/40">Tables disponibles ce soir</p>
-    </div>
-    <a href="/restaurants/">Tout voir →</a>
-  </div>
-  <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-    {% for venue in restaurants %}
-    <a href="/restaurants/{{ venue.city_slug }}/{{ venue.slug }}/" class="resto-card group block">
-      {% if venue.cover_image_url %}
-        <img src="{{ venue.cover_image_url }}" alt="{{ venue.name }}" class="thumb" loading="lazy" />
-      {% else %}
-        <div class="thumb-placeholder">🍽️</div>
-      {% endif %}
-      <div class="p-4">
-        <div class="flex items-start justify-between gap-2">
-          <h3 class="font-semibold text-white leading-tight group-hover:text-brand transition-colors">{{ venue.name }}</h3>
-          {% if venue.price_range %}<span class="shrink-0 text-xs text-white/40 mt-0.5">{{ venue.price_range }}</span>{% endif %}
-        </div>
-        <p class="mt-1 text-xs text-white/40">📍 {{ venue.city_label }}</p>
-        {% if venue.cuisine_type %}
-        <p class="mt-2"><span class="tag">{{ venue.cuisine_type }}</span></p>
-        {% endif %}
-        <div class="mt-3 flex items-center justify-between">
-          <span class="text-xs text-emerald-400 font-medium">● Tables dispo</span>
-          <span class="text-xs text-white/30 group-hover:text-brand transition-colors font-semibold">Réserver →</span>
-        </div>
+<section id="section-restaurants" style="background:#fff;padding:4.5rem 0">
+  <div class="mx-auto max-w-7xl px-4">
+    <div class="sh reveal">
+      <div>
+        <span class="sh-label" style="color:#EA580C">Réserver une table</span>
+        <h2>Restaurants à découvrir</h2>
       </div>
-    </a>
-    {% endfor %}
+      <a href="/restaurants/" class="sh-link" style="color:#EA580C">
+        Voir tout
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+      </a>
+    </div>
+    <div class="relative">
+      <div id="resto-carousel" class="flex gap-4 overflow-x-auto pb-2 scroll-smooth" style="scrollbar-width:none;-ms-overflow-style:none">
+        {% for venue in restaurants|slice:":8" %}
+        <a href="/restaurants/{{ venue.city_slug }}/{{ venue.slug }}/" class="kard" style="width:300px">
+          <div class="kard-img-wrap">
+            {% if venue.cover_image_url %}
+              <img class="kard-img" src="{{ venue.cover_image_url }}" alt="{{ venue.name }}" loading="lazy" style="height:200px">
+            {% else %}
+              <div class="kard-no-img" style="height:200px">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-9 h-9" style="color:#D1D5DB" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+              </div>
+            {% endif %}
+            {% if venue.price_range %}<span class="kard-badge" style="background:rgba(234,88,12,0.82)">{{ venue.price_range }}</span>{% endif %}
+            <span class="kard-save">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" style="color:#9CA3AF" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+            </span>
+          </div>
+          <div class="kard-body" style="text-align:center;padding:1rem 1rem 1.25rem">
+            {% if venue.cuisine_type %}<span class="kard-chip" style="background:#FFF7ED;color:#EA580C">{{ venue.cuisine_type }}</span>{% endif %}
+            <p class="kard-title" style="font-size:0.92rem;font-weight:800;line-height:1.3;margin-top:0.3rem">{{ venue.name }}</p>
+            <p class="kard-meta" style="justify-content:center;margin-top:0.35rem">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+              {{ venue.city_label }}
+            </p>
+            <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:0.65rem">
+              <span style="display:inline-flex;align-items:center;gap:4px;font-size:0.7rem;color:#10B981;background:#ECFDF5;border-radius:999px;padding:3px 10px;font-weight:600">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20"><circle cx="10" cy="10" r="4"/></svg>
+                Tables disponibles
+              </span>
+            </div>
+            <span class="kard-cta" style="background:linear-gradient(135deg,#EA580C,#F97316);color:#fff">
+              Réserver une table
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+            </span>
+          </div>
+        </a>
+        {% endfor %}
+        <a href="/restaurants/" class="kard-all" style="width:300px;min-height:370px">
+          <div class="kard-all-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" style="color:#EA580C" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+          </div>
+          <p style="font-size:0.88rem;font-weight:700;color:#111827">Tous les restaurants</p>
+          <p style="font-size:0.72rem;color:#9CA3AF;margin-top:4px;text-align:center;padding:0 1.5rem">Toutes les tables disponibles</p>
+        </a>
+      </div>
+      <button onclick="document.getElementById('resto-carousel').scrollBy({left:-280,behavior:'smooth'})" class="crsl-btn crsl-btn-l">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+      </button>
+      <button onclick="document.getElementById('resto-carousel').scrollBy({left:280,behavior:'smooth'})" class="crsl-btn crsl-btn-r">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+      </button>
+    </div>
   </div>
 </section>
 {% endif %}
 
-{# ═══════════════════════════════════════════ ACTIVITIES ════════════════════════════════════ #}
+{# ══ ACTIVITÉS ══ #}
 {% if partners %}
-<section class="mx-auto max-w-7xl px-4 pb-16">
-  <div class="sec-hd">
-    <div>
-      <h2>Activités & loisirs</h2>
-      <p class="mt-1 text-sm text-white/40">Paintball, karting, escape game et plus encore</p>
-    </div>
-    <a href="/partenaires/">Tous les partenaires →</a>
-  </div>
-  <div class="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
-    {% for partner in partners %}
-    <a href="/partenaires/" class="group relative overflow-hidden rounded-2xl border border-white/07 bg-[#14181F] transition-all hover:-translate-y-1 hover:shadow-2xl">
-      {% if partner.cover_image_url %}
-        <img src="{{ partner.cover_image_url }}" alt="{{ partner.name }}" class="w-full h-36 object-cover" loading="lazy" />
-      {% else %}
-        <div class="w-full h-36 flex items-center justify-center text-4xl" style="background:linear-gradient(135deg,#1a1e28,#2a2033)">
-          {% if partner.category == "Paintball" %}🎯{% elif partner.category == "Karting" %}🏎️{% elif partner.category == "Escape Game" %}🔐{% elif partner.category == "Bowling" %}🎳{% elif partner.category == "Laser Game" %}🔫{% elif partner.category == "Réalité Virtuelle" %}🥽{% elif partner.category == "Accrobranche" %}🌳{% elif partner.category == "Lancer de hache" %}🪓{% else %}🎉{% endif %}
-        </div>
-      {% endif %}
-      <div class="p-3">
-        <span class="inline-block mb-1 rounded-full bg-brand/10 px-2.5 py-0.5 text-xs font-semibold text-brand">{{ partner.category }}</span>
-        <p class="text-sm font-semibold text-white leading-tight group-hover:text-brand transition-colors line-clamp-1">{{ partner.name }}</p>
-        <p class="mt-0.5 text-xs text-white/40">📍 {{ partner.city }}</p>
+<section id="section-activites" style="background:#F8F9FA;padding:4.5rem 0">
+  <div class="mx-auto max-w-7xl px-4">
+    <div class="sh reveal">
+      <div>
+        <span class="sh-label" style="color:#059669">Loisirs &amp; activités</span>
+        <h2>Activités &amp; expériences</h2>
       </div>
-    </a>
-    {% endfor %}
+      <a href="/partenaires/" class="sh-link" style="color:#059669">
+        Voir tout
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+      </a>
+    </div>
+    <div class="relative">
+      <div id="activities-carousel" class="flex gap-4 overflow-x-auto pb-2 scroll-smooth" style="scrollbar-width:none;-ms-overflow-style:none">
+        {% for partner in partners|slice:":8" %}
+        <a href="/partenaires/" class="kard" style="width:300px">
+          <div class="kard-img-wrap">
+            {% if partner.cover_image_url %}
+              <img class="kard-img" src="{{ partner.cover_image_url }}" alt="{{ partner.name }}" loading="lazy" style="height:200px">
+            {% else %}
+              <div class="kard-no-img" style="height:200px">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-9 h-9" style="color:#D1D5DB" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+              </div>
+            {% endif %}
+            {% if partner.is_verified %}<span class="kard-badge" style="background:rgba(5,150,105,0.85)">&#10003; Vérifié</span>{% endif %}
+            <span class="kard-save">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" style="color:#9CA3AF" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+            </span>
+          </div>
+          <div class="kard-body" style="text-align:center;padding:1rem 1rem 1.25rem">
+            {% if partner.category %}<span class="kard-chip" style="background:#ECFDF5;color:#059669">{{ partner.category }}</span>{% endif %}
+            <p class="kard-title" style="font-size:0.92rem;font-weight:800;line-height:1.3;margin-top:0.3rem">{{ partner.name }}</p>
+            {% if partner.short_description %}<p style="font-size:0.74rem;color:#9CA3AF;margin-top:0.3rem;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">{{ partner.short_description }}</p>{% endif %}
+            <p class="kard-meta" style="justify-content:center;margin-top:0.35rem">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+              {{ partner.city }}
+            </p>
+            <span class="kard-cta" style="background:linear-gradient(135deg,#059669,#10B981);color:#fff">
+              Découvrir l'activité
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+            </span>
+          </div>
+        </a>
+        {% endfor %}
+        <a href="/partenaires/" class="kard-all" style="width:300px;min-height:370px">
+          <div class="kard-all-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" style="color:#059669" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+          </div>
+          <p style="font-size:0.88rem;font-weight:700;color:#111827">Toutes les activités</p>
+          <p style="font-size:0.72rem;color:#9CA3AF;margin-top:4px;text-align:center;padding:0 1.5rem">Tous nos partenaires loisirs</p>
+        </a>
+      </div>
+      <button onclick="document.getElementById('activities-carousel').scrollBy({left:-316,behavior:'smooth'})" class="crsl-btn crsl-btn-l">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+      </button>
+      <button onclick="document.getElementById('activities-carousel').scrollBy({left:316,behavior:'smooth'})" class="crsl-btn crsl-btn-r">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+      </button>
+    </div>
   </div>
 </section>
 {% endif %}
 
-{# ═══════════════════════════════════════════ CITIES ════════════════════════════════════════ #}
-{% if cities %}
-<section class="mx-auto max-w-7xl px-4 pb-16">
-  <div class="sec-hd">
-    <div>
-      <h2>Explorer par ville</h2>
-      <p class="mt-1 text-sm text-white/40">Trouve des sorties près de chez toi</p>
+{# ══ COMMENT ÇA MARCHE ══ #}
+<section style="background:#070A12;padding:7rem 0;position:relative;overflow:hidden">
+  <div style="pointer-events:none;position:absolute;bottom:-240px;left:50%;transform:translateX(-50%);width:900px;height:500px;background:radial-gradient(ellipse,rgba(255,106,77,0.05) 0%,transparent 65%)"></div>
+  <div style="pointer-events:none;position:absolute;top:-100px;left:-80px;width:400px;height:400px;background:radial-gradient(circle,rgba(255,106,77,0.03) 0%,transparent 65%)"></div>
+
+  <div class="mx-auto max-w-6xl px-4">
+
+    {# ── Header centré ── #}
+    <div style="text-align:center;max-width:580px;margin:0 auto 4.5rem" class="reveal">
+      <p style="font-size:0.62rem;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:#FF6A4D;margin-bottom:0.85rem">Comment ça marche</p>
+      <h2 style="font-size:clamp(2.4rem,5vw,3.6rem);font-weight:900;color:#fff;line-height:1.05;letter-spacing:-0.035em">
+        Simple. Rapide.<br>
+        <span style="background:linear-gradient(90deg,#FF6A4D 0%,#F97316 55%,#FBBF24 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Efficace.</span>
+      </h2>
+      <p style="margin-top:1.1rem;font-size:0.88rem;color:rgba(255,255,255,0.3);line-height:1.7">
+        De l'idée à la réservation en quelques clics. Pas de compte requis pour explorer.
+      </p>
     </div>
-    <a href="/villes/">Toutes les villes →</a>
-  </div>
-  {% comment %} City gradient placeholders since we have no city images {% endcomment %}
-  {% with city_gradients="from-purple-900/70 to-blue-900/70,from-orange-900/70 to-red-900/70,from-emerald-900/70 to-teal-900/70,from-pink-900/70 to-rose-900/70,from-indigo-900/70 to-violet-900/70,from-amber-900/70 to-yellow-900/70" %}
-  <div class="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-    {% for city in cities %}
-    <a href="/ville/{{ city.slug }}/" class="city-card group">
-      <div class="absolute inset-0 bg-gradient-to-br {% cycle 'from-purple-900/80 to-blue-900/80' 'from-orange-900/80 to-red-900/80' 'from-emerald-900/80 to-teal-900/80' 'from-pink-900/80 to-rose-900/80' 'from-indigo-900/80 to-violet-900/80' 'from-amber-900/80 to-orange-900/80' 'from-cyan-900/80 to-blue-900/80' 'from-fuchsia-900/80 to-pink-900/80' %} group-hover:opacity-80 transition-opacity"></div>
-      <div class="overlay"></div>
-      <div class="absolute bottom-0 left-0 p-4">
-        <p class="font-bold text-white text-lg leading-tight">{{ city.name }}</p>
-        <p class="text-xs text-white/50 mt-0.5">{{ city.sortie_count }} sortie{{ city.sortie_count|pluralize }}</p>
-      </div>
-    </a>
-    {% endfor %}
-  </div>
-  {% endwith %}
-</section>
-{% endif %}
 
-{# ═══════════════════════════════════════════ HOW IT WORKS ══════════════════════════════════ #}
-<section class="mx-auto max-w-7xl px-4 pb-16">
-  <div class="sec-hd"><div><h2>Comment ça marche ?</h2><p class="mt-1 text-sm text-white/40">Simple, rapide, sans prise de tête</p></div></div>
-  <div class="grid gap-6 sm:grid-cols-3">
-    <div class="card p-6 text-center">
-      <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full text-2xl" style="background:rgba(255,106,77,0.12)">🔍</div>
-      <h3 class="font-semibold text-white">1. Explore</h3>
-      <p class="mt-2 text-sm text-white/50">Parcours les sorties ouvertes, les restaurants dispo et les événements près de toi.</p>
-    </div>
-    <div class="card p-6 text-center">
-      <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full text-2xl" style="background:rgba(255,106,77,0.12)">🎟️</div>
-      <h3 class="font-semibold text-white">2. Rejoins ou réserve</h3>
-      <p class="mt-2 text-sm text-white/50">Rejoins une sortie en un clic ou réserve ta table directement depuis l'appli.</p>
-    </div>
-    <div class="card p-6 text-center">
-      <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full text-2xl" style="background:rgba(255,106,77,0.12)">🥂</div>
-      <h3 class="font-semibold text-white">3. Profite !</h3>
-      <p class="mt-2 text-sm text-white/50">Rencontre de nouvelles personnes et vis des expériences mémorables.</p>
-    </div>
-  </div>
-</section>
+    {# ── 3 étapes ── #}
+    <div class="how-grid reveal">
 
-{# ═══════════════════════════════════════════ PARTNER CTA ═══════════════════════════════════ #}
-<section class="mx-auto max-w-7xl px-4 pb-24">
-
-  {# ── Top text centré ── #}
-  <div class="mb-10 text-center">
-    <p class="mb-3 inline-block rounded-full border border-brand/30 bg-brand/10 px-4 py-1 text-xs font-bold uppercase tracking-widest text-brand">Devenez partenaire</p>
-    <h2 class="text-4xl font-bold text-white leading-tight md:text-5xl">
-      Développez votre activité<br>avec Mooviogo.
-    </h2>
-    <p class="mt-4 mx-auto max-w-xl text-white/55 text-lg">
-      Rejoignez +180 établissements et organisateurs qui touchent des milliers d'utilisateurs chaque semaine — sans commission cachée.
-    </p>
-  </div>
-
-  {# ── Category cards ── #}
-  <div class="grid gap-6 sm:grid-cols-3 items-stretch">
-
-    {# Restaurant #}
-    <a href="/devenir-partenaire/?type=restaurant" class="group flex flex-col overflow-hidden rounded-2xl border border-white/8 transition-all duration-300 hover:-translate-y-1 hover:border-brand/40 hover:shadow-lg hover:shadow-brand/10">
-      {# Photo #}
-      <div class="relative flex-shrink-0 overflow-hidden" style="height:240px">
-        <img
-          src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=900&q=85"
-          alt="Restaurant"
-          class="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-        />
-        <div class="absolute inset-0" style="background:linear-gradient(180deg,rgba(12,15,22,0.55) 0%,rgba(12,15,22,0.0) 45%)"></div>
-        <div class="absolute inset-x-0 top-0 pt-5 flex justify-center">
-          <span class="inline-block rounded-full bg-white/10 backdrop-blur-sm border border-white/20 px-4 py-1.5 text-xs font-bold text-white uppercase tracking-widest">Restaurant</span>
+      {# Step 1 #}
+      <div class="how-step">
+        <p class="how-big-num">01</p>
+        <div class="how-icon" style="background:rgba(255,106,77,0.12)">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" style="color:#FF6A4D" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
         </div>
+        <p class="how-label" style="color:#FF6A4D">Explorer</p>
+        <h3 style="font-size:1.05rem;font-weight:800;color:#fff;line-height:1.3;margin-bottom:0.65rem">Parcours les sorties</h3>
+        <p style="font-size:0.82rem;color:rgba(255,255,255,0.32);line-height:1.7">Filtre par ville, budget ou date. Sorties, restaurants, soirées — tout est là, à portée de main.</p>
       </div>
-      {# Text block #}
-      <div class="flex flex-col flex-1 items-center text-center px-6 pt-6 pb-7" style="background:#13161f;border-top:1px solid rgba(255,255,255,0.06)">
-        <h3 class="text-base font-bold text-white leading-snug">Remplissez vos tables tous les soirs</h3>
-        <p class="mt-2.5 text-sm leading-relaxed flex-1" style="color:rgba(255,255,255,0.48)">Publiez vos créneaux, proposez des menus spéciaux et touchez des milliers de clients locaux — zéro commission cachée.</p>
-        <span class="mt-6 inline-block btn-brand text-sm px-7 py-2.5 w-full text-center rounded-xl">Devenir partenaire</span>
-      </div>
-    </a>
 
-    {# Nightlife #}
-    <a href="/devenir-partenaire/?type=nightlife" class="group flex flex-col overflow-hidden rounded-2xl border border-white/8 transition-all duration-300 hover:-translate-y-1 hover:border-brand/40 hover:shadow-lg hover:shadow-brand/10">
-      {# Photo #}
-      <div class="relative flex-shrink-0 overflow-hidden" style="height:240px">
-        <img
-          src="https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=900&q=85"
-          alt="Nightlife"
-          class="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-        />
-        <div class="absolute inset-0" style="background:linear-gradient(180deg,rgba(12,15,22,0.55) 0%,rgba(12,15,22,0.0) 45%)"></div>
-        <div class="absolute inset-x-0 top-0 pt-5 flex justify-center">
-          <span class="inline-block rounded-full bg-white/10 backdrop-blur-sm border border-white/20 px-4 py-1.5 text-xs font-bold text-white uppercase tracking-widest">Nightlife</span>
+      {# Step 2 #}
+      <div class="how-step">
+        <p class="how-big-num">02</p>
+        <div class="how-icon" style="background:rgba(249,115,22,0.12)">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" style="color:#F97316" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
         </div>
+        <p class="how-label" style="color:#F97316">Rejoindre</p>
+        <h3 style="font-size:1.05rem;font-weight:800;color:#fff;line-height:1.3;margin-bottom:0.65rem">Un clic pour réserver</h3>
+        <p style="font-size:0.82rem;color:rgba(255,255,255,0.32);line-height:1.7">Rejoins une sortie ou réserve ta table directement. Zéro commission, zéro engagement.</p>
       </div>
-      {# Text block #}
-      <div class="flex flex-col flex-1 items-center text-center px-6 pt-6 pb-7" style="background:#13161f;border-top:1px solid rgba(255,255,255,0.06)">
-        <h3 class="text-base font-bold text-white leading-snug">Faites salle comble chaque week-end</h3>
-        <p class="mt-2.5 text-sm leading-relaxed flex-1" style="color:rgba(255,255,255,0.48)">Clubs, rooftops, soirées DJ — créez l'événement, on amène le public. Visibilité maximale auprès des noctambules locaux.</p>
-        <span class="mt-6 inline-block btn-brand text-sm px-7 py-2.5 w-full text-center rounded-xl">Devenir partenaire</span>
-      </div>
-    </a>
 
-    {# Évasion #}
-    <a href="/devenir-partenaire/?type=evasion" class="group flex flex-col overflow-hidden rounded-2xl border border-white/8 transition-all duration-300 hover:-translate-y-1 hover:border-brand/40 hover:shadow-lg hover:shadow-brand/10">
-      {# Photo #}
-      <div class="relative flex-shrink-0 overflow-hidden" style="height:240px">
-        <img
-          src="https://images.unsplash.com/photo-1551632811-561732d1e306?w=900&q=85"
-          alt="Évasion"
-          class="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-        />
-        <div class="absolute inset-0" style="background:linear-gradient(180deg,rgba(12,15,22,0.55) 0%,rgba(12,15,22,0.0) 45%)"></div>
-        <div class="absolute inset-x-0 top-0 pt-5 flex justify-center">
-          <span class="inline-block rounded-full bg-white/10 backdrop-blur-sm border border-white/20 px-4 py-1.5 text-xs font-bold text-white uppercase tracking-widest">Évasion</span>
+      {# Step 3 #}
+      <div class="how-step">
+        <p class="how-big-num">03</p>
+        <div class="how-icon" style="background:rgba(251,191,36,0.10)">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" style="color:#FBBF24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
         </div>
+        <p class="how-label" style="color:#FBBF24">Profiter</p>
+        <h3 style="font-size:1.05rem;font-weight:800;color:#fff;line-height:1.3;margin-bottom:0.65rem">Vis des moments mémorables</h3>
+        <p style="font-size:0.82rem;color:rgba(255,255,255,0.32);line-height:1.7">Rencontre de nouvelles personnes, explore ta ville autrement. C'est tout ce qu'il faut.</p>
       </div>
-      {# Text block #}
-      <div class="flex flex-col flex-1 items-center text-center px-6 pt-6 pb-7" style="background:#13161f;border-top:1px solid rgba(255,255,255,0.06)">
-        <h3 class="text-base font-bold text-white leading-snug">Attirez des groupes prêts à vivre l'aventure</h3>
-        <p class="mt-2.5 text-sm leading-relaxed flex-1" style="color:rgba(255,255,255,0.48)">Paintball, karting, escape game, accrobranche — référencez vos créneaux et remplissez vos sessions sans effort.</p>
-        <span class="mt-6 inline-block btn-brand text-sm px-7 py-2.5 w-full text-center rounded-xl">Devenir partenaire</span>
-      </div>
-    </a>
+
+    </div>
+
+    {# ── CTA ── #}
+    <div style="display:flex;align-items:center;justify-content:center;gap:1.5rem;margin-top:3.5rem;flex-wrap:wrap" class="reveal">
+      <a href="/inscription/" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#FF6A4D,#F97316);color:#fff;border-radius:999px;padding:0.95rem 2.4rem;font-weight:700;font-size:0.92rem;text-decoration:none;box-shadow:0 6px 28px rgba(255,106,77,0.22);transition:all 0.2s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 12px 36px rgba(255,106,77,0.35)'" onmouseout="this.style.transform='';this.style.boxShadow='0 6px 28px rgba(255,106,77,0.22)'">
+        Créer mon compte — gratuit
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+      </a>
+      <a href="/sorties/" style="font-size:0.85rem;font-weight:600;color:rgba(255,255,255,0.32);text-decoration:none;transition:color 0.2s" onmouseover="this.style.color='rgba(255,255,255,0.65)'" onmouseout="this.style.color='rgba(255,255,255,0.32)'">
+        Explorer sans compte →
+      </a>
+    </div>
 
   </div>
 </section>
+
+{# Transition dark → light #}
+<div style="height:64px;background:linear-gradient(180deg,#070A12 0%,#F5F3EF 100%)"></div>
+
+{# ══ SECTION PRO — light premium ══ #}
+<section id="section-pro" style="background:#F5F3EF;padding:5rem 0 6.5rem;position:relative;overflow:hidden">
+
+  {# Texture légère + orbs #}
+  <div style="pointer-events:none;position:absolute;top:-80px;right:0;width:500px;height:500px;background:radial-gradient(circle,rgba(255,106,77,0.07) 0%,transparent 60%)"></div>
+  <div style="pointer-events:none;position:absolute;bottom:-60px;left:3%;width:360px;height:360px;background:radial-gradient(circle,rgba(99,102,241,0.04) 0%,transparent 60%)"></div>
+
+  <div class="relative mx-auto max-w-6xl px-4">
+    <div class="flex flex-col lg:flex-row gap-16 xl:gap-24 items-start">
+
+      {# ─── Colonne gauche : pitch ─── #}
+      <div style="flex:1;min-width:0">
+        <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,106,77,0.09);border:1px solid rgba(255,106,77,0.22);border-radius:999px;padding:5px 14px;margin-bottom:1.25rem">
+          <span style="width:6px;height:6px;border-radius:50%;background:#FF6A4D;flex-shrink:0"></span>
+          <span style="font-size:0.6rem;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:#C84E35">Espace professionnel</span>
+        </div>
+        <h2 class="mt-0 font-black tracking-tight reveal" style="font-size:clamp(2rem,4.5vw,3rem);color:#0D1117;line-height:1.05;letter-spacing:-0.03em">
+          Votre établissement<br>devant&nbsp;<span style="background:linear-gradient(90deg,#FF6A4D,#F97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">15&nbsp;000</span>&nbsp;clients.<br>
+          <span style="color:rgba(0,0,0,0.26)">Dès aujourd'hui.</span>
+        </h2>
+        <p class="mt-5 leading-relaxed reveal" style="font-size:0.95rem;color:#6B7280;max-width:420px;line-height:1.75">
+          Mooviogo connecte les établissements locaux aux personnes qui veulent sortir maintenant. Sans commission cachée, sans contrat long.
+        </p>
+
+        {# Stats #}
+        <div class="mt-10 flex gap-8 reveal">
+          <div style="padding-right:2rem;border-right:1px solid rgba(0,0,0,0.1)">
+            <p class="font-black" style="font-size:1.75rem;color:#0D1117;letter-spacing:-0.04em;line-height:1">180+</p>
+            <p style="font-size:0.7rem;color:#9CA3AF;text-transform:uppercase;letter-spacing:.08em;margin-top:3px">Établissements</p>
+          </div>
+          <div style="padding-right:2rem;border-right:1px solid rgba(0,0,0,0.1)">
+            <p class="font-black" style="font-size:1.75rem;color:#0D1117;letter-spacing:-0.04em;line-height:1">15K+</p>
+            <p style="font-size:0.7rem;color:#9CA3AF;text-transform:uppercase;letter-spacing:.08em;margin-top:3px">Utilisateurs actifs</p>
+          </div>
+          <div>
+            <p class="font-black" style="font-size:1.75rem;color:#FF6A4D;letter-spacing:-0.04em;line-height:1">0%</p>
+            <p style="font-size:0.7rem;color:#9CA3AF;text-transform:uppercase;letter-spacing:.08em;margin-top:3px">Commission</p>
+          </div>
+        </div>
+
+        {# Séparateur #}
+        <div style="height:1px;background:linear-gradient(90deg,rgba(255,106,77,0.2),transparent);margin:2rem 0"></div>
+
+        {# Témoignage #}
+        <div class="pro-quote reveal">
+          <div style="display:flex;gap:1px;margin-bottom:0.55rem">
+            <span style="color:#FF6A4D;font-size:0.72rem;letter-spacing:2px">★★★★★</span>
+          </div>
+          <p style="font-size:0.88rem;color:#374151;font-style:italic;line-height:1.7">"Depuis Mooviogo, mes soirées du jeudi sont complètes en moins de 2h. Un canal de distribution qu'on aurait dû avoir depuis longtemps."</p>
+          <div class="flex items-center gap-2.5 mt-3">
+            <img src="https://i.pravatar.cc/32?img=15" alt="" class="w-7 h-7 rounded-full" style="outline:2px solid rgba(0,0,0,0.06)">
+            <span style="font-size:0.73rem;color:#9CA3AF;font-weight:600">Julien M. &mdash; Bar La Cave, Paris</span>
+          </div>
+        </div>
+
+        <div class="mt-8 flex items-center gap-5 flex-wrap reveal">
+          <a href="/devenir-partenaire/" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#FF6A4D,#F97316);color:#fff;border-radius:999px;padding:0.95rem 2.25rem;font-weight:700;font-size:0.95rem;text-decoration:none;box-shadow:0 6px 24px rgba(255,106,77,0.28);transition:all 0.2s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 12px 36px rgba(255,106,77,0.4)'" onmouseout="this.style.transform='';this.style.boxShadow='0 6px 24px rgba(255,106,77,0.28)'">
+            Rejoindre le réseau
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+          </a>
+          <a href="/connexion/" style="font-size:0.85rem;font-weight:600;color:#6B7280;text-decoration:none;transition:color 0.2s" onmouseover="this.style.color='#111827'" onmouseout="this.style.color='#6B7280'">Déjà partenaire ? Se connecter →</a>
+        </div>
+      </div>
+
+      {# ─── Colonne droite : 3 offres + photos ─── #}
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:0.75rem">
+
+        <a href="/devenir-partenaire/?type=restaurant" class="pro-feat reveal rd1">
+          <div class="pro-feat-icon" style="background:rgba(234,88,12,0.1)">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" style="color:#EA580C" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+          </div>
+          <div style="flex:1;min-width:0">
+            <p style="font-size:0.65rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#EA580C;margin-bottom:0.2rem">Restaurant</p>
+            <p style="font-size:0.9rem;font-weight:700;color:#111827;line-height:1.3">Remplissez vos tables chaque soir</p>
+            <p style="font-size:0.78rem;color:#6B7280;margin-top:0.25rem;line-height:1.5">Publiez vos créneaux et touchez des milliers de clients locaux.</p>
+          </div>
+          <div style="color:rgba(0,0,0,0.18);flex-shrink:0;padding-left:0.5rem;margin-top:4px">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+          </div>
+        </a>
+
+        <a href="/devenir-partenaire/?type=nightlife" class="pro-feat reveal rd2">
+          <div class="pro-feat-icon" style="background:rgba(147,51,234,0.08)">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" style="color:#9333EA" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
+          </div>
+          <div style="flex:1;min-width:0">
+            <p style="font-size:0.65rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#9333EA;margin-bottom:0.2rem">Bar &amp; Nightlife</p>
+            <p style="font-size:0.9rem;font-weight:700;color:#111827;line-height:1.3">Salle comble chaque week-end</p>
+            <p style="font-size:0.78rem;color:#6B7280;margin-top:0.25rem;line-height:1.5">Clubs, rooftops, soirées DJ — on amène le public.</p>
+          </div>
+          <div style="color:rgba(0,0,0,0.18);flex-shrink:0;padding-left:0.5rem;margin-top:4px">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+          </div>
+        </a>
+
+        <a href="/devenir-partenaire/?type=evasion" class="pro-feat reveal rd3">
+          <div class="pro-feat-icon" style="background:rgba(5,150,105,0.1)">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" style="color:#059669" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          </div>
+          <div style="flex:1;min-width:0">
+            <p style="font-size:0.65rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#059669;margin-bottom:0.2rem">Loisirs &amp; Évasion</p>
+            <p style="font-size:0.9rem;font-weight:700;color:#111827;line-height:1.3">Groupes prêts à l'aventure</p>
+            <p style="font-size:0.78rem;color:#6B7280;margin-top:0.25rem;line-height:1.5">Paintball, karting, escape game — remplissez vos sessions.</p>
+          </div>
+          <div style="color:rgba(0,0,0,0.18);flex-shrink:0;padding-left:0.5rem;margin-top:4px">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+          </div>
+        </a>
+
+        {# Mini galerie photos #}
+        <div class="grid grid-cols-3 gap-2 mt-3 reveal rd3">
+          <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&q=80" alt="" class="rounded-xl w-full h-20 object-cover" style="box-shadow:0 2px 8px rgba(0,0,0,0.12)">
+          <img src="https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=400&q=80" alt="" class="rounded-xl w-full h-20 object-cover" style="box-shadow:0 2px 8px rgba(0,0,0,0.12)">
+          <img src="https://images.unsplash.com/photo-1551632811-561732d1e306?w=400&q=80" alt="" class="rounded-xl w-full h-20 object-cover" style="box-shadow:0 2px 8px rgba(0,0,0,0.12)">
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+{# Transition light → dark #}
+<div style="height:64px;background:linear-gradient(180deg,#F5F3EF 0%,#070A12 100%)"></div>
+
+{# ══ CTA FINAL ══ #}
+<section style="background:#070A12;padding:7rem 0;position:relative;overflow:hidden">
+  <div style="pointer-events:none;position:absolute;top:-220px;right:-80px;width:720px;height:720px;background:radial-gradient(circle,rgba(255,106,77,0.07) 0%,transparent 58%)"></div>
+  <div style="pointer-events:none;position:absolute;bottom:-180px;left:-60px;width:520px;height:520px;background:radial-gradient(circle,rgba(192,132,252,0.05) 0%,transparent 60%)"></div>
+
+  <div class="relative mx-auto max-w-5xl px-4">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 xl:gap-20 items-center">
+
+      {# ─── Left: headline + stats ─── #}
+      <div class="reveal">
+        <p style="font-size:0.68rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#FF6A4D;margin-bottom:0.75rem">Gratuit &middot; Pour toujours</p>
+        <h2 style="font-size:clamp(2.4rem,5vw,3.6rem);font-weight:900;color:#fff;line-height:1.05;letter-spacing:-0.035em">
+          La ville est<br>pleine de<br>
+          <span style="background:linear-gradient(90deg,#FF6A4D 0%,#F97316 55%,#FBBF24 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">surprises.</span>
+        </h2>
+        <p style="margin-top:1.25rem;color:rgba(255,255,255,0.38);font-size:0.9rem;line-height:1.7;max-width:340px">
+          Rejoins 15&nbsp;000+ personnes qui ne s'ennuient plus le vendredi soir.
+        </p>
+        <div style="display:flex;gap:2.5rem;margin-top:2rem;padding-top:2rem;border-top:1px solid rgba(255,255,255,0.07)">
+          <div>
+            <p style="font-size:1.45rem;font-weight:900;color:#fff;letter-spacing:-0.03em;line-height:1">2 400<span style="color:#FF6A4D">+</span></p>
+            <p style="font-size:0.62rem;color:rgba(255,255,255,0.28);text-transform:uppercase;letter-spacing:.09em;margin-top:3px">Sorties créées</p>
+          </div>
+          <div>
+            <p style="font-size:1.45rem;font-weight:900;color:#fff;letter-spacing:-0.03em;line-height:1">4.9<span style="color:#F59E0B"> ★</span></p>
+            <p style="font-size:0.62rem;color:rgba(255,255,255,0.28);text-transform:uppercase;letter-spacing:.09em;margin-top:3px">Note moyenne</p>
+          </div>
+          <div>
+            <p style="font-size:1.45rem;font-weight:900;color:#FF6A4D;letter-spacing:-0.03em;line-height:1">0 €</p>
+            <p style="font-size:0.62rem;color:rgba(255,255,255,0.28);text-transform:uppercase;letter-spacing:.09em;margin-top:3px">Pour rejoindre</p>
+          </div>
+        </div>
+      </div>
+
+      {# ─── Right: signup card ─── #}
+      <div class="reveal rd1" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:24px;padding:2.25rem 2rem">
+        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.5rem">
+          <div style="display:flex">
+            <img src="https://i.pravatar.cc/40?img=47" alt="" style="width:34px;height:34px;border-radius:50%;outline:2px solid rgba(255,255,255,0.10)">
+            <img src="https://i.pravatar.cc/40?img=32" alt="" style="width:34px;height:34px;border-radius:50%;outline:2px solid rgba(255,255,255,0.10);margin-left:-9px">
+            <img src="https://i.pravatar.cc/40?img=12" alt="" style="width:34px;height:34px;border-radius:50%;outline:2px solid rgba(255,255,255,0.10);margin-left:-9px">
+            <img src="https://i.pravatar.cc/40?img=65" alt="" style="width:34px;height:34px;border-radius:50%;outline:2px solid rgba(255,255,255,0.10);margin-left:-9px">
+          </div>
+          <div>
+            <p style="font-size:0.8rem;font-weight:700;color:#fff;line-height:1.2">15 000+ membres</p>
+            <p style="font-size:0.68rem;color:rgba(255,255,255,0.28)">actifs cette semaine</p>
+          </div>
+        </div>
+        <h3 style="font-size:1.18rem;font-weight:800;color:#fff;line-height:1.35;margin-bottom:1.5rem">
+          Crée ton compte et rejoins<br>la prochaine sortie
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 inline-block ml-1" style="color:#FF6A4D" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+        </h3>
+        <div style="display:flex;flex-direction:column;gap:0.55rem;margin-bottom:1.75rem">
+          <div style="display:flex;align-items:center;gap:0.6rem;font-size:0.8rem;color:rgba(255,255,255,0.48)">
+            <span style="width:18px;height:18px;border-radius:50%;background:#FF6A4D;display:flex;align-items:center;justify-content:center;font-size:0.58rem;font-weight:800;color:#fff;flex-shrink:0">&#10003;</span>
+            Sorties, restaurants et soirées près de toi
+          </div>
+          <div style="display:flex;align-items:center;gap:0.6rem;font-size:0.8rem;color:rgba(255,255,255,0.48)">
+            <span style="width:18px;height:18px;border-radius:50%;background:#FF6A4D;display:flex;align-items:center;justify-content:center;font-size:0.58rem;font-weight:800;color:#fff;flex-shrink:0">&#10003;</span>
+            Réservation en 30 secondes, sans frais
+          </div>
+          <div style="display:flex;align-items:center;gap:0.6rem;font-size:0.8rem;color:rgba(255,255,255,0.48)">
+            <span style="width:18px;height:18px;border-radius:50%;background:#FF6A4D;display:flex;align-items:center;justify-content:center;font-size:0.58rem;font-weight:800;color:#fff;flex-shrink:0">&#10003;</span>
+            Rencontre des gens, vis des expériences uniques
+          </div>
+        </div>
+        <a href="/inscription/" style="display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#FF6A4D,#F97316);color:#fff;border-radius:14px;padding:1rem 1.5rem;font-weight:800;font-size:0.92rem;text-decoration:none;box-shadow:0 6px 28px rgba(255,106,77,0.25);transition:all 0.2s;margin-bottom:0.75rem" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 12px 36px rgba(255,106,77,0.38)'" onmouseout="this.style.transform='';this.style.boxShadow='0 6px 28px rgba(255,106,77,0.25)'">
+          Rejoindre Mooviogo — gratuit
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+        </a>
+        <a href="/sorties/" style="display:block;text-align:center;font-size:0.78rem;color:rgba(255,255,255,0.22);text-decoration:none;transition:color 0.2s" onmouseover="this.style.color='rgba(255,255,255,0.52)'" onmouseout="this.style.color='rgba(255,255,255,0.22)'">
+          Explorer sans s'inscrire →
+        </a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+{# ══ JAVASCRIPT ══ #}
+<script>
+(function(){
+  // ── Scroll reveals ──────────────────────────────────────────
+  var ro = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('vis'); } });
+  }, { threshold: 0.10, rootMargin: '0px 0px -32px 0px' });
+  document.querySelectorAll('.reveal').forEach(function(el){ ro.observe(el); });
+
+  // ── Count-up for trust strip ────────────────────────────────
+  function countUp(el){
+    var target = parseInt(el.dataset.target, 10);
+    var suffix = el.dataset.suffix || '';
+    var dur = 1600;
+    var start = performance.now();
+    function tick(now){
+      var t = Math.min((now - start) / dur, 1);
+      var ease = 1 - Math.pow(1 - t, 3);
+      var val = Math.floor(ease * target);
+      el.textContent = val.toLocaleString('fr-FR') + (t >= 1 ? suffix : '');
+      if(t < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+  var to = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){
+        e.target.querySelectorAll('[data-target]').forEach(countUp);
+        to.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.5 });
+  document.querySelectorAll('.trust-strip').forEach(function(el){ to.observe(el); });
+
+  // ── Card perspective tilt (.kard + .kf) ────────────────────
+  document.querySelectorAll('.kard, .kf').forEach(function(card){
+    card.addEventListener('mousemove', function(e){
+      var r = card.getBoundingClientRect();
+      var x = (e.clientX - r.left) / r.width  - 0.5;
+      var y = (e.clientY - r.top)  / r.height - 0.5;
+      card.style.transform = 'perspective(900px) rotateX('+(-y*4)+'deg) rotateY('+(x*4)+'deg) translateY(-4px)';
+    });
+    card.addEventListener('mouseleave', function(){
+      card.style.transition = 'transform 0.45s cubic-bezier(0.22,1,0.36,1), box-shadow 0.35s cubic-bezier(0.22,1,0.36,1)';
+      card.style.transform = '';
+      setTimeout(function(){ card.style.transition = ''; }, 450);
+    });
+  });
+
+  // ── Scroll progress bar ─────────────────────────────────────
+  var spbar = document.getElementById('spbar');
+  if(spbar){
+    function updProg(){
+      var s = window.scrollY;
+      var h = document.documentElement.scrollHeight - window.innerHeight;
+      spbar.style.width = (h > 0 ? Math.min(s / h * 100, 100) : 0) + '%';
+    }
+    document.addEventListener('scroll', updProg, { passive:true });
+  }
+
+})();
+</script>
 
 {% endblock %}

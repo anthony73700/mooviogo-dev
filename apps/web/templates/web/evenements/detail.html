@@ -2,21 +2,65 @@
 {% block title %}{{ event.title }} | Mooviogo{% endblock %}
 
 {% block content %}
-<div class="mx-auto max-w-3xl px-4 py-12">
-  <a href="/evenements/" class="mb-6 inline-flex items-center gap-2 text-sm text-white/40 hover:text-white transition-colors">← Retour aux événements</a>
-  <div class="card p-8">
-    <h1 class="text-3xl font-bold text-white">{{ event.title }}</h1>
-    <p class="mt-2 text-white/50">📍 {{ event.city }}</p>
-    {% if event.starts_at %}<p class="mt-1 text-sm text-white/40">🗓 {{ event.starts_at|date:"d M Y à H:i" }}</p>{% endif %}
-    {% if event.description %}<p class="mt-6 text-white/70 leading-relaxed">{{ event.description }}</p>{% endif %}
-    <div class="mt-8 flex items-center justify-between">
-      <span class="text-2xl font-bold text-white">{% if event.price %}{{ event.price|floatformat:2 }} €{% else %}Gratuit{% endif %}</span>
+
+{% if event.cover_image_url %}
+<div style="position:relative;height:340px;overflow:hidden">
+  <img src="{{ event.cover_image_url }}" alt="{{ event.title }}" style="width:100%;height:100%;object-fit:cover" />
+  <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,10,18,0.2) 0%,rgba(7,10,18,0.85) 100%)"></div>
+  <div style="position:absolute;bottom:0;left:0;right:0;padding:1.5rem max(1rem,(100vw - 48rem)/2)">
+    <a href="/evenements/" class="back-link" style="margin-bottom:0.75rem;color:rgba(255,255,255,0.5)">← Événements</a>
+    <span style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,rgba(255,106,77,0.9),rgba(249,115,22,0.9));border-radius:999px;padding:3px 11px;font-size:0.65rem;font-weight:800;color:#fff;letter-spacing:.07em;text-transform:uppercase;margin-bottom:0.6rem">Officiel Mooviogo</span>
+    <h1 style="font-size:1.9rem;font-weight:900;color:#fff;letter-spacing:-0.02em;line-height:1.15">{{ event.title }}</h1>
+  </div>
+</div>
+{% else %}
+<div class="pg-hdr">
+  <div class="mx-auto max-w-3xl px-4">
+    <a href="/evenements/" class="back-link">← Événements</a>
+    <span style="display:inline-flex;background:rgba(255,106,77,0.12);border:1px solid rgba(255,106,77,0.2);border-radius:999px;padding:3px 11px;font-size:0.65rem;font-weight:800;color:#FF8A66;text-transform:uppercase;letter-spacing:.07em;margin-bottom:0.75rem">Officiel Mooviogo</span>
+    <h1 style="font-size:2rem;font-weight:900;color:#fff;letter-spacing:-0.02em">{{ event.title }}</h1>
+  </div>
+</div>
+{% endif %}
+
+<div class="mx-auto max-w-3xl px-4" style="padding-top:2rem;padding-bottom:5rem">
+  <div class="pk" style="padding:2rem">
+
+    {# Meta #}
+    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:1.25rem;margin-bottom:{% if event.description %}1.5rem{% else %}1.75rem{% endif %};padding-bottom:1.5rem;border-bottom:1px solid rgba(255,255,255,0.06)">
+      {% if event.starts_at %}
+      <div style="display:flex;align-items:center;gap:8px;font-size:0.82rem;color:rgba(255,255,255,0.5)">
+        <svg xmlns="http://www.w3.org/2000/svg" style="width:0.9rem;height:0.9rem;color:#FF8A66;flex-shrink:0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        {{ event.starts_at|date:"d M Y à H:i" }}
+      </div>
+      {% endif %}
+      <div style="display:flex;align-items:center;gap:8px;font-size:0.82rem;color:rgba(255,255,255,0.5)">
+        <svg xmlns="http://www.w3.org/2000/svg" style="width:0.9rem;height:0.9rem;color:#FF8A66;flex-shrink:0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        {{ event.city }}
+      </div>
+    </div>
+
+    {% if event.description %}
+    <p style="color:rgba(255,255,255,0.65);line-height:1.75;font-size:0.92rem;margin-bottom:1.75rem">{{ event.description }}</p>
+    {% endif %}
+
+    {# Prix + CTA #}
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.06)">
+      <div>
+        <p style="font-size:0.65rem;color:rgba(255,255,255,0.3);font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:0.3rem">Prix</p>
+        <p style="font-size:1.75rem;font-weight:900;color:{% if event.price %}#fff{% else %}#4ADE80{% endif %}">{% if event.price %}{{ event.price }} €{% else %}Gratuit{% endif %}</p>
+      </div>
       {% if user.is_authenticated %}
-      <a href="/reservation/?event={{ event.id }}" class="btn-brand px-8 py-3">Réserver</a>
+      <a href="/reservation/?event={{ event.id }}" class="btn-brand" style="padding:0.85rem 2rem;border-radius:14px;font-size:0.92rem;font-weight:800">
+        Réserver ma place
+      </a>
       {% else %}
-      <a href="/connexion/?next=/evenements/{{ event.slug }}/" class="btn-brand px-8 py-3">Se connecter pour réserver</a>
+      <a href="/connexion/?next=/evenements/{{ event.slug }}/" class="btn-brand" style="padding:0.85rem 2rem;border-radius:14px;font-size:0.92rem;font-weight:800">
+        Se connecter pour réserver
+      </a>
       {% endif %}
     </div>
+
   </div>
 </div>
 {% endblock %}

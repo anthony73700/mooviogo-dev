@@ -2,10 +2,119 @@
 {% block title %}{{ sortie.title }} | Mooviogo{% endblock %}
 
 {% block content %}
-<div class="mx-auto max-w-3xl px-4 py-12">
-  <a href="/sorties/" class="mb-6 inline-flex items-center gap-2 text-sm text-white/40 hover:text-white transition-colors">← Retour aux sorties</a>
 
-  <div class="card p-8">
+{# ── Header cover ── #}
+{% if sortie.cover_image_url %}
+<div style="position:relative;height:320px;overflow:hidden">
+  <img src="{{ sortie.cover_image_url }}" alt="{{ sortie.title }}" style="width:100%;height:100%;object-fit:cover" />
+  <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,10,18,0.2) 0%,rgba(7,10,18,0.85) 100%)"></div>
+  <div style="position:absolute;bottom:0;left:0;right:0;padding:1.5rem max(1rem,(100vw - 56rem)/2)">
+    <a href="/sorties/" class="back-link" style="margin-bottom:0.75rem;color:rgba(255,255,255,0.5)">← Retour aux sorties</a>
+    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:0.5rem;margin-bottom:0.6rem">
+      <span class="tag tag-orange">{{ sortie.get_type_display }}</span>
+      <span class="tag {% if sortie.status == 'OPEN' %}tag-green{% elif sortie.status == 'FULL' %}tag-yellow{% else %}tag-gray{% endif %}">{{ sortie.get_status_display }}</span>
+    </div>
+    <h1 style="font-size:2rem;font-weight:900;color:#fff;letter-spacing:-0.02em;line-height:1.15">{{ sortie.title }}</h1>
+  </div>
+</div>
+{% else %}
+<div class="pg-hdr">
+  <div class="mx-auto max-w-3xl px-4">
+    <a href="/sorties/" class="back-link">← Retour aux sorties</a>
+    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:0.5rem;margin-bottom:0.75rem">
+      <span class="tag tag-orange">{{ sortie.get_type_display }}</span>
+      <span class="tag {% if sortie.status == 'OPEN' %}tag-green{% elif sortie.status == 'FULL' %}tag-yellow{% else %}tag-gray{% endif %}">{{ sortie.get_status_display }}</span>
+    </div>
+    <h1 style="font-size:2rem;font-weight:900;color:#fff;letter-spacing:-0.02em">{{ sortie.title }}</h1>
+  </div>
+</div>
+{% endif %}
+
+{# ── Corps ── #}
+<div class="mx-auto max-w-3xl px-4" style="padding-top:2rem;padding-bottom:5rem">
+  {% if sortie.cover_image_url %}
+  <a href="/sorties/" class="back-link" style="display:none"></a>
+  {% endif %}
+
+  <div style="display:grid;gap:1.25rem;grid-template-columns:1fr;align-items:start">
+
+    {# Infos principales #}
+    <div class="pk" style="padding:2rem">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:1.25rem;color:rgba(255,255,255,0.4);font-size:0.82rem">
+        <svg xmlns="http://www.w3.org/2000/svg" style="width:0.85rem;height:0.85rem;flex-shrink:0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        {{ sortie.city }}
+        {% if sortie.starts_at %}
+        &nbsp;&middot;&nbsp;
+        <svg xmlns="http://www.w3.org/2000/svg" style="width:0.85rem;height:0.85rem;flex-shrink:0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        {{ sortie.starts_at|date:"d M Y à H:i" }}
+        {% endif %}
+      </div>
+
+      {% if sortie.description %}
+      <p style="color:rgba(255,255,255,0.65);line-height:1.75;font-size:0.92rem;margin-bottom:1.75rem">{{ sortie.description }}</p>
+      {% endif %}
+
+      {# Stats #}
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;margin-bottom:1.75rem">
+        <div style="background:rgba(255,255,255,0.04);border-radius:14px;padding:1rem;text-align:center">
+          <p style="font-size:0.65rem;color:rgba(255,255,255,0.35);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:0.4rem">Prix</p>
+          <p style="font-size:1.1rem;font-weight:900;color:{% if sortie.is_free %}#4ADE80{% else %}#fff{% endif %}">{% if sortie.is_free %}Gratuit{% else %}{{ sortie.price|floatformat:2 }} €{% endif %}</p>
+        </div>
+        <div style="background:rgba(255,255,255,0.04);border-radius:14px;padding:1rem;text-align:center">
+          <p style="font-size:0.65rem;color:rgba(255,255,255,0.35);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:0.4rem">Participants</p>
+          <p style="font-size:1.1rem;font-weight:900;color:#fff">{{ participant_count }}<span style="color:rgba(255,255,255,0.25);font-size:0.8rem">/{{ sortie.max_participants|default:"∞" }}</span></p>
+        </div>
+        <div style="background:rgba(255,255,255,0.04);border-radius:14px;padding:1rem;text-align:center">
+          <p style="font-size:0.65rem;color:rgba(255,255,255,0.35);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:0.4rem">Statut</p>
+          <p style="font-size:0.85rem;font-weight:700;color:{% if sortie.status == 'OPEN' %}#4ADE80{% elif sortie.status == 'FULL' %}#FDE047{% else %}rgba(255,255,255,0.4){% endif %}">{{ sortie.get_status_display }}</p>
+        </div>
+      </div>
+
+      {# CTA ── #}
+      {% if user.is_authenticated %}
+        {% if is_participant %}
+        <form method="post" action="/sorties/{{ sortie.id }}/quitter/">
+          {% csrf_token %}
+          <button type="submit" class="btn-ghost" style="width:100%;padding:0.85rem;font-size:0.9rem;border-radius:14px;justify-content:center">Quitter la sortie</button>
+        </form>
+        {% elif sortie.status == 'OPEN' %}
+        <form method="post" action="/sorties/{{ sortie.id }}/rejoindre/">
+          {% csrf_token %}
+          <button type="submit" class="btn-brand" style="width:100%;padding:0.85rem;font-size:0.95rem;border-radius:14px;justify-content:center;font-weight:800">
+            <svg xmlns="http://www.w3.org/2000/svg" style="width:1rem;height:1rem" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            Rejoindre la sortie
+          </button>
+        </form>
+        {% else %}
+        <button disabled style="width:100%;padding:0.85rem;border-radius:14px;background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.3);font-size:0.9rem;cursor:not-allowed;border:1px solid rgba(255,255,255,0.07)">Sortie complète ou fermée</button>
+        {% endif %}
+      {% else %}
+      <a href="/connexion/?next=/sorties/{{ sortie.id }}/" class="btn-brand" style="width:100%;padding:0.85rem;font-size:0.95rem;border-radius:14px;justify-content:center;font-weight:800;text-align:center">Se connecter pour rejoindre</a>
+      {% endif %}
+    </div>
+
+    {# Participants #}
+    {% if participants %}
+    <div class="pk" style="padding:1.5rem">
+      <p style="font-size:0.72rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,0.22);margin-bottom:1rem">Participants ({{ participant_count }})</p>
+      <div style="display:flex;flex-wrap:wrap;gap:0.5rem">
+        {% for p in participants %}
+        <div style="display:flex;align-items:center;gap:6px;border-radius:999px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.04);padding:5px 12px 5px 6px">
+          {% if p.user.avatar_url %}
+          <img src="{{ p.user.avatar_url }}" style="width:22px;height:22px;border-radius:50%;object-fit:cover;flex-shrink:0" />
+          {% else %}
+          <span style="width:22px;height:22px;border-radius:50%;background:rgba(255,106,77,0.2);display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:800;color:#FF8A66;flex-shrink:0">{{ p.user.display_name|default:p.user.username|first|upper }}</span>
+          {% endif %}
+          <span style="font-size:0.78rem;color:rgba(255,255,255,0.6)">{{ p.user.display_name|default:p.user.username }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}
     <div class="mb-4 flex flex-wrap items-center gap-3">
       <span class="rounded-full bg-brand/10 px-3 py-1 text-xs font-medium text-brand">{{ sortie.get_type_display }}</span>
       <span class="rounded-full px-3 py-1 text-xs

@@ -28,10 +28,30 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
-    body { background: #0C0F16; color: #F8FAFC; }
-    .glass { background: linear-gradient(180deg,rgba(20,24,33,0.92),rgba(12,15,22,0.98)); border: 1px solid rgba(255,255,255,0.08); }
-    .btn-brand { background: #FF6A4D; color: #fff; border-radius: 22px; padding: 0.6rem 1.4rem; font-weight: 600; transition: background 0.2s; }
-    .btn-brand:hover { background: #E05030; }
+    body { background: #0B0818; color: #F8FAFC; }
+    .glass { background: linear-gradient(180deg,rgba(18,12,32,0.92),rgba(10,8,24,0.98)); border: 1px solid rgba(255,255,255,0.08); }
+    .btn-brand { background: linear-gradient(135deg,#FF6A4D 0%,#F97316 100%); color: #fff; border-radius: 22px; padding: 0.6rem 1.4rem; font-weight: 700; transition: filter 0.2s, transform 0.2s; text-decoration:none; display:inline-flex;align-items:center; }
+    .btn-brand:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    /* Shared inner-page styles */
+    .pg-hdr { background: linear-gradient(180deg,#070A12 0%,#0D1117 100%); padding:4rem 0 3rem; border-bottom:1px solid rgba(255,255,255,0.05); }
+    .pk { background:linear-gradient(180deg,rgba(20,24,33,0.85),rgba(12,15,22,0.95)); border:1px solid rgba(255,255,255,0.07); border-radius:20px; transition:border-color 0.2s,box-shadow 0.2s; }
+    .pk:hover { border-color:rgba(255,255,255,0.13); box-shadow:0 12px 40px rgba(0,0,0,0.4); }
+    .pk-img { width:100%; height:200px; object-fit:cover; }
+    .tag { display:inline-flex;align-items:center;border-radius:999px;padding:3px 11px;font-size:0.72rem;font-weight:600; }
+    .tag-orange { background:rgba(255,106,77,0.12);color:#FF8A66; }
+    .tag-green { background:rgba(34,197,94,0.12);color:#4ADE80; }
+    .tag-yellow { background:rgba(234,179,8,0.12);color:#FDE047; }
+    .tag-red { background:rgba(239,68,68,0.12);color:#F87171; }
+    .tag-gray { background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.38); }
+    .tag-blue { background:rgba(96,165,250,0.12);color:#93C5FD; }
+    .slabel { font-size:0.6rem;font-weight:900;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,0.22); }
+    .hdiv { height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.06),transparent);margin:2rem 0; }
+    .back-link { display:inline-flex;align-items:center;gap:6px;font-size:0.8rem;color:rgba(255,255,255,0.32);text-decoration:none;transition:color 0.15s;margin-bottom:2rem; }
+    .back-link:hover { color:rgba(255,255,255,0.75); }
+    .fi-input { min-height:3rem;width:100%;border-radius:12px;border:1px solid rgba(255,255,255,0.08);background:rgba(20,24,33,0.8);padding:0 1rem;color:#F8FAFC;outline:none;transition:border-color 0.2s; font-size:0.88rem; }
+    .fi-input:focus { border-color:rgba(255,106,77,0.35);box-shadow:0 0 0 3px rgba(255,106,77,0.08); }
+    .fi-input::placeholder { color:#5A6375; }
+    select.fi-input { cursor:pointer; }
     .btn-ghost { border: 1px solid rgba(255,255,255,0.12); border-radius: 22px; padding: 0.6rem 1.4rem; font-weight: 500; color: rgba(255,255,255,0.8); transition: all 0.2s; }
     .btn-ghost:hover { border-color: rgba(255,255,255,0.25); color: #fff; }
     .card { background: linear-gradient(180deg,rgba(20,24,33,0.85),rgba(12,15,22,0.95)); border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; }
@@ -62,7 +82,7 @@
           <form method="post" action="/deconnexion/" style="display:inline">{% csrf_token %}<button type="submit" class="btn-ghost text-sm">Déconnexion</button></form>
         {% else %}
           <a href="/connexion/" class="btn-ghost text-sm">Connexion</a>
-          <a href="/inscription/" class="btn-brand text-sm">Inscription</a>
+          <a href="/inscription/" style="display:inline-flex;align-items:center;gap:6px;padding:0.52rem 1.25rem;border-radius:999px;font-size:0.82rem;font-weight:800;color:#fff;background:linear-gradient(135deg,#FF6A4D 0%,#C084FC 60%,#F472B6 100%);box-shadow:0 3px 14px rgba(192,132,252,0.32);text-decoration:none;transition:transform 0.2s,box-shadow 0.2s" onmouseover="this.style.transform='scale(1.04)';this.style.boxShadow='0 5px 22px rgba(192,132,252,0.48)'" onmouseout="this.style.transform='';this.style.boxShadow='0 3px 14px rgba(192,132,252,0.32)'">Inscription</a>
         {% endif %}
       </div>
     </div>
@@ -88,46 +108,85 @@
   </main>
 
   {# ── Footer ── #}
-  <footer class="mt-24 border-t border-white/[0.06] py-12 text-sm text-white/40">
-    <div class="mx-auto max-w-7xl px-4">
-      <div class="grid grid-cols-2 gap-8 md:grid-cols-4">
-        <div>
-          <p class="mb-3 font-semibold text-white/70">Mooviogo</p>
-          <ul class="space-y-2">
-            <li><a href="/a-propos/" class="hover:text-white/70 transition-colors">À propos</a></li>
-            <li><a href="/contact/" class="hover:text-white/70 transition-colors">Contact</a></li>
-            <li><a href="/faq/" class="hover:text-white/70 transition-colors">FAQ</a></li>
-          </ul>
+  <footer style="background:#060A10;overflow:hidden;position:relative">
+
+    {# ── Corps principal ── #}
+    <div class="mx-auto max-w-6xl px-4" style="padding-top:3.5rem;padding-bottom:3rem">
+      <div style="display:flex;gap:4rem;flex-wrap:wrap;align-items:flex-start">
+
+        {# Marque #}
+        <div style="flex:0 0 210px;min-width:170px">
+          <a href="/" style="display:inline-flex;align-items:center;gap:10px;text-decoration:none;margin-bottom:1rem">
+            <span style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#FF6A4D,#F97316);display:flex;align-items:center;justify-content:center;font-size:0.8rem;color:#fff;font-weight:900;flex-shrink:0">M</span>
+            <span style="font-size:1.1rem;font-weight:900;color:#fff;letter-spacing:-0.02em">Mooviogo</span>
+          </a>
+          <p style="font-size:0.79rem;color:rgba(255,255,255,0.28);line-height:1.75;max-width:185px;margin-bottom:1.6rem">
+            Sorties, restaurants, soirées &mdash; tout ce qu'il faut pour ne plus s'ennuyer.
+          </p>
+          <div style="display:flex;align-items:center;gap:7px;margin-bottom:0.55rem">
+            <span style="width:6px;height:6px;border-radius:50%;background:#22C55E;flex-shrink:0"></span>
+            <span style="font-size:0.69rem;color:rgba(255,255,255,0.26)">Tous les services OK</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:7px">
+            <span style="font-size:0.5rem;color:rgba(255,255,255,0.15)">&#9679;</span>
+            <span style="font-size:0.69rem;color:rgba(255,255,255,0.22)">Paris, France</span>
+          </div>
         </div>
-        <div>
-          <p class="mb-3 font-semibold text-white/70">Explorer</p>
-          <ul class="space-y-2">
-            <li><a href="/sorties/" class="hover:text-white/70 transition-colors">Sorties</a></li>
-            <li><a href="/restaurants/" class="hover:text-white/70 transition-colors">Restaurants</a></li>
-            <li><a href="/evenements/" class="hover:text-white/70 transition-colors">Événements</a></li>
-            <li><a href="/villes/" class="hover:text-white/70 transition-colors">Villes</a></li>
-          </ul>
-        </div>
-        <div>
-          <p class="mb-3 font-semibold text-white/70">Partenaires</p>
-          <ul class="space-y-2">
-            <li><a href="/devenir-partenaire/" class="hover:text-white/70 transition-colors">Devenir partenaire</a></li>
-            <li><a href="/partenaires/" class="hover:text-white/70 transition-colors">Partenaires</a></li>
-            <li><a href="/pro/connexion/" class="hover:text-white/70 transition-colors">Espace pro</a></li>
-          </ul>
-        </div>
-        <div>
-          <p class="mb-3 font-semibold text-white/70">Légal</p>
-          <ul class="space-y-2">
-            <li><a href="/cgu/" class="hover:text-white/70 transition-colors">CGU</a></li>
-            <li><a href="/confidentialite/" class="hover:text-white/70 transition-colors">Confidentialité</a></li>
-            <li><a href="/mentions-legales/" class="hover:text-white/70 transition-colors">Mentions légales</a></li>
-            <li><a href="/cookies/" class="hover:text-white/70 transition-colors">Cookies</a></li>
-          </ul>
+
+        {# Liens #}
+        <div style="flex:1;display:grid;grid-template-columns:repeat(2,1fr);gap:2.5rem 2rem" class="sm:grid-cols-4">
+
+          <div>
+            <p style="font-size:0.57rem;font-weight:900;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,0.18);margin-bottom:1.2rem">Explorer</p>
+            <ul style="list-style:none;display:flex;flex-direction:column;gap:0.72rem">
+              <li><a href="/sorties/" style="font-size:0.82rem;font-weight:500;color:rgba(255,255,255,0.36);text-decoration:none;transition:color 0.15s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.36)'">Sorties</a></li>
+              <li><a href="/restaurants/" style="font-size:0.82rem;font-weight:500;color:rgba(255,255,255,0.36);text-decoration:none;transition:color 0.15s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.36)'">Restaurants</a></li>
+              <li><a href="/evenements/" style="font-size:0.82rem;font-weight:500;color:rgba(255,255,255,0.36);text-decoration:none;transition:color 0.15s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.36)'">Événements</a></li>
+              <li><a href="/villes/" style="font-size:0.82rem;font-weight:500;color:rgba(255,255,255,0.36);text-decoration:none;transition:color 0.15s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.36)'">Villes</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <p style="font-size:0.57rem;font-weight:900;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,0.18);margin-bottom:1.2rem">Partenaires</p>
+            <ul style="list-style:none;display:flex;flex-direction:column;gap:0.72rem">
+              <li><a href="/devenir-partenaire/" style="font-size:0.82rem;font-weight:700;color:rgba(255,106,77,0.7);text-decoration:none;transition:color 0.15s" onmouseover="this.style.color='#FF6A4D'" onmouseout="this.style.color='rgba(255,106,77,0.7)'">&#8599; Devenir partenaire</a></li>
+              <li><a href="/partenaires/" style="font-size:0.82rem;font-weight:500;color:rgba(255,255,255,0.36);text-decoration:none;transition:color 0.15s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.36)'">Annuaire</a></li>
+              <li><a href="/partenaire/" style="font-size:0.82rem;font-weight:500;color:rgba(255,255,255,0.36);text-decoration:none;transition:color 0.15s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.36)'">Espace pro</a></li>
+              <li><a href="/connexion/" style="font-size:0.82rem;font-weight:500;color:rgba(255,255,255,0.36);text-decoration:none;transition:color 0.15s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.36)'">Connexion</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <p style="font-size:0.57rem;font-weight:900;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,0.18);margin-bottom:1.2rem">Mooviogo</p>
+            <ul style="list-style:none;display:flex;flex-direction:column;gap:0.72rem">
+              <li><a href="/a-propos/" style="font-size:0.82rem;font-weight:500;color:rgba(255,255,255,0.36);text-decoration:none;transition:color 0.15s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.36)'">À propos</a></li>
+              <li><a href="/contact/" style="font-size:0.82rem;font-weight:500;color:rgba(255,255,255,0.36);text-decoration:none;transition:color 0.15s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.36)'">Contact</a></li>
+              <li><a href="/faq/" style="font-size:0.82rem;font-weight:500;color:rgba(255,255,255,0.36);text-decoration:none;transition:color 0.15s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.36)'">FAQ</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <p style="font-size:0.57rem;font-weight:900;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,0.18);margin-bottom:1.2rem">Légal</p>
+            <ul style="list-style:none;display:flex;flex-direction:column;gap:0.72rem">
+              <li><a href="/cgu/" style="font-size:0.82rem;font-weight:500;color:rgba(255,255,255,0.36);text-decoration:none;transition:color 0.15s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.36)'">CGU</a></li>
+              <li><a href="/confidentialite/" style="font-size:0.82rem;font-weight:500;color:rgba(255,255,255,0.36);text-decoration:none;transition:color 0.15s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.36)'">Confidentialité</a></li>
+              <li><a href="/mentions-legales/" style="font-size:0.82rem;font-weight:500;color:rgba(255,255,255,0.36);text-decoration:none;transition:color 0.15s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.36)'">Mentions légales</a></li>
+              <li><a href="/cookies/" style="font-size:0.82rem;font-weight:500;color:rgba(255,255,255,0.36);text-decoration:none;transition:color 0.15s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.36)'">Cookies</a></li>
+            </ul>
+          </div>
+
         </div>
       </div>
-      <p class="mt-10 text-center">© {% now "Y" %} Mooviogo. Tous droits réservés.</p>
     </div>
+
+    {# ── Barre du bas ── #}
+    <div style="border-top:1px solid rgba(255,255,255,0.045);padding:1.1rem 0">
+      <div class="mx-auto max-w-6xl px-4" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem">
+        <p style="font-size:0.69rem;color:rgba(255,255,255,0.15)">&copy; {% now "Y" %} Mooviogo &mdash; Tous droits réservés</p>
+        <p style="font-size:0.69rem;color:rgba(255,255,255,0.12)">Fait avec &hearts; en France</p>
+      </div>
+    </div>
+
   </footer>
 
   {% block extra_js %}{% endblock %}

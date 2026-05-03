@@ -1,66 +1,67 @@
 {% extends "base.html" %}
-{% block title %}Événements Mooviogo{% endblock %}
+{% block title %}Événements | Mooviogo{% endblock %}
+{% block description %}Concerts, soirées, festivals — les événements officiels Mooviogo.{% endblock %}
 
 {% block extra_head %}
 <style>
-  .ev-card { position:relative; border-radius:20px; overflow:hidden; background:#14181F; border:1px solid rgba(255,255,255,0.07); transition:transform 0.2s, box-shadow 0.2s; }
-  .ev-card:hover { transform:translateY(-3px); box-shadow:0 16px 48px rgba(0,0,0,0.5); }
-  .ev-card .thumb { width:100%; height:220px; object-fit:cover; }
-  .ev-card .thumb-placeholder { width:100%; height:220px; display:flex; align-items:center; justify-content:center; font-size:3rem; background:linear-gradient(135deg,#1a1e28,#2a1520); }
-  .ev-card .official-badge { position:absolute; top:12px; left:12px; background:rgba(255,106,77,0.92); backdrop-filter:blur(8px); border-radius:999px; padding:4px 12px; font-size:0.68rem; font-weight:700; color:#fff; letter-spacing:.04em; text-transform:uppercase; }
-  .date-box { min-width:52px; text-align:center; background:rgba(255,106,77,0.12); border:1px solid rgba(255,106,77,0.2); border-radius:12px; padding:6px 10px; }
+  .ev-card { position:relative;border-radius:20px;overflow:hidden;background:#14181F;border:1px solid rgba(255,255,255,0.07);transition:transform 0.22s,box-shadow 0.22s;text-decoration:none;display:block; }
+  .ev-card:hover { transform:translateY(-4px);box-shadow:0 20px 56px rgba(0,0,0,0.55); }
+  .ev-thumb { width:100%;height:220px;object-fit:cover; }
+  .ev-ph { width:100%;height:220px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1a1e28,#2a1520); }
+  .ev-badge { position:absolute;top:12px;left:12px;background:linear-gradient(135deg,rgba(255,106,77,0.95),rgba(249,115,22,0.95));backdrop-filter:blur(8px);border-radius:999px;padding:4px 12px;font-size:0.65rem;font-weight:800;color:#fff;letter-spacing:.07em;text-transform:uppercase; }
+  .date-box { min-width:50px;text-align:center;background:rgba(255,106,77,0.12);border:1px solid rgba(255,106,77,0.22);border-radius:12px;padding:5px 9px;flex-shrink:0; }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="mx-auto max-w-7xl px-4 py-12">
 
-  {# Header #}
-  <div class="mb-3 inline-flex items-center gap-2 rounded-full border border-brand/30 bg-brand/10 px-4 py-1 text-xs font-bold uppercase tracking-widest text-brand">
-    ✦ Officiel Mooviogo
+<div class="pg-hdr">
+  <div class="mx-auto max-w-7xl px-4">
+    <p class="slabel mb-3">Officiel Mooviogo</p>
+    <h1 style="font-size:2.25rem;font-weight:900;color:#fff;letter-spacing:-0.03em;line-height:1.1">Événements</h1>
+    <p style="margin-top:0.45rem;font-size:0.9rem;color:rgba(255,255,255,0.4)">Concerts, soirées, festivals — organisés directement par Mooviogo</p>
   </div>
-  <div class="mb-10">
-    <h1 class="text-4xl font-bold text-white">Événements</h1>
-    <p class="mt-2 text-white/50">Concerts, soirées, festivals, conférences — organisés directement par Mooviogo.</p>
-  </div>
+</div>
 
+<div class="mx-auto max-w-7xl px-4" style="padding-top:3rem;padding-bottom:5rem">
   {% if events %}
-  <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:1.25rem">
     {% for event in events %}
-    <a href="/evenements/{{ event.slug }}/" class="ev-card group block">
-      <span class="official-badge">Mooviogo</span>
+    <a href="/evenements/{{ event.slug }}/" class="ev-card">
+      <span class="ev-badge">Officiel</span>
       {% if event.cover_image_url %}
-        <img src="{{ event.cover_image_url }}" alt="{{ event.title }}" class="thumb" loading="lazy" />
+        <img src="{{ event.cover_image_url }}" alt="{{ event.title }}" class="ev-thumb" loading="lazy" />
       {% else %}
-        <div class="thumb-placeholder">🎭</div>
+        <div class="ev-ph">
+          <svg xmlns="http://www.w3.org/2000/svg" style="width:3rem;height:3rem;color:rgba(255,255,255,0.1)" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
+        </div>
       {% endif %}
-      <div class="p-4">
-        {# Date + city #}
-        <div class="flex items-center gap-3 mb-3">
+      <div style="padding:1rem 1.1rem 1.25rem">
+        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem">
           {% if event.starts_at %}
           <div class="date-box">
-            <p class="text-xs font-bold text-brand uppercase leading-tight">{{ event.starts_at|date:"M" }}</p>
-            <p class="text-xl font-bold text-white leading-tight">{{ event.starts_at|date:"d" }}</p>
+            <p style="font-size:0.6rem;font-weight:800;color:#FF8A66;text-transform:uppercase;letter-spacing:.06em;line-height:1.2">{{ event.starts_at|date:"M" }}</p>
+            <p style="font-size:1.3rem;font-weight:900;color:#fff;line-height:1.1">{{ event.starts_at|date:"d" }}</p>
           </div>
           {% endif %}
           <div>
-            <p class="text-xs text-white/40">📍 {{ event.city }}</p>
-            {% if event.starts_at %}<p class="text-xs text-white/40 mt-0.5">🕗 {{ event.starts_at|date:"H:i" }}</p>{% endif %}
+            <p style="font-size:0.72rem;color:rgba(255,255,255,0.35);display:flex;align-items:center;gap:4px">
+              <svg xmlns="http://www.w3.org/2000/svg" style="width:0.7rem;height:0.7rem;flex-shrink:0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+              {{ event.city }}
+            </p>
+            {% if event.starts_at %}<p style="font-size:0.72rem;color:rgba(255,255,255,0.28);margin-top:2px">{{ event.starts_at|date:"H:i" }}</p>{% endif %}
           </div>
         </div>
-        <h3 class="font-semibold text-white leading-tight group-hover:text-brand transition-colors line-clamp-2">{{ event.title }}</h3>
-        {% if event.location %}
-        <p class="mt-1.5 text-xs text-white/40 line-clamp-1">{{ event.location }}</p>
-        {% endif %}
+        <p style="font-size:0.95rem;font-weight:800;color:#fff;line-height:1.3;margin-bottom:0.35rem">{{ event.title }}</p>
         {% if event.description %}
-        <p class="mt-2 text-sm text-white/50 line-clamp-2">{{ event.description }}</p>
+        <p style="font-size:0.78rem;color:rgba(255,255,255,0.4);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:0.75rem">{{ event.description }}</p>
         {% endif %}
-        <div class="mt-4 flex items-center justify-between">
-          <span class="font-semibold text-sm {% if not event.price %}text-emerald-400{% else %}text-white{% endif %}">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:0.5rem">
+          <span style="font-size:1rem;font-weight:900;color:{% if not event.price %}#4ADE80{% else %}#fff{% endif %}">
             {% if event.price %}{{ event.price }} €{% else %}Gratuit{% endif %}
           </span>
           {% if event.max_participants %}
-          <span class="text-xs text-white/30">{{ event.max_participants }} places</span>
+          <span style="font-size:0.7rem;color:rgba(255,255,255,0.3)">{{ event.max_participants }} places</span>
           {% endif %}
         </div>
       </div>
@@ -68,10 +69,12 @@
     {% endfor %}
   </div>
   {% else %}
-  <div class="flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 py-24 text-center">
-    <span class="text-5xl">🎭</span>
-    <p class="mt-4 text-lg font-semibold text-white">Aucun événement pour le moment</p>
-    <p class="mt-2 text-sm text-white/40">Les prochains événements Mooviogo seront annoncés ici.</p>
+  <div style="border:1px dashed rgba(255,255,255,0.08);border-radius:24px;padding:5rem 2rem;text-align:center">
+    <div style="width:56px;height:56px;border-radius:16px;background:rgba(255,106,77,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem">
+      <svg xmlns="http://www.w3.org/2000/svg" style="width:1.5rem;height:1.5rem;color:#FF8A66" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+    </div>
+    <p style="font-size:1.05rem;font-weight:700;color:#fff;margin-bottom:0.5rem">Aucun événement pour le moment</p>
+    <p style="font-size:0.85rem;color:rgba(255,255,255,0.3)">Les prochains événements Mooviogo seront annoncés ici</p>
   </div>
   {% endif %}
 </div>

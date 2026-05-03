@@ -2,9 +2,82 @@
 {% block title %}Créer une sortie | Mooviogo{% endblock %}
 
 {% block content %}
-<div class="mx-auto max-w-xl px-4 py-12">
-  <a href="/sorties/" class="mb-6 inline-flex items-center gap-2 text-sm text-white/40 hover:text-white transition-colors">← Retour</a>
-  <h1 class="mb-8 text-3xl font-bold text-white">Créer une sortie</h1>
+<div class="pg-hdr">
+  <div class="mx-auto max-w-xl px-4">
+    <a href="/sorties/" class="back-link">← Retour aux sorties</a>
+    <h1 style="font-size:2rem;font-weight:900;color:#fff;letter-spacing:-0.025em">Créer une sortie</h1>
+    <p style="margin-top:0.4rem;font-size:0.88rem;color:rgba(255,255,255,0.38)">Invite la communauté à te rejoindre</p>
+  </div>
+</div>
+
+<div class="mx-auto max-w-xl px-4" style="padding-top:2.5rem;padding-bottom:5rem">
+  <div class="pk" style="padding:2rem">
+    <form method="post">
+      {% csrf_token %}
+      <div style="display:flex;flex-direction:column;gap:1.25rem">
+
+        <div>
+          <label style="display:block;font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.45);margin-bottom:0.5rem">Titre *</label>
+          <input type="text" name="title" value="{{ form.title.value|default:'' }}" required class="fi-input" placeholder="Ex: Balade au Parc de la Tête d'Or" />
+          {% if form.title.errors %}<p style="margin-top:0.3rem;font-size:0.72rem;color:#F87171">{{ form.title.errors.0 }}</p>{% endif %}
+        </div>
+
+        <div>
+          <label style="display:block;font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.45);margin-bottom:0.5rem">Description</label>
+          <textarea name="description" rows="4" class="fi-input" style="height:auto;padding:0.75rem 1rem;resize:none" placeholder="Décris ta sortie, le lieu, l'ambiance…">{{ form.description.value|default:'' }}</textarea>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+          <div>
+            <label style="display:block;font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.45);margin-bottom:0.5rem">Ville *</label>
+            <input type="text" name="city" value="{{ form.city.value|default:'' }}" required class="fi-input" placeholder="Lyon" />
+          </div>
+          <div>
+            <label style="display:block;font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.45);margin-bottom:0.5rem">Type *</label>
+            <select name="type" class="fi-input">
+              <option value="COMMUNAUTAIRE" {% if form.type.value == "COMMUNAUTAIRE" %}selected{% endif %}>Communautaire</option>
+              <option value="PARTENAIRE" {% if form.type.value == "PARTENAIRE" %}selected{% endif %}>Partenaire</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+          <div>
+            <label style="display:block;font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.45);margin-bottom:0.5rem">Date et heure</label>
+            <input type="datetime-local" name="starts_at" value="{{ form.starts_at.value|default:'' }}" class="fi-input" />
+          </div>
+          <div>
+            <label style="display:block;font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.45);margin-bottom:0.5rem">Participants max</label>
+            <input type="number" name="max_participants" value="{{ form.max_participants.value|default:'' }}" min="2" class="fi-input" placeholder="10" />
+          </div>
+        </div>
+
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:0.85rem 1rem;border-radius:12px;border:1px solid rgba(255,255,255,0.07);background:rgba(255,255,255,0.03)">
+          <input type="checkbox" name="is_free" id="is_free" {% if form.is_free.value %}checked{% endif %} style="width:16px;height:16px;accent-color:#FF6A4D;cursor:pointer" />
+          <span style="font-size:0.88rem;color:rgba(255,255,255,0.65)">Sortie gratuite</span>
+        </label>
+
+        <div id="price-field">
+          <label style="display:block;font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.45);margin-bottom:0.5rem">Prix (€)</label>
+          <input type="number" name="price" value="{{ form.price.value|default:'0' }}" min="0" step="0.01" class="fi-input" placeholder="0.00" />
+        </div>
+
+      </div>
+      <button type="submit" class="btn-brand" style="margin-top:2rem;width:100%;padding:0.95rem;font-size:0.95rem;border-radius:14px;justify-content:center;font-weight:800">
+        Créer la sortie
+      </button>
+    </form>
+  </div>
+</div>
+
+<script>
+const checkbox = document.getElementById('is_free');
+const priceField = document.getElementById('price-field');
+function togglePrice() { priceField.style.display = checkbox.checked ? 'none' : 'block'; }
+checkbox.addEventListener('change', togglePrice);
+togglePrice();
+</script>
+{% endblock %}
 
   <div class="card p-8">
     <form method="post">

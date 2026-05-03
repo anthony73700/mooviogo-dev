@@ -2,9 +2,16 @@
 {% block title %}{{ page_title }} | Mooviogo{% endblock %}
 
 {% block content %}
-<div class="mx-auto max-w-3xl px-4 py-12">
-  <h1 class="mb-8 text-3xl font-bold text-white">{{ page_title }}</h1>
-  <div class="card p-8 prose prose-invert max-w-none text-white/70 leading-relaxed">
+
+<div class="pg-hdr">
+  <div class="mx-auto max-w-3xl px-4">
+    <p class="slabel mb-3">Légal</p>
+    <h1 style="font-size:1.85rem;font-weight:900;color:#fff;letter-spacing:-0.025em">{{ page_title }}</h1>
+  </div>
+</div>
+
+<div class="mx-auto max-w-3xl px-4" style="padding-top:3rem;padding-bottom:5rem">
+  <div class="pk" style="padding:2.25rem 2.5rem;font-size:0.88rem;line-height:1.85;color:rgba(255,255,255,0.62)">
     {{ content|safe }}
   </div>
 </div>

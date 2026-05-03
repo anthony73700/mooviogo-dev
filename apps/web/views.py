@@ -20,7 +20,12 @@ User = get_user_model()
 # ──────────────────────────────────────────────────────────────────────────────
 
 def home(request):
-    sorties = Sortie.objects.filter(status=Sortie.Status.OPEN).order_by("-created_at")[:12]
+    sorties = (
+        Sortie.objects
+        .filter(status=Sortie.Status.OPEN)
+        .annotate(participant_count=Count("participants"))
+        .order_by("-created_at")[:12]
+    )
     restaurants = RestaurantVenue.objects.filter(is_active=True).order_by("name")[:6]
     partners = Partner.objects.filter(status=Partner.Status.ACTIVE, is_verified=True).order_by("name")[:8]
 
@@ -101,22 +106,29 @@ def logout_view(request):
 # ──────────────────────────────────────────────────────────────────────────────
 
 def sorties_list(request):
-    qs = Sortie.objects.all().order_by("-created_at")
+    qs = Sortie.objects.all().select_related("creator").order_by("-created_at")
     q = request.GET.get("q", "")
     city = request.GET.get("city", "")
     type_ = request.GET.get("type", "")
+    free = request.GET.get("free", "")
     if q:
         qs = qs.filter(Q(title__icontains=q) | Q(description__icontains=q))
     if city:
         qs = qs.filter(city__icontains=city)
     if type_:
         qs = qs.filter(type=type_)
+    if free == "1":
+        qs = qs.filter(is_free=True)
+    elif free == "0":
+        qs = qs.filter(is_free=False)
+    total_count = qs.count()
     paginator = Paginator(qs, 18)
     page_obj = paginator.get_page(request.GET.get("page"))
     return render(request, "web/sorties/list.html", {
         "sorties": page_obj,
         "page_obj": page_obj,
         "is_paginated": paginator.num_pages > 1,
+        "total_count": total_count,
     })
 
 
