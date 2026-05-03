@@ -1,32 +1,88 @@
 {% extends "base.html" %}
 {% block title %}Partenaires | Mooviogo{% endblock %}
 
+{% block extra_head %}
+<style>
+  .partner-card { border-radius:20px; overflow:hidden; border:1px solid rgba(255,255,255,0.07); background:#14181F; transition:transform 0.2s, box-shadow 0.2s; }
+  .partner-card:hover { transform:translateY(-3px); box-shadow:0 16px 48px rgba(0,0,0,0.5); }
+  .partner-card .thumb { width:100%; height:200px; object-fit:cover; }
+  .partner-card .thumb-placeholder { width:100%; height:200px; display:flex; align-items:center; justify-content:center; font-size:3rem; }
+  .cat-tag { display:inline-block; background:rgba(255,106,77,0.12); color:#FF8A66; border-radius:999px; padding:3px 12px; font-size:0.72rem; font-weight:600; }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="mx-auto max-w-7xl px-4 py-12">
-  <h1 class="mb-2 text-3xl font-bold text-white">Partenaires</h1>
-  <p class="mb-8 text-white/50">Restaurants, organisateurs, lieux — nos partenaires vérifiés</p>
+
+  {# Header #}
+  <div class="mb-10">
+    <h1 class="text-4xl font-bold text-white">Nos partenaires</h1>
+    <p class="mt-2 text-white/50">Paintball, karting, escape game, bowling et bien plus — réservez directement.</p>
+  </div>
+
+  {# Category filter pills #}
+  <div class="mb-8 flex flex-wrap gap-2">
+    <a href="/partenaires/" class="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-white/70 hover:text-white transition-colors">Tous</a>
+    {% for cat in categories %}
+    <a href="?categorie={{ cat }}" class="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-white/70 hover:text-white transition-colors">{{ cat }}</a>
+    {% endfor %}
+  </div>
+
   {% if partners %}
-  <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+  <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
     {% for partner in partners %}
-    <a href="/partenaires/{{ partner.slug|default:partner.id }}/" class="card p-5 hover:border-white/15 transition-all block group">
-      <div class="mb-3 flex items-center gap-3">
-        <div class="flex h-10 w-10 items-center justify-center rounded-full bg-brand/10 text-brand font-bold text-lg">
-          {{ partner.owner.display_name|default:partner.owner.username|first|upper }}
+    <div class="partner-card group">
+      {% if partner.cover_image_url %}
+        <img src="{{ partner.cover_image_url }}" alt="{{ partner.name }}" class="thumb" loading="lazy" />
+      {% else %}
+        <div class="thumb-placeholder" style="background:linear-gradient(135deg,#1a1e28,#2a1f30)">
+          {% if partner.category == "Paintball" %}🎯
+          {% elif partner.category == "Karting" %}🏎️
+          {% elif partner.category == "Escape Game" %}🔐
+          {% elif partner.category == "Bowling" %}🎳
+          {% elif partner.category == "Laser Game" %}🔫
+          {% elif partner.category == "Réalité Virtuelle" %}🥽
+          {% elif partner.category == "Accrobranche" %}🌳
+          {% elif partner.category == "Lancer de hache" %}🪓
+          {% else %}🎉{% endif %}
         </div>
-        <div>
-          <h3 class="font-semibold text-white group-hover:text-brand transition-colors">{{ partner.owner.display_name|default:partner.owner.username }}</h3>
-          {% if partner.is_verified %}<span class="text-xs text-green-400">✓ Vérifié</span>{% endif %}
+      {% endif %}
+      <div class="p-4">
+        <div class="flex items-start justify-between gap-2 mb-2">
+          <h3 class="font-semibold text-white leading-tight group-hover:text-brand transition-colors">{{ partner.name }}</h3>
+          {% if partner.is_verified %}
+          <span class="shrink-0 mt-0.5 text-xs font-semibold text-emerald-400">✓ Vérifié</span>
+          {% endif %}
         </div>
+        {% if partner.category %}
+        <p class="mb-2"><span class="cat-tag">{{ partner.category }}</span></p>
+        {% endif %}
+        <p class="text-xs text-white/40">📍 {{ partner.city }}</p>
+        {% if partner.short_description %}
+        <p class="mt-2 text-sm text-white/55 line-clamp-2">{{ partner.short_description }}</p>
+        {% endif %}
+        {% if partner.website %}
+        <a href="{{ partner.website }}" target="_blank" rel="noopener" class="mt-3 inline-flex items-center gap-1 text-xs text-brand font-semibold hover:underline">
+          Voir le site →
+        </a>
+        {% endif %}
       </div>
-      {% if partner.description %}<p class="text-sm text-white/50 line-clamp-2">{{ partner.description }}</p>{% endif %}
-    </a>
+    </div>
     {% endfor %}
   </div>
   {% else %}
-  <div class="rounded-2xl border border-white/[0.06] bg-white/[0.02] py-20 text-center">
-    <p class="text-white/40">Aucun partenaire pour le moment</p>
-    <a href="/devenir-partenaire/" class="mt-4 inline-block btn-brand text-sm">Devenir partenaire</a>
+  <div class="rounded-2xl border border-dashed border-white/10 py-20 text-center">
+    <span class="text-5xl">🤝</span>
+    <p class="mt-4 text-white/40">Aucun partenaire pour le moment.</p>
+    <a href="/devenir-partenaire/" class="mt-5 inline-block btn-brand text-sm">Devenir partenaire</a>
   </div>
   {% endif %}
+
+  {# CTA #}
+  <div class="mt-16 rounded-3xl border border-brand/20 p-10 text-center" style="background:linear-gradient(135deg,rgba(255,106,77,0.10),rgba(20,24,33,1))">
+    <h2 class="text-2xl font-bold text-white">Tu gères un lieu d'activité ?</h2>
+    <p class="mt-3 text-white/50">Karting, escape game, bowling… rejoins Mooviogo et touche des milliers de sorties par mois.</p>
+    <a href="/devenir-partenaire/" class="mt-6 inline-block btn-brand px-8 py-3">Devenir partenaire</a>
+  </div>
 </div>
 {% endblock %}

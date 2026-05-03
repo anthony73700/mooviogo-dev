@@ -22,6 +22,7 @@ User = get_user_model()
 def home(request):
     sorties = Sortie.objects.filter(status=Sortie.Status.OPEN).order_by("-created_at")[:12]
     restaurants = RestaurantVenue.objects.filter(is_active=True).order_by("name")[:6]
+    partners = Partner.objects.filter(status=Partner.Status.ACTIVE, is_verified=True).order_by("name")[:8]
 
     cities_qs = (
         Sortie.objects.filter(status=Sortie.Status.OPEN)
@@ -34,6 +35,7 @@ def home(request):
     return render(request, "web/home.html", {
         "sorties": sorties,
         "restaurants": restaurants,
+        "partners": partners,
         "cities": cities,
     })
 
@@ -233,7 +235,10 @@ def restaurant_book(request, city_slug, slug):
 # ──────────────────────────────────────────────────────────────────────────────
 
 def evenements_list(request):
-    events = Event.objects.filter(status=Event.Status.PUBLISHED).order_by("starts_at")
+    events = Event.objects.filter(
+        status=Event.Status.PUBLISHED,
+        is_partner_event=False,
+    ).order_by("starts_at")
     return render(request, "web/evenements/list.html", {"events": events})
 
 
@@ -277,8 +282,18 @@ def ville_detail(request, city_slug):
 # ──────────────────────────────────────────────────────────────────────────────
 
 def partenaires_list(request):
-    partners = Partner.objects.filter(status=Partner.Status.ACTIVE).select_related("owner")
-    return render(request, "web/partenaires/list.html", {"partners": partners})
+    qs = Partner.objects.filter(status=Partner.Status.ACTIVE).select_related("owner")
+    cat = request.GET.get("categorie", "").strip()
+    if cat:
+        qs = qs.filter(category=cat)
+    categories = (
+        Partner.objects.filter(status=Partner.Status.ACTIVE)
+        .exclude(category="")
+        .values_list("category", flat=True)
+        .distinct()
+        .order_by("category")
+    )
+    return render(request, "web/partenaires/list.html", {"partners": qs, "categories": categories})
 
 
 def devenir_partenaire(request):
