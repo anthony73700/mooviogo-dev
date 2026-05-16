@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Nightlife promotions | Mooviogo{% endblock %}
+
+{% block content %}
+<div class="pg-hdr">
+  <div class="mx-auto max-w-6xl px-4">
+    <p class="slabel mb-3">Nightlife promotions</p>
+    <h1 style="font-size:2rem;font-weight:900;color:#fff;letter-spacing:-0.03em">Campagnes sponsorisees</h1>
+    <p style="margin-top:0.55rem;font-size:0.9rem;color:rgba(255,255,255,0.45)">Active des boosts locaux et pilote tes campagnes premium.</p>
+  </div>
+</div>
+
+<div class="mx-auto max-w-6xl px-4" style="padding-top:2rem;padding-bottom:4rem;display:grid;grid-template-columns:1.1fr 0.9fr;gap:1rem">
+  <section class="pk" style="padding:1rem">
+    <p class="slabel" style="margin-bottom:0.6rem">Nouvelle campagne</p>
+    <form method="post" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0.6rem">
+      {% csrf_token %}
+      <select name="event_id" required style="padding:0.55rem;border-radius:9px;border:1px solid rgba(255,255,255,0.16);background:#0f1118;color:#fff;font-size:0.75rem;grid-column:span 2">
+        <option value="">Choisir un event</option>
+        {% for event in nightlife_events %}
+        <option value="{{ event.id }}">#{{ event.id }} · {{ event.title }} · {{ event.city }}</option>
+        {% endfor %}
+      </select>
+      <input type="text" name="city" value="{% if partner %}{{ partner.city }}{% endif %}" placeholder="Ville" required style="padding:0.55rem;border-radius:9px;border:1px solid rgba(255,255,255,0.16);background:rgba(255,255,255,0.02);color:#fff;font-size:0.75rem" />
+      <input type="number" name="budget_eur" min="10" value="30" placeholder="Budget" style="padding:0.55rem;border-radius:9px;border:1px solid rgba(255,255,255,0.16);background:rgba(255,255,255,0.02);color:#fff;font-size:0.75rem" />
+      <input type="number" name="days" min="1" value="7" placeholder="Duree (jours)" style="padding:0.55rem;border-radius:9px;border:1px solid rgba(255,255,255,0.16);background:rgba(255,255,255,0.02);color:#fff;font-size:0.75rem" />
+      <button class="btn-brand" type="submit" style="font-size:0.75rem;padding:0.55rem 0.8rem">Activer campagne</button>
+    </form>
+  </section>
+
+  <section class="pk" style="padding:1rem">
+    <p class="slabel" style="margin-bottom:0.55rem">Campagnes recentes</p>
+    {% for campaign in campaigns %}
+    <div style="display:flex;justify-content:space-between;gap:0.6rem;padding:0.56rem 0;border-bottom:1px solid rgba(255,255,255,0.08)">
+      <div>
+        <p style="font-size:0.79rem;color:#fff">Event #{{ campaign.event_id }} · {{ campaign.city }}</p>
+        <p style="font-size:0.72rem;color:rgba(255,255,255,0.46)">{{ campaign.get_status_display }} · {{ campaign.budget_eur }} EUR</p>
+      </div>
+      <p style="font-size:0.72rem;color:rgba(255,255,255,0.45)">{{ campaign.ends_at|date:"d/m" }}</p>
+    </div>
+    {% empty %}
+    <p style="font-size:0.8rem;color:rgba(255,255,255,0.45)">Aucune campagne active.</p>
+    {% endfor %}
+  </section>
+</div>
+{% endblock %}

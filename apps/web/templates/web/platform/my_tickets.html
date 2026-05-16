@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Mes billets | Mooviogo{% endblock %}
+
+{% block extra_head %}
+<style>
+  .mt-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.9rem;
+  }
+  @media (max-width: 980px) {
+    .mt-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 640px) {
+    .mt-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pg-hdr">
+  <div class="mx-auto max-w-6xl px-4">
+    <p class="slabel mb-3">Billetterie</p>
+    <h1 style="font-size:2rem;font-weight:900;color:#fff;letter-spacing:-0.03em">Mes tickets et paiements</h1>
+  </div>
+</div>
+
+<div class="mx-auto max-w-6xl px-4" style="padding-top:2rem;padding-bottom:4rem">
+  <div class="mt-grid">
+    <section class="pk" style="padding:1rem">
+      <h2 style="font-size:1rem;font-weight:800;color:#fff;margin-bottom:0.7rem">Tickets QR</h2>
+      {% for ticket in tickets %}
+      <div style="display:block;padding:0.55rem 0;border-bottom:1px solid rgba(255,255,255,0.06)">
+        <p style="font-size:0.85rem;font-weight:700;color:#fff">Ticket #{{ ticket.id }} · {{ ticket.get_status_display }}</p>
+        <p style="font-size:0.72rem;color:rgba(255,255,255,0.35)">{{ ticket.qr_payload|truncatechars:40 }}</p>
+      </div>
+      {% empty %}<p style="font-size:0.75rem;color:rgba(255,255,255,0.35)">Aucun ticket</p>{% endfor %}
+    </section>
+
+    <section class="pk" style="padding:1rem">
+      <h2 style="font-size:1rem;font-weight:800;color:#fff;margin-bottom:0.7rem">Reservations</h2>
+      {% for booking in bookings %}
+      <div style="display:block;padding:0.55rem 0;border-bottom:1px solid rgba(255,255,255,0.06)">
+        <p style="font-size:0.85rem;font-weight:700;color:#fff">#{{ booking.id }} · {{ booking.get_booking_type_display }}</p>
+        <p style="font-size:0.72rem;color:rgba(255,255,255,0.35)">{{ booking.get_status_display }} · {{ booking.created_at|date:"d M Y H:i" }}</p>
+      </div>
+      {% empty %}<p style="font-size:0.75rem;color:rgba(255,255,255,0.35)">Aucune reservation</p>{% endfor %}
+    </section>
+
+    <section class="pk" style="padding:1rem">
+      <h2 style="font-size:1rem;font-weight:800;color:#fff;margin-bottom:0.7rem">Paiements</h2>
+      {% for payment in payments %}
+      <div style="display:block;padding:0.55rem 0;border-bottom:1px solid rgba(255,255,255,0.06)">
+        <p style="font-size:0.85rem;font-weight:700;color:#fff">{{ payment.amount }} {{ payment.currency }}</p>
+        <p style="font-size:0.72rem;color:rgba(255,255,255,0.35)">{{ payment.status }} · {{ payment.created_at|date:"d M Y H:i" }}</p>
+      </div>
+      {% empty %}<p style="font-size:0.75rem;color:rgba(255,255,255,0.35)">Aucun paiement</p>{% endfor %}
+    </section>
+  </div>
+</div>
+{% endblock %}

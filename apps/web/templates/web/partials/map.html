@@ -1,0 +1,37 @@
+{% comment %}
+Reusable map partial.
+
+Expected context:
+  - map_lat (float), map_lng (float)         REQUIRED
+  - map_label (string, optional)             e.g. "La Plage du Mourillon"
+  - map_zoom (int, optional, default 15)
+
+Renders Google Maps embed if GOOGLE_MAPS_API_KEY is configured,
+falls back to OpenStreetMap iframe otherwise — both keyless from the browser.
+{% endcomment %}
+{% if map_lat and map_lng %}
+<div class="mm-map" style="border-radius:18px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);background:#0b1220">
+  {% if GOOGLE_MAPS_API_KEY %}
+  <iframe
+    title="{{ map_label|default:'Localisation' }}"
+    src="https://www.google.com/maps/embed/v1/place?key={{ GOOGLE_MAPS_API_KEY }}&q={{ map_lat }},{{ map_lng }}&zoom={{ map_zoom|default:15 }}"
+    width="100%"
+    height="320"
+    style="border:0;display:block"
+    loading="lazy"
+    referrerpolicy="no-referrer-when-downgrade"
+    allowfullscreen></iframe>
+  {% else %}
+  <iframe
+    title="{{ map_label|default:'Localisation' }}"
+    src="https://www.openstreetmap.org/export/embed.html?bbox={{ map_lng|add:'-0.01' }}%2C{{ map_lat|add:'-0.008' }}%2C{{ map_lng|add:'0.01' }}%2C{{ map_lat|add:'0.008' }}&layer=mapnik&marker={{ map_lat }}%2C{{ map_lng }}"
+    width="100%"
+    height="320"
+    style="border:0;display:block"
+    loading="lazy"></iframe>
+  <div style="text-align:right;padding:4px 10px;font-size:11px;background:rgba(0,0,0,0.4)">
+    <a href="https://www.openstreetmap.org/?mlat={{ map_lat }}&mlon={{ map_lng }}#map={{ map_zoom|default:15 }}/{{ map_lat }}/{{ map_lng }}" target="_blank" rel="noopener" style="color:rgba(255,255,255,0.7)">Voir sur OpenStreetMap</a>
+  </div>
+  {% endif %}
+</div>
+{% endif %}

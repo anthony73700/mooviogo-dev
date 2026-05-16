@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Admin dashboard" %} | Mooviogo{% endblock %}
+
+{% block extra_head %}
+<style>
+  .ad-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+  }
+
+  @media (max-width: 980px) {
+    .ad-kpi-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 640px) {
+    .ad-kpi-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pg-hdr">
+  <div class="mx-auto max-w-7xl px-4">
+    <p class="slabel mb-3">{% trans "Administration plateforme" %}</p>
+    <h1 style="font-size:2rem;font-weight:900;color:#fff;letter-spacing:-0.03em">{% trans "Admin dashboard" %}</h1>
+  </div>
+</div>
+
+<div class="mx-auto max-w-7xl px-4" style="padding-top:2rem;padding-bottom:4rem">
+  <div class="ad-kpi-grid">
+    <div class="pk" style="padding:1rem"><p class="slabel">{% trans "Utilisateurs" %}</p><p style="font-size:1.35rem;font-weight:900;color:#fff">{{ kpis.users_count }}</p></div>
+    <div class="pk" style="padding:1rem"><p class="slabel">{% trans "Events actifs" %}</p><p style="font-size:1.35rem;font-weight:900;color:#fff">{{ kpis.active_events }}</p></div>
+    <div class="pk" style="padding:1rem"><p class="slabel">{% trans "Sorties ouvertes" %}</p><p style="font-size:1.35rem;font-weight:900;color:#fff">{{ kpis.active_sorties }}</p></div>
+    <div class="pk" style="padding:1rem"><p class="slabel">{% trans "Revenu total" %}</p><p style="font-size:1.35rem;font-weight:900;color:#fff">{{ kpis.revenue_cents }} cts</p></div>
+    <div class="pk" style="padding:1rem"><p class="slabel">{% trans "Alertes OTP 24h" %}</p><p style="font-size:1.35rem;font-weight:900;color:#fff">{{ kpis.otp_alerts_24h }}</p></div>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:0.6rem">
+    <a href="/admin/users/" class="btn-brand" style="font-size:0.78rem;padding:0.5rem 0.9rem">{% trans "Users" %}</a>
+    <a href="/admin/events/" class="btn-brand" style="font-size:0.78rem;padding:0.5rem 0.9rem">{% trans "Events" %}</a>
+    <a href="/admin/reports/" class="btn-brand" style="font-size:0.78rem;padding:0.5rem 0.9rem">{% trans "Reports" %}</a>
+    <a href="/admin/payments/" class="btn-brand" style="font-size:0.78rem;padding:0.5rem 0.9rem">{% trans "Payments" %}</a>
+    <a href="/admin/ads/" class="btn-brand" style="font-size:0.78rem;padding:0.5rem 0.9rem">{% trans "Ads" %}</a>
+    <a href="/admin/analytics/" class="btn-brand" style="font-size:0.78rem;padding:0.5rem 0.9rem">{% trans "Analytics" %}</a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Demande activite partenaire | Mooviogo{% endblock %}
+
+{% block content %}
+<div class="pg-hdr">
+  <div class="mx-auto max-w-3xl px-4">
+    <p class="slabel mb-3">Creation</p>
+    <h1 style="font-size:2rem;font-weight:900;color:#fff;letter-spacing:-0.03em">Demande d'activite partenaire</h1>
+    <p style="margin-top:0.5rem;font-size:0.88rem;color:rgba(255,255,255,0.45)">Soumets ta demande. Un partenaire peut l'accepter, la modifier ou la refuser.</p>
+  </div>
+</div>
+
+<div class="mx-auto max-w-3xl px-4" style="padding-top:2rem;padding-bottom:4rem">
+  <form method="post" class="pk" style="padding:1.2rem;display:flex;flex-direction:column;gap:0.7rem">
+    {% csrf_token %}
+    <input class="fi-input" type="text" name="title" placeholder="Titre de la demande" required />
+    {% if errors.title %}<p style="font-size:0.72rem;color:#f87171">{{ errors.title }}</p>{% endif %}
+
+    <input class="fi-input" type="text" name="city" placeholder="Ville" required />
+    {% if errors.city %}<p style="font-size:0.72rem;color:#f87171">{{ errors.city }}</p>{% endif %}
+
+    <input class="fi-input" type="text" name="category" placeholder="Categorie (karting, paintball, etc.)" />
+    <textarea class="fi-input" style="min-height:8rem;padding:0.75rem 1rem" name="description" placeholder="Date, heure, nombre de participants, contraintes"></textarea>
+
+    <button class="btn-brand" style="justify-content:center">Envoyer la demande</button>
+  </form>
+</div>
+{% endblock %}

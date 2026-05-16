@@ -1,0 +1,31 @@
+[Unit]
+Description=Mooviogo WSGI (gunicorn)
+After=network.target postgresql.service redis.service
+Requires=network.target
+
+[Service]
+Type=notify
+User=mooviogo
+Group=mooviogo
+WorkingDirectory=/opt/mooviogo
+EnvironmentFile=/opt/mooviogo/.env.production
+Environment=DJANGO_SETTINGS_MODULE=mooviogo.settings.production
+ExecStartPre=/opt/mooviogo/.venv/bin/python manage.py migrate --noinput
+ExecStartPre=/opt/mooviogo/.venv/bin/python manage.py collectstatic --noinput
+ExecStart=/opt/mooviogo/.venv/bin/gunicorn mooviogo.wsgi:application --config /opt/mooviogo/deploy/gunicorn.conf.py
+Restart=always
+RestartSec=5
+KillSignal=SIGQUIT
+TimeoutStopSec=30
+StandardOutput=journal
+StandardError=journal
+
+# Hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/opt/mooviogo/media /opt/mooviogo/staticfiles /opt/mooviogo/logs
+
+[Install]
+WantedBy=multi-user.target

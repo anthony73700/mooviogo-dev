@@ -29,6 +29,11 @@ class Partner(models.Model):
     category = models.CharField(max_length=100, blank=True)
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
     is_verified = models.BooleanField(default=False)
+    stripe_connect_account_id = models.CharField(max_length=120, blank=True)
+    stripe_connect_onboarded = models.BooleanField(default=False)
+    stripe_connect_charges_enabled = models.BooleanField(default=False)
+    stripe_connect_payouts_enabled = models.BooleanField(default=False)
+    stripe_connect_details_submitted = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

@@ -1,15 +1,77 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% block title %}{{ venue.name }} | Mooviogo{% endblock %}
+{% block description %}{{ venue.name }} à {{ venue.city_label }} — réservation rapide sur Mooviogo.{% endblock %}
+{% block og_title %}{{ venue.name }}{% endblock %}
+{% block og_description %}Réservez {{ venue.name }} à {{ venue.city_label }} en quelques clics.{% endblock %}
+{% block og_image %}{% if venue.cover_image_url %}{{ venue.cover_image_url }}{% else %}{{ APP_BASE_URL }}/static/og/default-og.svg{% endif %}{% endblock %}
+
+{% block schema_jsonld %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Restaurant",
+  "name": "{{ venue.name|escapejs }}",
+  {% if venue.cover_image_url %}"image": "{{ venue.cover_image_url }}",{% endif %}
+  {% if venue.cuisine_type %}"servesCuisine": "{{ venue.cuisine_type|escapejs }}",{% endif %}
+  {% if venue.price_range %}"priceRange": "{{ venue.price_range|escapejs }}",{% endif %}
+  {% if venue.phone %}"telephone": "{{ venue.phone|escapejs }}",{% endif %}
+  {% if venue.website %}"url": "{{ venue.website|escapejs }}",{% endif %}
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "{{ venue.city_label|escapejs }}",
+    "streetAddress": "{{ venue.address|default:''|escapejs }}",
+    "addressCountry": "FR"
+  }
+}
+</script>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+  .rd-hero {
+    position: relative;
+    height: 340px;
+    overflow: hidden;
+  }
+
+  .rd-hero-inner {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1.5rem max(1rem, (100vw - 48rem) / 2);
+  }
+
+  .rd-card {
+    padding: 2rem;
+  }
+
+  @media (max-width: 760px) {
+    .rd-hero {
+      height: 260px;
+    }
+
+    .rd-hero-inner {
+      padding: 1rem;
+    }
+
+    .rd-card {
+      padding: 1.15rem;
+    }
+  }
+</style>
+{% endblock %}
 
 {% block content %}
 
 {# ── Image hero ── #}
 {% if venue.cover_image_url %}
-<div style="position:relative;height:340px;overflow:hidden">
+<div class="rd-hero">
   <img src="{{ venue.cover_image_url }}" alt="{{ venue.name }}" style="width:100%;height:100%;object-fit:cover" />
   <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,10,18,0.15) 0%,rgba(7,10,18,0.8) 100%)"></div>
-  <div style="position:absolute;bottom:0;left:0;right:0;padding:1.5rem max(1rem,(100vw - 48rem)/2)">
-    <a href="/restaurants/" class="back-link" style="margin-bottom:0.75rem;color:rgba(255,255,255,0.5)">← Restaurants</a>
+  <div class="rd-hero-inner">
+    <a href="/restaurants/" class="back-link" style="margin-bottom:0.75rem;color:rgba(255,255,255,0.5)">← {% trans "Restaurants" %}</a>
     {% if venue.cuisine_type %}<span class="tag tag-orange" style="margin-bottom:0.6rem;display:inline-flex">{{ venue.cuisine_type }}</span>{% endif %}
     <h1 style="font-size:2rem;font-weight:900;color:#fff;letter-spacing:-0.02em;line-height:1.15">{{ venue.name }}</h1>
   </div>
@@ -17,7 +79,7 @@
 {% else %}
 <div class="pg-hdr">
   <div class="mx-auto max-w-3xl px-4">
-    <a href="/restaurants/" class="back-link">← Restaurants</a>
+    <a href="/restaurants/" class="back-link">← {% trans "Restaurants" %}</a>
     {% if venue.cuisine_type %}<span class="tag tag-orange" style="margin-bottom:0.7rem;display:inline-flex">{{ venue.cuisine_type }}</span>{% endif %}
     <h1 style="font-size:2rem;font-weight:900;color:#fff;letter-spacing:-0.02em">{{ venue.name }}</h1>
   </div>
@@ -26,7 +88,7 @@
 
 <div class="mx-auto max-w-3xl px-4" style="padding-top:2rem;padding-bottom:5rem">
 
-  <div class="pk" style="padding:2rem;margin-bottom:1.25rem">
+  <div class="pk rd-card" style="margin-bottom:1.25rem">
     <div style="display:flex;align-items:center;gap:6px;font-size:0.82rem;color:rgba(255,255,255,0.38);margin-bottom:{% if venue.description %}1rem{% else %}0{% endif %}">
       <svg xmlns="http://www.w3.org/2000/svg" style="width:0.85rem;height:0.85rem;flex-shrink:0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
       {{ venue.address|default:venue.city_label }}
@@ -38,8 +100,8 @@
   </div>
 
   {# Créneaux #}
-  <div class="pk" style="padding:1.75rem">
-    <p style="font-size:0.72rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,0.22);margin-bottom:1.25rem">Créneaux disponibles</p>
+  <div class="pk rd-card" style="padding:1.75rem">
+    <p style="font-size:0.72rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,0.22);margin-bottom:1.25rem">{% trans "Creneaux disponibles" %}</p>
     {% if slots %}
     <div style="display:grid;gap:0.75rem;grid-template-columns:repeat(auto-fill,minmax(200px,1fr))">
       {% for slot in slots %}
@@ -49,7 +111,7 @@
         <input type="hidden" name="slot_id" value="{{ slot.id }}" />
         <button type="submit" style="width:100%;border-radius:14px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.04);padding:1rem;text-align:left;cursor:pointer;transition:border-color 0.2s,background 0.2s" onmouseover="this.style.borderColor='rgba(255,106,77,0.35)';this.style.background='rgba(255,106,77,0.06)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)';this.style.background='rgba(255,255,255,0.04)'">
           <p style="font-size:0.88rem;font-weight:700;color:#fff;margin-bottom:0.3rem">{{ slot.date|date:"d M Y" }} à {{ slot.time|time:"H:i" }}</p>
-          <p style="font-size:0.72rem;color:rgba(255,255,255,0.35)">{{ slot.capacity }} places · Réserver →</p>
+          <p style="font-size:0.72rem;color:rgba(255,255,255,0.35)">{{ slot.capacity }} {% trans "places" %} · {% trans "Reserver" %} →</p>
         </button>
       </form>
       {% endif %}
@@ -57,50 +119,15 @@
     </div>
     {% else %}
     <div style="padding:2rem;text-align:center">
-      <p style="font-size:0.88rem;color:rgba(255,255,255,0.32)">Aucun créneau disponible pour le moment</p>
+      <p style="font-size:0.88rem;color:rgba(255,255,255,0.32)">{% trans "Aucun creneau disponible pour le moment" %}</p>
     </div>
     {% endif %}
     {% if not user.is_authenticated %}
     <p style="margin-top:1rem;font-size:0.78rem;color:rgba(255,255,255,0.3);text-align:center">
-      <a href="/connexion/?next=/restaurants/{{ venue.city_slug }}/{{ venue.slug }}/" style="color:#FF8A66;text-decoration:none">Connecte-toi</a> pour réserver
+      <a href="/connexion/?next=/restaurants/{{ venue.city_slug }}/{{ venue.slug }}/" style="color:#FF8A66;text-decoration:none">{% trans "Connecte-toi" %}</a> {% trans "pour reserver" %}
     </p>
     {% endif %}
   </div>
 
-</div>
-{% endblock %}
-
-  {% if venue.cover_image_url %}
-  <div class="mb-8 overflow-hidden rounded-2xl" style="height:280px">
-    <img src="{{ venue.cover_image_url }}" alt="{{ venue.name }}" class="h-full w-full object-cover" />
-  </div>
-  {% endif %}
-
-  <div class="card p-8">
-    <h1 class="text-3xl font-bold text-white">{{ venue.name }}</h1>
-    <p class="mt-2 text-white/50">📍 {{ venue.address|default:venue.city_label }}</p>
-    {% if venue.cuisine_type %}<p class="mt-1 text-sm text-white/40">{{ venue.cuisine_type }}</p>{% endif %}
-    {% if venue.description %}<p class="mt-5 text-white/70 leading-relaxed">{{ venue.description }}</p>{% endif %}
-
-    <h2 class="mt-8 mb-4 text-lg font-semibold text-white">Créneaux disponibles</h2>
-    {% if slots %}
-    <div class="grid gap-3 sm:grid-cols-2">
-      {% for slot in slots %}
-      {% if slot.confirmed_count < slot.capacity %}
-      <form method="post" action="/restaurants/{{ venue.city_slug }}/{{ venue.slug }}/reserver/">
-        {% csrf_token %}
-        <input type="hidden" name="slot_id" value="{{ slot.id }}" />
-        <button type="submit" class="w-full rounded-xl border border-white/10 bg-white/[0.03] p-4 text-left hover:border-brand/30 hover:bg-brand/5 transition-all group">
-          <p class="font-medium text-white group-hover:text-brand transition-colors">{{ slot.date|date:"d M Y" }} à {{ slot.time|time:"H:i" }}</p>
-          <p class="mt-1 text-xs text-white/40">{{ slot.capacity|add:"-"|add:slot.confirmed_count }} places restantes</p>
-        </button>
-      </form>
-      {% endif %}
-      {% endfor %}
-    </div>
-    {% else %}
-    <p class="text-white/40">Aucun créneau disponible pour le moment.</p>
-    {% endif %}
-  </div>
 </div>
 {% endblock %}

@@ -1,12 +1,17 @@
 {% extends "base.html" %}
-{% block title %}Créer une sortie | Mooviogo{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Creer une sortie" %} | Mooviogo{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+{% endblock %}
 
 {% block content %}
 <div class="pg-hdr">
   <div class="mx-auto max-w-xl px-4">
-    <a href="/sorties/" class="back-link">← Retour aux sorties</a>
-    <h1 style="font-size:2rem;font-weight:900;color:#fff;letter-spacing:-0.025em">Créer une sortie</h1>
-    <p style="margin-top:0.4rem;font-size:0.88rem;color:rgba(255,255,255,0.38)">Invite la communauté à te rejoindre</p>
+    <a href="/sorties/" class="back-link">← {% trans "Retour aux sorties" %}</a>
+    <h1 style="font-size:2rem;font-weight:900;color:#fff;letter-spacing:-0.025em">{% trans "Creer une sortie" %}</h1>
+    <p style="margin-top:0.4rem;font-size:0.88rem;color:rgba(255,255,255,0.38)">{% trans "Invite la communaute a te rejoindre" %}</p>
   </div>
 </div>
 
@@ -17,122 +22,194 @@
       <div style="display:flex;flex-direction:column;gap:1.25rem">
 
         <div>
-          <label style="display:block;font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.45);margin-bottom:0.5rem">Titre *</label>
-          <input type="text" name="title" value="{{ form.title.value|default:'' }}" required class="fi-input" placeholder="Ex: Balade au Parc de la Tête d'Or" />
+          <label style="display:block;font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.45);margin-bottom:0.5rem">{% trans "Titre" %} *</label>
+          <input type="text" name="title" value="{{ form.title|default:'' }}" required class="fi-input" placeholder="Ex: Balade au Parc" />
           {% if form.title.errors %}<p style="margin-top:0.3rem;font-size:0.72rem;color:#F87171">{{ form.title.errors.0 }}</p>{% endif %}
         </div>
 
         <div>
-          <label style="display:block;font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.45);margin-bottom:0.5rem">Description</label>
-          <textarea name="description" rows="4" class="fi-input" style="height:auto;padding:0.75rem 1rem;resize:none" placeholder="Décris ta sortie, le lieu, l'ambiance…">{{ form.description.value|default:'' }}</textarea>
+          <label style="display:block;font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.45);margin-bottom:0.5rem">{% trans "Description" %}</label>
+          <textarea name="description" rows="4" class="fi-input" style="height:auto;padding:0.75rem 1rem;resize:none" placeholder="{% trans "Decris ta sortie" %}">{{ form.description|default:'' }}</textarea>
         </div>
 
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
           <div>
-            <label style="display:block;font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.45);margin-bottom:0.5rem">Ville *</label>
-            <input type="text" name="city" value="{{ form.city.value|default:'' }}" required class="fi-input" placeholder="Lyon" />
+            <label style="display:block;font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.45);margin-bottom:0.5rem">{% trans "Ville" %} *</label>
+            <input type="text" id="city-input" name="city" value="{{ form.city|default:'' }}" required class="fi-input" placeholder="Lyon" />
           </div>
           <div>
-            <label style="display:block;font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.45);margin-bottom:0.5rem">Type *</label>
-            <select name="type" class="fi-input">
-              <option value="COMMUNAUTAIRE" {% if form.type.value == "COMMUNAUTAIRE" %}selected{% endif %}>Communautaire</option>
-              <option value="PARTENAIRE" {% if form.type.value == "PARTENAIRE" %}selected{% endif %}>Partenaire</option>
+            <label style="display:block;font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.45);margin-bottom:0.5rem">{% trans "Type" %} *</label>
+            <select id="type" name="type" class="fi-input">
+              <option value="COMMUNAUTAIRE" {% if form.type == "COMMUNAUTAIRE" or not form.type %}selected{% endif %}>{% trans "Entre membres" %}</option>
+              <option value="PARTENAIRE" {% if form.type == "PARTENAIRE" %}selected{% endif %}>{% trans "Chez un partenaire" %}</option>
             </select>
+            {% if errors.type %}<p style="margin-top:0.3rem;font-size:0.72rem;color:#F87171">{{ errors.type }}</p>{% endif %}
           </div>
         </div>
 
+        <div>
+          <label style="display:block;font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.45);margin-bottom:0.5rem">{% trans "Adresse / lieu" %}</label>
+          <div style="display:grid;grid-template-columns:1fr auto;gap:0.6rem;align-items:center">
+            <input type="text" id="location-input" name="location" value="{{ form.location|default:'' }}" class="fi-input" placeholder="{% trans "Ex: 12 Rue de la Republique" %}" />
+            <button type="button" id="geocode-btn" class="btn-ghost" style="padding:0.7rem 1rem;border-radius:12px;font-size:0.78rem;white-space:nowrap">{% trans "Trouver" %}</button>
+          </div>
+          <p id="geocode-feedback" style="margin-top:0.45rem;font-size:0.72rem;color:rgba(255,255,255,0.5)"></p>
+          <div id="geocode-results" style="margin-top:0.6rem;display:flex;flex-direction:column;gap:0.35rem"></div>
+        </div>
+
+        <input type="hidden" id="latitude" name="latitude" value="{{ form.latitude|default:'' }}" />
+        <input type="hidden" id="longitude" name="longitude" value="{{ form.longitude|default:'' }}" />
+
+        <div id="map" style="height:280px;border-radius:14px;border:1px solid rgba(255,255,255,0.1);overflow:hidden"></div>
+        {% if errors.latitude %}<p style="margin-top:0.3rem;font-size:0.72rem;color:#F87171">{{ errors.latitude }}</p>{% endif %}
+        {% if errors.longitude %}<p style="margin-top:0.3rem;font-size:0.72rem;color:#F87171">{{ errors.longitude }}</p>{% endif %}
+
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
           <div>
-            <label style="display:block;font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.45);margin-bottom:0.5rem">Date et heure</label>
-            <input type="datetime-local" name="starts_at" value="{{ form.starts_at.value|default:'' }}" class="fi-input" />
+            <label style="display:block;font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.45);margin-bottom:0.5rem">{% trans "Date et heure" %}</label>
+            <input type="datetime-local" name="starts_at" value="{{ form.starts_at|default:'' }}" class="fi-input" />
           </div>
           <div>
-            <label style="display:block;font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.45);margin-bottom:0.5rem">Participants max</label>
-            <input type="number" name="max_participants" value="{{ form.max_participants.value|default:'' }}" min="2" class="fi-input" placeholder="10" />
+            <label style="display:block;font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.45);margin-bottom:0.5rem">{% trans "Participants max" %}</label>
+            <input type="number" name="max_participants" value="{{ form.max_participants|default:'' }}" min="2" class="fi-input" placeholder="10" />
           </div>
         </div>
 
         <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:0.85rem 1rem;border-radius:12px;border:1px solid rgba(255,255,255,0.07);background:rgba(255,255,255,0.03)">
-          <input type="checkbox" name="is_free" id="is_free" {% if form.is_free.value %}checked{% endif %} style="width:16px;height:16px;accent-color:#FF6A4D;cursor:pointer" />
-          <span style="font-size:0.88rem;color:rgba(255,255,255,0.65)">Sortie gratuite</span>
+          <input type="checkbox" name="is_free" id="is_free" {% if form.is_free %}checked{% endif %} style="width:16px;height:16px;accent-color:#FF6A4D;cursor:pointer" />
+          <span style="font-size:0.88rem;color:rgba(255,255,255,0.65)">{% trans "Sortie gratuite" %}</span>
         </label>
 
         <div id="price-field">
-          <label style="display:block;font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.45);margin-bottom:0.5rem">Prix (€)</label>
-          <input type="number" name="price" value="{{ form.price.value|default:'0' }}" min="0" step="0.01" class="fi-input" placeholder="0.00" />
+          <label style="display:block;font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.45);margin-bottom:0.5rem">{% trans "Prix" %} (€)</label>
+          <input type="number" name="price" value="{{ form.price|default:'0' }}" min="0" step="0.01" class="fi-input" placeholder="0.00" />
+          {% if errors.price %}<p style="margin-top:0.3rem;font-size:0.72rem;color:#F87171">{{ errors.price }}</p>{% endif %}
         </div>
-
       </div>
+
       <button type="submit" class="btn-brand" style="margin-top:2rem;width:100%;padding:0.95rem;font-size:0.95rem;border-radius:14px;justify-content:center;font-weight:800">
-        Créer la sortie
+        {% trans "Creer la sortie" %}
       </button>
     </form>
   </div>
 </div>
-
-<script>
-const checkbox = document.getElementById('is_free');
-const priceField = document.getElementById('price-field');
-function togglePrice() { priceField.style.display = checkbox.checked ? 'none' : 'block'; }
-checkbox.addEventListener('change', togglePrice);
-togglePrice();
-</script>
 {% endblock %}
 
-  <div class="card p-8">
-    <form method="post">
-      {% csrf_token %}
-      <div class="space-y-5">
-        <div>
-          <label class="mb-2 block text-sm text-white/60">Titre *</label>
-          <input type="text" name="title" value="{{ form.title.value|default:'' }}" required class="input" placeholder="Ex: Balade au Parc de la Tête d'Or" />
-          {% if form.title.errors %}<p class="mt-1 text-xs text-red-400">{{ form.title.errors.0 }}</p>{% endif %}
-        </div>
-        <div>
-          <label class="mb-2 block text-sm text-white/60">Description</label>
-          <textarea name="description" rows="4" class="input py-3 h-auto resize-none" placeholder="Décris ta sortie...">{{ form.description.value|default:'' }}</textarea>
-        </div>
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="mb-2 block text-sm text-white/60">Ville *</label>
-            <input type="text" name="city" value="{{ form.city.value|default:'' }}" required class="input" placeholder="Lyon" />
-          </div>
-          <div>
-            <label class="mb-2 block text-sm text-white/60">Type *</label>
-            <select name="type" class="input">
-              <option value="COMMUNAUTAIRE" {% if form.type.value == "COMMUNAUTAIRE" %}selected{% endif %}>Communautaire</option>
-              <option value="PARTENAIRE" {% if form.type.value == "PARTENAIRE" %}selected{% endif %}>Partenaire</option>
-            </select>
-          </div>
-        </div>
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="mb-2 block text-sm text-white/60">Date et heure</label>
-            <input type="datetime-local" name="starts_at" value="{{ form.starts_at.value|default:'' }}" class="input" />
-          </div>
-          <div>
-            <label class="mb-2 block text-sm text-white/60">Participants max</label>
-            <input type="number" name="max_participants" value="{{ form.max_participants.value|default:'' }}" min="2" class="input" placeholder="10" />
-          </div>
-        </div>
-        <div class="flex items-center gap-3">
-          <input type="checkbox" name="is_free" id="is_free" {% if form.is_free.value %}checked{% endif %} class="h-4 w-4 accent-brand" />
-          <label for="is_free" class="text-sm text-white/70">Sortie gratuite</label>
-        </div>
-        <div id="price-field">
-          <label class="mb-2 block text-sm text-white/60">Prix (€)</label>
-          <input type="number" name="price" value="{{ form.price.value|default:'0' }}" min="0" step="0.01" class="input" placeholder="0.00" />
-        </div>
-      </div>
-      <button type="submit" class="btn-brand mt-8 w-full py-3 text-base">Créer la sortie</button>
-    </form>
-  </div>
-</div>
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
-const checkbox = document.getElementById('is_free');
-const priceField = document.getElementById('price-field');
-function togglePrice() { priceField.style.display = checkbox.checked ? 'none' : 'block'; }
-checkbox.addEventListener('change', togglePrice);
-togglePrice();
+(function () {
+  const typeSelect = document.getElementById('type');
+  const checkbox = document.getElementById('is_free');
+  const priceField = document.getElementById('price-field');
+  const geocodeBtn = document.getElementById('geocode-btn');
+  const locationInput = document.getElementById('location-input');
+  const cityInput = document.getElementById('city-input');
+  const feedback = document.getElementById('geocode-feedback');
+  const resultsEl = document.getElementById('geocode-results');
+  const latInput = document.getElementById('latitude');
+  const lngInput = document.getElementById('longitude');
+
+  const map = L.map('map').setView([48.8566, 2.3522], 5);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap'
+  }).addTo(map);
+
+  let marker = null;
+  function setMarker(lat, lng, label) {
+    if (marker) {
+      map.removeLayer(marker);
+    }
+    marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+    marker.bindPopup(label || 'Point selectionne').openPopup();
+    map.setView([lat, lng], 15);
+    latInput.value = Number(lat).toFixed(6);
+    lngInput.value = Number(lng).toFixed(6);
+    marker.on('dragend', function (event) {
+      const p = event.target.getLatLng();
+      latInput.value = Number(p.lat).toFixed(6);
+      lngInput.value = Number(p.lng).toFixed(6);
+    });
+  }
+
+  if (latInput.value && lngInput.value) {
+    setMarker(parseFloat(latInput.value), parseFloat(lngInput.value), 'Point sauvegarde');
+  }
+
+  function syncTypeRules() {
+    if (typeSelect.value === 'COMMUNAUTAIRE') {
+      checkbox.checked = true;
+      checkbox.disabled = true;
+      priceField.style.display = 'none';
+      return;
+    }
+    checkbox.disabled = false;
+    priceField.style.display = checkbox.checked ? 'none' : 'block';
+  }
+
+  function renderResults(items) {
+    resultsEl.innerHTML = '';
+    if (!items.length) {
+      feedback.textContent = 'Aucun resultat.';
+      feedback.style.color = '#F87171';
+      return;
+    }
+    feedback.textContent = 'Selectionne une adresse proposee.';
+    feedback.style.color = 'rgba(255,255,255,0.75)';
+
+    items.forEach(function (item) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn-ghost';
+      btn.style.fontSize = '0.74rem';
+      btn.style.textAlign = 'left';
+      btn.style.justifyContent = 'flex-start';
+      btn.style.padding = '0.55rem 0.75rem';
+      btn.style.borderRadius = '10px';
+      btn.textContent = item.display_name;
+      btn.addEventListener('click', function () {
+        locationInput.value = item.display_name;
+        if (item.city && !cityInput.value) {
+          cityInput.value = item.city;
+        }
+        setMarker(item.latitude, item.longitude, item.display_name);
+      });
+      resultsEl.appendChild(btn);
+    });
+  }
+
+  geocodeBtn.addEventListener('click', async function () {
+    const q = (locationInput.value || '').trim();
+    if (!q) {
+      feedback.textContent = 'Saisis un lieu avant la recherche.';
+      feedback.style.color = '#F87171';
+      return;
+    }
+
+    feedback.textContent = 'Recherche geographique en cours...';
+    feedback.style.color = 'rgba(255,255,255,0.65)';
+    resultsEl.innerHTML = '';
+
+    try {
+      const params = new URLSearchParams({ q: q, city: (cityInput.value || '').trim() });
+      const response = await fetch('/api/v1/city-feed/geocode/?' + params.toString());
+      const payload = await response.json();
+      if (!response.ok) {
+        feedback.textContent = payload.detail || 'Erreur geocoding.';
+        feedback.style.color = '#F87171';
+        return;
+      }
+      renderResults(payload.results || []);
+    } catch (_err) {
+      feedback.textContent = 'Erreur reseau geocoding.';
+      feedback.style.color = '#F87171';
+    }
+  });
+
+  typeSelect.addEventListener('change', syncTypeRules);
+  checkbox.addEventListener('change', syncTypeRules);
+  syncTypeRules();
+})();
 </script>
 {% endblock %}

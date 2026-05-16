@@ -1,11 +1,39 @@
+{% load i18n %}
 <!DOCTYPE html>
-<html lang="fr" class="dark">
+<html lang="{{ LANGUAGE_CODE|default:'fr' }}" class="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{% block title %}Mooviogo{% endblock %}</title>
   <meta name="description" content="{% block description %}Mooviogo t'aide à trouver quoi faire ce soir et réserver un restaurant rapidement.{% endblock %}" />
+  <link rel="canonical" href="{{ APP_BASE_URL }}{{ request.path }}" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Mooviogo" />
+  <meta property="og:title" content="{% block og_title %}Mooviogo{% endblock %}" />
+  <meta property="og:description" content="{% block og_description %}Mooviogo t'aide à trouver quoi faire ce soir et réserver un restaurant rapidement.{% endblock %}" />
+  <meta property="og:url" content="{{ APP_BASE_URL }}{{ request.path }}" />
+  <meta property="og:image" content="{{ APP_BASE_URL }}/static/og/default-og.svg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="{% block twitter_title %}Mooviogo{% endblock %}" />
+  <meta name="twitter:description" content="{% block twitter_description %}Mooviogo t'aide à trouver quoi faire ce soir et réserver un restaurant rapidement.{% endblock %}" />
+  <meta name="twitter:image" content="{{ APP_BASE_URL }}/static/og/default-og.svg" />
+  <meta name="robots" content="index,follow" />
   {% block meta_extra %}{% endblock %}
+
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Mooviogo",
+      "url": "{{ APP_BASE_URL }}",
+      "contactPoint": [{
+        "@type": "ContactPoint",
+        "contactType": "customer support",
+        "email": "hello@mooviogo.com"
+      }]
+    }
+  </script>
+  {% block schema_jsonld %}{% endblock %}
 
   {# Tailwind CDN for dev — swap for compiled CSS in production #}
   <script src="https://cdn.tailwindcss.com"></script>
@@ -28,10 +56,87 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
+    :root {
+      --signup-btn-grad: linear-gradient(135deg,#FF6A4D 0%,#C084FC 60%,#F472B6 100%);
+      --signup-btn-shadow: 0 5px 22px rgba(192,132,252,0.45);
+      --focus-ring: #F59E0B;
+    }
+
     body { background: #0B0818; color: #F8FAFC; }
     .glass { background: linear-gradient(180deg,rgba(18,12,32,0.92),rgba(10,8,24,0.98)); border: 1px solid rgba(255,255,255,0.08); }
-    .btn-brand { background: linear-gradient(135deg,#FF6A4D 0%,#F97316 100%); color: #fff; border-radius: 22px; padding: 0.6rem 1.4rem; font-weight: 700; transition: filter 0.2s, transform 0.2s; text-decoration:none; display:inline-flex;align-items:center; }
+    .btn-brand { background: var(--signup-btn-grad); color: #fff; border-radius: 22px; padding: 0.6rem 1.4rem; font-weight: 700; transition: filter 0.2s, transform 0.2s; text-decoration:none; display:inline-flex;align-items:center; box-shadow: var(--signup-btn-shadow); }
     .btn-brand:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+    .skip-link {
+      position: absolute;
+      left: 0.6rem;
+      top: -3rem;
+      z-index: 9999;
+      padding: 0.55rem 0.8rem;
+      border-radius: 10px;
+      background: #111827;
+      color: #fff;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-decoration: none;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .skip-link:focus-visible {
+      top: 0.6rem;
+      outline: 3px solid var(--focus-ring);
+      outline-offset: 2px;
+    }
+
+    a:focus-visible,
+    button:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+      outline: 3px solid var(--focus-ring);
+      outline-offset: 2px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    /* Global button color alignment with header signup button */
+    button,
+    .btn-brand,
+    .btn-ghost,
+    .cta-primary,
+    .pag-btn,
+    .sc-cta,
+    .tc-action,
+    .ftab,
+    .top-search .go,
+    .top-tab.active,
+    .btn-signup-gradient {
+      background: var(--signup-btn-grad) !important;
+      color: #fff !important;
+      border-color: transparent !important;
+      box-shadow: var(--signup-btn-shadow) !important;
+    }
+
+    button:hover,
+    .btn-brand:hover,
+    .btn-ghost:hover,
+    .cta-primary:hover,
+    .pag-btn:hover,
+    .sc-cta:hover,
+    .tc-action:hover,
+    .ftab:hover,
+    .top-search .go:hover,
+    .top-tab.active:hover,
+    .btn-signup-gradient:hover {
+      filter: brightness(1.06) !important;
+    }
     /* Shared inner-page styles */
     .pg-hdr { background: linear-gradient(180deg,#070A12 0%,#0D1117 100%); padding:4rem 0 3rem; border-bottom:1px solid rgba(255,255,255,0.05); }
     .pk { background:linear-gradient(180deg,rgba(20,24,33,0.85),rgba(12,15,22,0.95)); border:1px solid rgba(255,255,255,0.07); border-radius:20px; transition:border-color 0.2s,box-shadow 0.2s; }
@@ -58,10 +163,44 @@
     .input { min-height: 3.5rem; width: 100%; border-radius: 22px; border: 1px solid rgba(255,255,255,0.1); background: linear-gradient(180deg,rgba(20,24,33,0.92),rgba(12,15,22,0.98)); padding: 0 1rem; color: #F8FAFC; outline: none; transition: all 0.2s; }
     .input:focus { border-color: rgba(255,138,102,0.32); box-shadow: 0 0 0 4px rgba(255,106,77,0.08); }
     .input::placeholder { color: #7C8595; }
+
+    .mobile-nav {
+      display: none;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      background: rgba(12,15,22,0.96);
+    }
+    .mobile-nav[data-open="true"] { display: block; }
+    .mobile-link {
+      display: block;
+      padding: 0.72rem 0.2rem;
+      font-size: 0.92rem;
+      color: rgba(255,255,255,0.86);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .mobile-link:last-of-type { border-bottom: none; }
+    .mobile-actions {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.65rem;
+      margin-top: 0.95rem;
+    }
+    .mobile-btn {
+      width: 100%;
+      justify-content: center;
+      padding: 0.72rem 0.9rem;
+      border-radius: 14px;
+      font-size: 0.86rem;
+      font-weight: 700;
+    }
+    @media (min-width: 640px) {
+      .mobile-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
   </style>
   {% block extra_head %}{% endblock %}
 </head>
 <body class="min-h-screen font-sans antialiased">
+  <a href="#main-content" class="skip-link">{% trans "Aller au contenu principal" %}</a>
 
   {# ── Navbar ── #}
   <nav class="sticky top-0 z-50 w-full border-b border-white/[0.06] backdrop-blur-xl" style="background:rgba(12,15,22,0.88)">
@@ -70,20 +209,65 @@
         <span class="text-brand">●</span> Mooviogo
       </a>
       <div class="hidden md:flex items-center gap-6 text-sm text-white/70">
-        <a href="/sorties/" class="hover:text-white transition-colors">Sorties</a>
-        <a href="/restaurants/" class="hover:text-white transition-colors">Restaurants</a>
-        <a href="/evenements/" class="hover:text-white transition-colors">Événements</a>
-        <a href="/villes/" class="hover:text-white transition-colors">Villes</a>
-        <a href="/partenaires/" class="hover:text-white transition-colors">Partenaires</a>
+        <a href="/sorties/" class="hover:text-white transition-colors">{% trans "Sorties" %}</a>
+        <a href="/restaurants/" class="hover:text-white transition-colors">{% trans "Restaurants" %}</a>
+        <a href="/evenements/" class="hover:text-white transition-colors">{% trans "Evenements" %}</a>
+        <a href="/villes/" class="hover:text-white transition-colors">{% trans "Villes" %}</a>
+        <a href="/partenaires/" class="hover:text-white transition-colors">{% trans "Partenaires" %}</a>
       </div>
-      <div class="flex items-center gap-3">
+      <div class="hidden sm:flex items-center gap-3">
+        <form method="post" action="/i18n/setlang/" style="display:inline-flex;align-items:center;gap:0.35rem">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.get_full_path }}" />
+          <select name="language" class="fi-input" style="min-height:2.1rem;height:2.1rem;padding:0 0.65rem;font-size:0.75rem">
+            {% get_available_languages as LANGUAGES %}
+            {% for lang_code, lang_name in LANGUAGES %}
+            <option value="{{ lang_code }}" {% if lang_code == LANGUAGE_CODE %}selected{% endif %}>{{ lang_code|upper }}</option>
+            {% endfor %}
+          </select>
+          <button type="submit" class="btn-ghost" style="padding:0.35rem 0.65rem;border-radius:10px;font-size:0.72rem">{% trans "Langue" %}</button>
+        </form>
         {% if user.is_authenticated %}
           <a href="/profil/" class="btn-ghost text-sm">{{ user.display_name|default:user.username }}</a>
-          <form method="post" action="/deconnexion/" style="display:inline">{% csrf_token %}<button type="submit" class="btn-ghost text-sm">Déconnexion</button></form>
+          <form method="post" action="/deconnexion/" style="display:inline">{% csrf_token %}<button type="submit" class="btn-ghost text-sm">{% trans "Deconnexion" %}</button></form>
         {% else %}
-          <a href="/connexion/" class="btn-ghost text-sm">Connexion</a>
-          <a href="/inscription/" style="display:inline-flex;align-items:center;gap:6px;padding:0.52rem 1.25rem;border-radius:999px;font-size:0.82rem;font-weight:800;color:#fff;background:linear-gradient(135deg,#FF6A4D 0%,#C084FC 60%,#F472B6 100%);box-shadow:0 3px 14px rgba(192,132,252,0.32);text-decoration:none;transition:transform 0.2s,box-shadow 0.2s" onmouseover="this.style.transform='scale(1.04)';this.style.boxShadow='0 5px 22px rgba(192,132,252,0.48)'" onmouseout="this.style.transform='';this.style.boxShadow='0 3px 14px rgba(192,132,252,0.32)'">Inscription</a>
+          <a href="/connexion/" class="btn-ghost text-sm">{% trans "Connexion" %}</a>
+          <a href="/inscription/" class="btn-signup-gradient" style="display:inline-flex;align-items:center;gap:6px;padding:0.52rem 1.25rem;border-radius:999px;font-size:0.82rem;font-weight:800;text-decoration:none;transition:transform 0.2s,box-shadow 0.2s" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform=''">{% trans "Inscription" %}</a>
         {% endif %}
+      </div>
+      <button id="mobile-nav-toggle" type="button" class="inline-flex sm:hidden items-center justify-center rounded-xl border border-white/15 px-3 py-2 text-white/85" aria-label="{% trans "Ouvrir le menu" %}" aria-expanded="false" aria-controls="mobile-nav-panel">
+        <svg xmlns="http://www.w3.org/2000/svg" style="width:1.1rem;height:1.1rem" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+    </div>
+    <div id="mobile-nav-panel" class="mobile-nav sm:hidden" data-open="false">
+      <div class="mx-auto max-w-7xl px-4 py-3">
+        <a href="/sorties/" class="mobile-link">{% trans "Sorties" %}</a>
+        <a href="/restaurants/" class="mobile-link">{% trans "Restaurants" %}</a>
+        <a href="/evenements/" class="mobile-link">{% trans "Evenements" %}</a>
+        <a href="/villes/" class="mobile-link">{% trans "Villes" %}</a>
+        <a href="/partenaires/" class="mobile-link">{% trans "Partenaires" %}</a>
+
+        <form method="post" action="/i18n/setlang/" style="display:flex;gap:0.5rem;margin-top:0.8rem">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.get_full_path }}" />
+          <select name="language" class="fi-input" style="min-height:2.3rem;height:2.3rem;padding:0 0.65rem;font-size:0.78rem">
+            {% get_available_languages as LANGUAGES %}
+            {% for lang_code, lang_name in LANGUAGES %}
+            <option value="{{ lang_code }}" {% if lang_code == LANGUAGE_CODE %}selected{% endif %}>{{ lang_code|upper }}</option>
+            {% endfor %}
+          </select>
+          <button type="submit" class="btn-ghost mobile-btn" style="max-width:130px">{% trans "Langue" %}</button>
+        </form>
+
+        <div class="mobile-actions">
+          {% if user.is_authenticated %}
+            <a href="/profil/" class="btn-ghost mobile-btn">{{ user.display_name|default:user.username }}</a>
+            <form method="post" action="/deconnexion/">{% csrf_token %}<button type="submit" class="btn-ghost mobile-btn">{% trans "Deconnexion" %}</button></form>
+          {% else %}
+            <a href="/connexion/" class="btn-ghost mobile-btn">{% trans "Connexion" %}</a>
+            <a href="/inscription/" class="btn-brand mobile-btn">{% trans "Inscription" %}</a>
+          {% endif %}
+        </div>
       </div>
     </div>
   </nav>
@@ -103,7 +287,7 @@
   {% endif %}
 
   {# ── Main content ── #}
-  <main>
+  <main id="main-content">
     {% block content %}{% endblock %}
   </main>
 
@@ -134,7 +318,7 @@
         </div>
 
         {# Liens #}
-        <div style="flex:1;display:grid;grid-template-columns:repeat(2,1fr);gap:2.5rem 2rem" class="sm:grid-cols-4">
+        <div style="flex:1;display:grid;gap:2.5rem 2rem" class="grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
 
           <div>
             <p style="font-size:0.57rem;font-weight:900;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,0.18);margin-bottom:1.2rem">Explorer</p>
@@ -189,6 +373,119 @@
 
   </footer>
 
+  {% if ENABLE_ANALYTICS %}
+  <div id="cookie-consent" style="position:fixed;left:1rem;right:1rem;bottom:1rem;z-index:1200;display:none">
+    <div class="pk" style="padding:0.9rem 1rem;display:flex;gap:0.8rem;flex-wrap:wrap;align-items:center;justify-content:space-between">
+      <p style="font-size:0.8rem;color:rgba(255,255,255,0.82);margin:0">
+        Nous utilisons des cookies de mesure d'audience (GA4/PostHog/Pixel) pour améliorer Mooviogo.
+      </p>
+      <div style="display:flex;gap:0.55rem;align-items:center">
+        <button id="cookie-deny" class="btn-ghost" style="padding:0.45rem 0.75rem;border-radius:10px;font-size:0.75rem">Refuser</button>
+        <button id="cookie-accept" class="btn-brand" style="padding:0.45rem 0.75rem;border-radius:10px;font-size:0.75rem">Accepter</button>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
   {% block extra_js %}{% endblock %}
+  <script>
+    (function () {
+      var toggle = document.getElementById("mobile-nav-toggle");
+      var panel = document.getElementById("mobile-nav-panel");
+      if (!toggle || !panel) return;
+
+      toggle.addEventListener("click", function () {
+        var isOpen = panel.getAttribute("data-open") === "true";
+        panel.setAttribute("data-open", isOpen ? "false" : "true");
+        toggle.setAttribute("aria-expanded", isOpen ? "false" : "true");
+      });
+    })();
+
+    (function () {
+      var enabled = {{ ENABLE_ANALYTICS|yesno:"true,false" }};
+      if (!enabled) return;
+
+      var consentKey = "mooviogo_analytics_consent";
+      var consent = localStorage.getItem(consentKey);
+      var banner = document.getElementById("cookie-consent");
+      var acceptBtn = document.getElementById("cookie-accept");
+      var denyBtn = document.getElementById("cookie-deny");
+
+      function loadScript(src, attrs) {
+        var s = document.createElement("script");
+        s.src = src;
+        s.async = true;
+        attrs = attrs || {};
+        Object.keys(attrs).forEach(function (k) { s.setAttribute(k, attrs[k]); });
+        document.head.appendChild(s);
+      }
+
+      function initAnalytics() {
+        var ga4 = "{{ GA4_MEASUREMENT_ID|escapejs }}";
+        var posthogKey = "{{ POSTHOG_KEY|escapejs }}";
+        var posthogHost = "{{ POSTHOG_HOST|escapejs }}";
+        var metaPixelId = "{{ META_PIXEL_ID|escapejs }}";
+        var tiktokPixelId = "{{ TIKTOK_PIXEL_ID|escapejs }}";
+
+        if (ga4) {
+          loadScript("https://www.googletagmanager.com/gtag/js?id=" + encodeURIComponent(ga4));
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){ window.dataLayer.push(arguments); }
+          gtag("js", new Date());
+          gtag("config", ga4, { anonymize_ip: true });
+        }
+
+        if (posthogKey) {
+          loadScript("https://unpkg.com/posthog-js@1.151.0/dist/module.no-external.js");
+          setTimeout(function () {
+            if (window.posthog && typeof window.posthog.init === "function") {
+              window.posthog.init(posthogKey, { api_host: posthogHost || "https://eu.i.posthog.com", capture_pageview: true });
+            }
+          }, 250);
+        }
+
+        if (metaPixelId) {
+          loadScript("https://connect.facebook.net/en_US/fbevents.js");
+          setTimeout(function () {
+            if (window.fbq) {
+              window.fbq("init", metaPixelId);
+              window.fbq("track", "PageView");
+            }
+          }, 250);
+        }
+
+        if (tiktokPixelId) {
+          loadScript("https://analytics.tiktok.com/i18n/pixel/events.js");
+          setTimeout(function () {
+            if (window.ttq && typeof window.ttq.load === "function") {
+              window.ttq.load(tiktokPixelId);
+              window.ttq.page();
+            }
+          }, 250);
+        }
+      }
+
+      if (consent === "accepted") {
+        initAnalytics();
+      } else if (banner) {
+        banner.style.display = "block";
+      }
+
+      if (acceptBtn) {
+        acceptBtn.addEventListener("click", function () {
+          localStorage.setItem(consentKey, "accepted");
+          if (banner) banner.style.display = "none";
+          initAnalytics();
+        });
+      }
+
+      if (denyBtn) {
+        denyBtn.addEventListener("click", function () {
+          localStorage.setItem(consentKey, "denied");
+          if (banner) banner.style.display = "none";
+        });
+      }
+    })();
+  </script>
 </body>
 </html>

@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }} | Mooviogo{% endblock %}
+
+{% block extra_head %}
+<style>
+  .hub-filter {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .hub-filter-q {
+    grid-column: span 6;
+  }
+
+  .hub-filter-city {
+    grid-column: span 4;
+  }
+
+  .hub-filter-btn {
+    grid-column: span 2;
+    justify-content: center;
+  }
+
+  .hub-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 0.8rem;
+    gap: 0.6rem;
+  }
+
+  @media (max-width: 900px) {
+    .hub-filter-q,
+    .hub-filter-city,
+    .hub-filter-btn {
+      grid-column: span 12;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .hub-head {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pg-hdr">
+  <div class="mx-auto max-w-7xl px-4">
+    <p class="slabel mb-3">{{ page_kicker|default:"Plateforme" }}</p>
+    <h1 style="font-size:2.2rem;font-weight:900;color:#fff;letter-spacing:-0.03em;line-height:1.1">{{ page_title }}</h1>
+    <p style="margin-top:0.6rem;max-width:56rem;font-size:0.9rem;color:rgba(255,255,255,0.46)">{{ page_description }}</p>
+  </div>
+</div>
+
+<div class="mx-auto max-w-7xl px-4" style="padding-top:2rem;padding-bottom:4rem">
+  <form method="get" class="hub-filter" aria-label="Filtrer le contenu de la plateforme">
+    <input class="fi-input hub-filter-q" type="text" name="q" value="{{ search_query|default:'' }}" placeholder="Recherche rapide" aria-label="Recherche rapide" />
+    <input class="fi-input hub-filter-city" type="text" name="city" value="{{ city|default:'' }}" placeholder="Ville" aria-label="Ville" />
+    <button class="btn-brand hub-filter-btn">Filtrer</button>
+  </form>
+
+  {% if sorties %}
+  <section style="margin-bottom:2rem">
+    <div class="hub-head">
+      <h2 style="font-size:1.25rem;font-weight:800;color:#fff">Sorties communautaires</h2>
+      <a href="/sorties/" style="font-size:0.78rem;color:rgba(255,255,255,0.45);text-decoration:none">Tout voir</a>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:0.8rem">
+      {% for sortie in sorties %}
+      <a href="/sorties/{{ sortie.id }}/" class="pk" style="padding:1rem;text-decoration:none;display:block">
+        <p style="font-size:0.9rem;font-weight:800;color:#fff;line-height:1.35">{{ sortie.title }}</p>
+        <p style="font-size:0.72rem;color:rgba(255,255,255,0.35);margin-top:0.25rem">{{ sortie.city }} · {{ sortie.get_type_display }}</p>
+        <p style="font-size:0.72rem;color:#4ADE80;margin-top:0.4rem">{% if sortie.is_free %}Gratuit{% else %}{{ sortie.price_euros }} €{% endif %}</p>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  {% if events %}
+  <section style="margin-bottom:2rem">
+    <div class="hub-head">
+      <h2 style="font-size:1.25rem;font-weight:800;color:#fff">Evenements</h2>
+      <a href="/evenements/" style="font-size:0.78rem;color:rgba(255,255,255,0.45);text-decoration:none">Tout voir</a>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:0.8rem">
+      {% for event in events %}
+      <a href="/evenements/{{ event.slug }}/" class="pk" style="padding:1rem;text-decoration:none;display:block">
+        <p style="font-size:0.9rem;font-weight:800;color:#fff;line-height:1.35">{{ event.title }}</p>
+        <p style="font-size:0.72rem;color:rgba(255,255,255,0.35);margin-top:0.25rem">{{ event.city }}{% if event.starts_at %} · {{ event.starts_at|date:"d M H:i" }}{% endif %}</p>
+        <p style="font-size:0.72rem;color:#93C5FD;margin-top:0.4rem">{% if event.price %}{{ event.price }} €{% else %}Gratuit{% endif %}</p>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  {% if partners %}
+  <section>
+    <div class="hub-head">
+      <h2 style="font-size:1.25rem;font-weight:800;color:#fff">Partenaires activites</h2>
+      <a href="/partenaires/" style="font-size:0.78rem;color:rgba(255,255,255,0.45);text-decoration:none">Tout voir</a>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:0.8rem">
+      {% for partner in partners %}
+      <article class="pk" style="padding:1rem">
+        <p style="font-size:0.9rem;font-weight:800;color:#fff;line-height:1.35">{{ partner.name }}</p>
+        <p style="font-size:0.72rem;color:rgba(255,255,255,0.35);margin-top:0.25rem">{{ partner.city }}{% if partner.category %} · {{ partner.category }}{% endif %}</p>
+        <p style="font-size:0.72rem;color:#FDE047;margin-top:0.4rem">{% if partner.is_verified %}Partenaire verifie{% else %}En attente{% endif %}</p>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

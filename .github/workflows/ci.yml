@@ -1,0 +1,86 @@
+name: CI
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: mooviogo_test
+          POSTGRES_USER: mooviogo
+          POSTGRES_PASSWORD: mooviogo
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U mooviogo"
+          --health-interval 10s --health-timeout 5s --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 10s
+          --health-timeout 5s --health-retries 5
+    env:
+      DJANGO_SETTINGS_MODULE: mooviogo.settings.development
+      SECRET_KEY: ci-only-not-secret-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+      DATABASE_URL: postgres://mooviogo:mooviogo@localhost:5432/mooviogo_test
+      REDIS_URL: redis://localhost:6379/0
+      DEBUG: "True"
+      ALLOWED_HOSTS: localhost,127.0.0.1
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Django system check
+        run: python manage.py check
+
+      - name: Run migrations
+        run: python manage.py migrate --noinput
+
+      - name: Run tests
+        run: pytest -q --tb=short
+
+  deploy-check:
+    runs-on: ubuntu-latest
+    env:
+      DJANGO_SETTINGS_MODULE: mooviogo.settings.production
+      SECRET_KEY: ci-only-not-secret-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+      ALLOWED_HOSTS: example.com
+      DATABASE_URL: sqlite:///dev.db
+      REDIS_URL: redis://localhost:6379/0
+      APP_BASE_URL: https://example.com
+      CSRF_TRUSTED_ORIGINS: https://example.com
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - run: |
+          pip install -r requirements.txt
+          pip install sentry-sdk django-storages boto3
+      - name: Django deploy check
+        run: python manage.py check --deploy --fail-level WARNING
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install ruff
+      - run: ruff check apps mooviogo

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Messages | Mooviogo{% endblock %}
+
+{% block content %}
+<div class="pg-hdr">
+  <div class="mx-auto max-w-6xl px-4">
+    <p class="slabel mb-3">Chat & communaute</p>
+    <h1 style="font-size:2rem;font-weight:900;color:#fff;letter-spacing:-0.03em">Messages</h1>
+    <p style="margin-top:0.55rem;font-size:0.9rem;color:rgba(255,255,255,0.45)">Conversations privees, groupes de sorties et discussions d'evenements.</p>
+  </div>
+</div>
+
+<div class="mx-auto max-w-6xl px-4" style="padding-top:2rem;padding-bottom:4rem">
+  <div class="pk" style="padding:1rem">
+    {% for chat in chats %}
+    <article style="padding:0.7rem 0.8rem;border:1px solid rgba(255,255,255,0.08);border-radius:12px;margin-bottom:0.6rem">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:0.8rem;flex-wrap:wrap">
+        <div>
+          <p style="font-size:0.88rem;font-weight:800;color:#fff">{{ chat.name|default:"Conversation" }}</p>
+          <p style="font-size:0.72rem;color:rgba(255,255,255,0.36)">{{ chat.get_type_display }} · {{ chat.participants.count }} participant{{ chat.participants.count|pluralize }}</p>
+        </div>
+        <span class="tag tag-blue">{{ chat.messages.count }} message{{ chat.messages.count|pluralize }}</span>
+      </div>
+      {% with last=chat.messages.last %}
+      {% if last %}
+      <p style="margin-top:0.55rem;font-size:0.77rem;color:rgba(255,255,255,0.52)">{{ last.content|truncatechars:120 }}</p>
+      {% endif %}
+      {% endwith %}
+    </article>
+    {% empty %}
+    <p style="font-size:0.82rem;color:rgba(255,255,255,0.42)">Aucune conversation pour l'instant.</p>
+    {% endfor %}
+
+    <div style="margin-top:0.8rem;display:flex;gap:0.6rem;flex-wrap:wrap">
+      <a href="/sorties/" class="btn-brand" style="font-size:0.78rem;padding:0.5rem 0.9rem">Rejoindre une sortie</a>
+      <a href="/my-events/" class="btn-brand" style="font-size:0.78rem;padding:0.5rem 0.9rem">Voir mes evenements</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

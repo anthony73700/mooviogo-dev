@@ -38,6 +38,7 @@ DJANGO_APPS = [
 ]
 
 THIRD_PARTY_APPS = [
+    "channels",
     "rest_framework",
     "rest_framework_simplejwt",
     "corsheaders",
@@ -45,16 +46,22 @@ THIRD_PARTY_APPS = [
 ]
 
 LOCAL_APPS = [
+    "apps.common",
     "apps.users",
     "apps.authentication",
+    "apps.ai",
+    "apps.ads",
     "apps.sorties",
     "apps.restaurants",
     "apps.bookings",
+    "apps.chats",
     "apps.events",
+    "apps.notifications",
     "apps.public_events",
     "apps.partners",
     "apps.partner_opportunities",
     "apps.payments",
+    "apps.tickets",
     "apps.city_feed",
     "apps.reports",
     "apps.health",
@@ -70,9 +77,11 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "apps.web.middleware.UserPreferredLanguageMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -88,8 +97,10 @@ TEMPLATES = [
             "context_processors": [
                 "django.template.context_processors.debug",
                 "django.template.context_processors.request",
+                "django.template.context_processors.i18n",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "apps.web.context_processors.site_config",
             ],
         },
     },
@@ -122,9 +133,15 @@ AUTH_PASSWORD_VALIDATORS = [
 # ─── Internationalisation ──────────────────────────────────────────────────────
 
 LANGUAGE_CODE = "fr-fr"
+LANGUAGES = [
+    ("fr", "Francais"),
+    ("en", "English"),
+    ("es", "Espanol"),
+]
 TIME_ZONE = "Europe/Paris"
 USE_I18N = True
 USE_TZ = True
+LOCALE_PATHS = [BASE_DIR / "locale"]
 
 # ─── Static / Media ────────────────────────────────────────────────────────────
 
@@ -154,6 +171,15 @@ REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": [
         "rest_framework.renderers.JSONRenderer",
     ],
+    "DEFAULT_THROTTLE_RATES": {
+        "otp_request": "8/hour",
+        "otp_verify": "20/hour",
+        "ticket_validate": "90/min",
+        "ticket_scan_audits": "120/min",
+        "report_moderation": "60/min",
+        "notification_send": "20/min",
+    },
+    "DEFAULT_SCHEMA_CLASS": "rest_framework.schemas.openapi.AutoSchema",
 }
 
 # ─── JWT ───────────────────────────────────────────────────────────────────────
@@ -177,6 +203,14 @@ CORS_ALLOW_CREDENTIALS = True
 # ─── Redis / Celery ────────────────────────────────────────────────────────────
 
 REDIS_URL = env("REDIS_URL", default="redis://localhost:6379/0")
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [REDIS_URL],
+        },
+    },
+}
 CELERY_BROKER_URL = REDIS_URL
 CELERY_RESULT_BACKEND = REDIS_URL
 CELERY_ACCEPT_CONTENT = ["json"]
@@ -196,3 +230,80 @@ DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="noreply@mooviogo.com")
 
 STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY", default="")
 STRIPE_WEBHOOK_SECRET = env("STRIPE_WEBHOOK_SECRET", default="")
+APP_BASE_URL = env("APP_BASE_URL", default="http://localhost:8000")
+
+# ─── OAuth Apple ─────────────────────────────────────────────────────────────
+
+APPLE_CLIENT_ID = env("APPLE_CLIENT_ID", default="")
+APPLE_TEAM_ID = env("APPLE_TEAM_ID", default="")
+APPLE_KEY_ID = env("APPLE_KEY_ID", default="")
+APPLE_JWKS_URL = env("APPLE_JWKS_URL", default="https://appleid.apple.com/auth/keys")
+
+# ─── Analytics / tracking ─────────────────────────────────────────────────────
+
+ENABLE_ANALYTICS = env.bool("ENABLE_ANALYTICS", default=False)
+GA4_MEASUREMENT_ID = env("GA4_MEASUREMENT_ID", default="")
+POSTHOG_KEY = env("POSTHOG_KEY", default="")
+POSTHOG_HOST = env("POSTHOG_HOST", default="https://eu.i.posthog.com")
+META_PIXEL_ID = env("META_PIXEL_ID", default="")
+TIKTOK_PIXEL_ID = env("TIKTOK_PIXEL_ID", default="")
+
+# ─── Twilio notifications ───────────────────────────────────────────────────────
+
+TWILIO_ACCOUNT_SID = env("TWILIO_ACCOUNT_SID", default="")
+TWILIO_AUTH_TOKEN = env("TWILIO_AUTH_TOKEN", default="")
+TWILIO_FROM_SMS = env("TWILIO_FROM_SMS", default="")
+TWILIO_FROM_WHATSAPP = env("TWILIO_FROM_WHATSAPP", default="")
+
+# ─── Web Push (VAPID) ──────────────────────────────────────────────────────────
+
+WEB_PUSH_VAPID_PUBLIC_KEY = env("WEB_PUSH_VAPID_PUBLIC_KEY", default="")
+WEB_PUSH_VAPID_PRIVATE_KEY = env("WEB_PUSH_VAPID_PRIVATE_KEY", default="")
+WEB_PUSH_VAPID_CLAIMS_SUBJECT = env("WEB_PUSH_VAPID_CLAIMS_SUBJECT", default="mailto:hello@mooviogo.com")
+
+# ─── Geocoding / maps ────────────────────────────────────────────────────────
+
+GEOCODING_ENABLED = env.bool("GEOCODING_ENABLED", default=True)
+GEOCODING_PROVIDER = env("GEOCODING_PROVIDER", default="nominatim")
+GEOCODING_NOMINATIM_URL = env("GEOCODING_NOMINATIM_URL", default="https://nominatim.openstreetmap.org/search")
+GEOCODING_USER_AGENT = env("GEOCODING_USER_AGENT", default="mooviogo/1.0 (hello@mooviogo.com)")
+
+# ─── Google Maps (carte interactive) ─────────────────────────────────────────
+
+GOOGLE_MAPS_API_KEY = env("GOOGLE_MAPS_API_KEY", default="")
+
+# ─── OpenAI (recommandations, génération contenu, marketing) ────────────────
+
+OPENAI_API_KEY = env("OPENAI_API_KEY", default="")
+OPENAI_MODEL = env("OPENAI_MODEL", default="gpt-4o-mini")
+OPENAI_TIMEOUT_SECONDS = env.int("OPENAI_TIMEOUT_SECONDS", default=20)
+
+# ─── Anti-bot (Cloudflare Turnstile) ─────────────────────────────────────────
+
+TURNSTILE_SITE_KEY = env("TURNSTILE_SITE_KEY", default="")
+TURNSTILE_SECRET_KEY = env("TURNSTILE_SECRET_KEY", default="")
+
+# Application-level data encryption key (Fernet). Optional — falls back to a
+# key derived from SECRET_KEY in dev. Generate via:
+#     python manage.py generate_encryption_key
+DATA_ENCRYPTION_KEY = env("DATA_ENCRYPTION_KEY", default="")
+
+# ─── Celery Beat (tâches périodiques) ────────────────────────────────────────
+
+from celery.schedules import crontab  # noqa: E402
+
+CELERY_BEAT_SCHEDULE = {
+    "expire-pending-tickets-every-30min": {
+        "task": "apps.notifications.periodic.expire_stale_pending_tickets",
+        "schedule": crontab(minute="*/30"),
+    },
+    "send-event-reminders-hourly": {
+        "task": "apps.notifications.periodic.send_upcoming_event_reminders",
+        "schedule": crontab(minute=5),
+    },
+    "cleanup-expired-otp-keys-daily": {
+        "task": "apps.notifications.periodic.cleanup_expired_otp_keys",
+        "schedule": crontab(hour=3, minute=15),
+    },
+}
+

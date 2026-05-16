@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% block title %}Scan tickets | Mooviogo{% endblock %}
+
+{% block content %}
+<div class="pg-hdr">
+  <div class="mx-auto max-w-5xl px-4">
+    <p class="slabel mb-3">Interface operateur</p>
+    <h1 style="font-size:2rem;font-weight:900;color:#fff;letter-spacing:-0.03em">Scan QR d'entree</h1>
+    <p style="margin-top:0.55rem;font-size:0.9rem;color:rgba(255,255,255,0.45)">Scanne ou colle le token QR pour valider l'entree en temps reel.</p>
+    {% if operator_city %}
+    <p style="margin-top:0.35rem;font-size:0.78rem;color:rgba(255,255,255,0.58)">Perimetre operateur: {{ operator_city }}</p>
+    {% endif %}
+  </div>
+</div>
+
+<div class="mx-auto max-w-5xl px-4" style="padding-top:2rem;padding-bottom:4rem;display:grid;grid-template-columns:1.2fr 0.8fr;gap:1rem">
+  <section class="pk" style="padding:1rem">
+    <div style="display:flex;flex-wrap:wrap;gap:0.6rem;margin-bottom:0.8rem">
+      <button id="start-camera" type="button" class="btn-brand" style="font-size:0.74rem;padding:0.48rem 0.82rem">Demarrer camera</button>
+      <button id="stop-camera" type="button" class="btn-brand" style="font-size:0.74rem;padding:0.48rem 0.82rem;background:rgba(255,255,255,0.15)">Stop camera</button>
+      <span id="camera-status" style="font-size:0.74rem;color:rgba(255,255,255,0.55);align-self:center">Camera inactive</span>
+    </div>
+
+    <video id="camera-view" playsinline muted style="width:100%;max-height:280px;border-radius:12px;border:1px solid rgba(255,255,255,0.15);background:#090b12;margin-bottom:0.8rem"></video>
+
+    <form method="post" id="scan-form" style="display:flex;flex-direction:column;gap:0.8rem">
+      {% csrf_token %}
+      <input type="hidden" name="source" id="scan-source" value="WEB" />
+      <label style="font-size:0.75rem;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.06em">Token QR</label>
+      <input type="text" name="qr_token" id="qr-token-input" value="{{ qr_token }}" required placeholder="Ex: tk_..." style="width:100%;padding:0.7rem 0.8rem;border-radius:10px;border:1px solid rgba(255,255,255,0.16);background:rgba(255,255,255,0.02);color:#fff;font-size:0.85rem" />
+      <button class="btn-brand" type="submit" style="width:max-content">Valider l'entree</button>
+    </form>
+
+    {% if result %}
+    <div style="margin-top:1rem;padding:0.85rem;border-radius:10px;border:1px solid {% if result.status == 'success' %}rgba(88,255,162,0.45){% else %}rgba(255,113,113,0.45){% endif %};background:{% if result.status == 'success' %}rgba(88,255,162,0.08){% else %}rgba(255,113,113,0.08){% endif %}">
+      <p style="font-size:0.85rem;font-weight:700;color:#fff">{{ result.message }}</p>
+      {% if result.reason_code %}
+      <p style="margin-top:0.35rem;font-size:0.76rem;color:rgba(255,255,255,0.62)">Code refus: {{ result.reason_code }}</p>
+      {% endif %}
+      {% if result.ticket %}
+      <p style="margin-top:0.35rem;font-size:0.76rem;color:rgba(255,255,255,0.62)">Ticket #{{ result.ticket.id }} · Utilise le {{ result.ticket.used_at|date:"d/m/Y H:i" }}</p>
+      {% endif %}
+    </div>
+    {% endif %}
+  </section>
+
+  <section class="pk" style="padding:1rem">
+    <p class="slabel" style="margin-bottom:0.55rem">Journal des scans</p>
+    {% for audit in latest_scans %}
+    <div style="display:flex;justify-content:space-between;gap:0.6rem;padding:0.55rem 0;border-bottom:1px solid rgba(255,255,255,0.08)">
+      <div>
+        <p style="font-size:0.8rem;color:#fff">{% if audit.ticket_id %}Ticket #{{ audit.ticket_id }}{% else %}Token inconnu{% endif %}</p>
+        <p style="font-size:0.72rem;color:rgba(255,255,255,0.45)">{{ audit.outcome }}{% if audit.reason_code %} · {{ audit.reason_code }}{% endif %}</p>
+      </div>
+      <p style="font-size:0.74rem;color:rgba(255,255,255,0.45)">{{ audit.created_at|date:"H:i" }}</p>
+    </div>
+    {% empty %}
+    <p style="font-size:0.8rem;color:rgba(255,255,255,0.45)">Aucun scan enregistre.</p>
+    {% endfor %}
+  </section>
+</div>
+
+<script>
+(() => {
+  const startBtn = document.getElementById("start-camera");
+  const stopBtn = document.getElementById("stop-camera");
+  const statusEl = document.getElementById("camera-status");
+  const videoEl = document.getElementById("camera-view");
+  const tokenInput = document.getElementById("qr-token-input");
+  const form = document.getElementById("scan-form");
+  const sourceInput = document.getElementById("scan-source");
+
+  let stream = null;
+  let timer = null;
+  let detector = null;
+
+  function setStatus(text) {
+    statusEl.textContent = text;
+  }
+
+  function extractToken(raw) {
+    if (!raw) return "";
+    if (raw.startsWith("mooviogo:ticket:")) {
+      return raw.split("mooviogo:ticket:").pop().trim();
+    }
+    return raw.trim();
+  }
+
+  async function scanLoop() {
+    if (!detector || !videoEl || videoEl.readyState < 2) return;
+    try {
+      const codes = await detector.detect(videoEl);
+      if (codes && codes.length) {
+        const token = extractToken(codes[0].rawValue || "");
+        if (token) {
+          tokenInput.value = token;
+          sourceInput.value = "WEB";
+          setStatus("QR detecte, validation...");
+          stopCamera();
+          form.submit();
+        }
+      }
+    } catch (err) {
+      setStatus("Detection indisponible");
+    }
+  }
+
+  async function startCamera() {
+    if (!("BarcodeDetector" in window)) {
+      setStatus("BarcodeDetector non supporte par ce navigateur");
+      return;
+    }
+
+    detector = new BarcodeDetector({ formats: ["qr_code"] });
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
+      videoEl.srcObject = stream;
+      await videoEl.play();
+      setStatus("Camera active, vise le QR...");
+      timer = window.setInterval(scanLoop, 700);
+    } catch (err) {
+      setStatus("Impossible d'acceder a la camera");
+    }
+  }
+
+  function stopCamera() {
+    if (timer) {
+      window.clearInterval(timer);
+      timer = null;
+    }
+    if (stream) {
+      stream.getTracks().forEach((t) => t.stop());
+      stream = null;
+    }
+    videoEl.srcObject = null;
+    setStatus("Camera inactive");
+  }
+
+  startBtn.addEventListener("click", startCamera);
+  stopBtn.addEventListener("click", stopCamera);
+})();
+</script>
+{% endblock %}

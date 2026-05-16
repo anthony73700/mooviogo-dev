@@ -1,20 +1,63 @@
 {% extends "base.html" %}
-{% block title %}Restaurants | Mooviogo{% endblock %}
-{% block description %}Réserve une table dans les meilleurs restaurants en quelques secondes. Disponibilités en temps réel.{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Restaurants" %} | Mooviogo{% endblock %}
+{% block description %}{% trans "Reserve une table dans les meilleurs restaurants en quelques secondes. Disponibilites en temps reel." %}{% endblock %}
+
+{% block extra_head %}
+<style>
+  .rl-form {
+    margin-top: 1.75rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    align-items: center;
+  }
+
+  .rl-input-q {
+    max-width: 220px;
+  }
+
+  .rl-input-city {
+    max-width: 160px;
+  }
+
+  .rl-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.25rem;
+  }
+
+  @media (max-width: 640px) {
+    .rl-input-q,
+    .rl-input-city,
+    .rl-form .btn-brand,
+    .rl-form .btn-ghost {
+      width: 100%;
+      max-width: 100%;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .rl-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %}
 
 {% block content %}
 
 <div class="pg-hdr">
   <div class="mx-auto max-w-7xl px-4">
-    <p class="slabel mb-3">Tables disponibles maintenant</p>
-    <h1 style="font-size:2.25rem;font-weight:900;color:#fff;letter-spacing:-0.03em;line-height:1.1">Restaurants</h1>
-    <p style="margin-top:0.45rem;font-size:0.9rem;color:rgba(255,255,255,0.4)">Réserve une table en quelques secondes</p>
-    <form method="get" style="margin-top:1.75rem;display:flex;flex-wrap:wrap;gap:0.6rem;align-items:center">
-      <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Restaurant, cuisine…" class="fi-input" style="max-width:220px" />
-      <input type="text" name="city" value="{{ request.GET.city }}" placeholder="Ville…" class="fi-input" style="max-width:160px" />
-      <button type="submit" class="btn-brand" style="font-size:0.82rem;padding:0.55rem 1.2rem">Rechercher</button>
+    <p class="slabel mb-3">{% trans "Tables disponibles maintenant" %}</p>
+    <h1 style="font-size:2.25rem;font-weight:900;color:#fff;letter-spacing:-0.03em;line-height:1.1">{% trans "Restaurants" %}</h1>
+    <p style="margin-top:0.45rem;font-size:0.9rem;color:rgba(255,255,255,0.4)">{% trans "Reserve une table en quelques secondes" %}</p>
+    <form method="get" class="rl-form" aria-label="{% trans "Recherche de restaurants" %}">
+      <input type="text" name="q" value="{{ request.GET.q }}" placeholder="{% trans "Restaurant, cuisine..." %}" class="fi-input rl-input-q" aria-label="{% trans "Nom du restaurant ou cuisine" %}" />
+      <input type="text" name="city" value="{{ request.GET.city }}" placeholder="{% trans "Ville..." %}" class="fi-input rl-input-city" aria-label="{% trans "Ville" %}" />
+      <button type="submit" class="btn-brand" style="font-size:0.82rem;padding:0.55rem 1.2rem">{% trans "Rechercher" %}</button>
       {% if request.GET.q or request.GET.city %}
-      <a href="/restaurants/" class="btn-ghost" style="font-size:0.82rem;padding:0.55rem 1rem">Tout afficher</a>
+      <a href="/restaurants/" class="btn-ghost" style="font-size:0.82rem;padding:0.55rem 1rem">{% trans "Tout afficher" %}</a>
       {% endif %}
     </form>
   </div>
@@ -22,7 +65,7 @@
 
 <div class="mx-auto max-w-7xl px-4" style="padding-top:3rem;padding-bottom:5rem">
   {% if venues %}
-  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:1.25rem">
+  <div class="rl-grid">
     {% for venue in venues %}
     <a href="/restaurants/{{ venue.city_slug }}/{{ venue.slug }}/" class="pk" style="display:block;text-decoration:none;overflow:hidden">
       {% if venue.cover_image_url %}
@@ -52,8 +95,8 @@
   </div>
   {% else %}
   <div style="border:1px dashed rgba(255,255,255,0.08);border-radius:24px;padding:5rem 2rem;text-align:center">
-    <p style="font-size:1rem;font-weight:700;color:rgba(255,255,255,0.5)">Aucun restaurant trouvé</p>
-    <a href="/restaurants/" style="display:inline-block;margin-top:1rem;font-size:0.82rem;color:#FF8A66;text-decoration:none">Voir tous les restaurants →</a>
+    <p style="font-size:1rem;font-weight:700;color:rgba(255,255,255,0.5)">{% trans "Aucun restaurant trouve" %}</p>
+    <a href="/restaurants/" style="display:inline-block;margin-top:1rem;font-size:0.82rem;color:#FF8A66;text-decoration:none">{% trans "Voir tous les restaurants" %} →</a>
   </div>
   {% endif %}
 </div>

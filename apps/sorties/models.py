@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
 
 
@@ -28,6 +29,8 @@ class Sortie(models.Model):
     description = models.TextField(blank=True)
     city = models.CharField(max_length=100)
     location = models.CharField(max_length=255, blank=True)
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     type = models.CharField(max_length=20, choices=Type.choices, default=Type.COMMUNAUTAIRE)
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.DRAFT)
     price = models.PositiveIntegerField(default=0, help_text="Price in cents. 0 = free.")
@@ -45,6 +48,25 @@ class Sortie(models.Model):
 
     def __str__(self) -> str:
         return self.title
+
+    def clean(self):
+        allowed_types = {self.Type.COMMUNAUTAIRE, self.Type.PARTENAIRE}
+        if self.type not in allowed_types:
+            raise ValidationError({"type": "Seuls les types COMMUNAUTAIRE et PARTENAIRE sont autorisés."})
+
+        # A community outing must always remain free.
+        if self.type == self.Type.COMMUNAUTAIRE:
+            self.is_free = True
+            self.price = 0
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super().save(*args, **kwargs)
+
+    @property
+    def price_euros(self):
+        """Return price converted from cents to euros."""
+        return self.price / 100
 
 
 class SortieParticipant(models.Model):

@@ -1,0 +1,23 @@
+[Unit]
+Description=Mooviogo Celery beat scheduler
+After=network.target redis.service
+Requires=network.target
+
+[Service]
+Type=simple
+User=mooviogo
+Group=mooviogo
+WorkingDirectory=/opt/mooviogo
+EnvironmentFile=/opt/mooviogo/.env.production
+Environment=DJANGO_SETTINGS_MODULE=mooviogo.settings.production
+ExecStart=/opt/mooviogo/.venv/bin/celery -A mooviogo beat --loglevel=info
+Restart=always
+RestartSec=5
+
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

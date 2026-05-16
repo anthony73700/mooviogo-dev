@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}API Docs | Mooviogo{% endblock %}
+
+{% block content %}
+<section class="mx-auto" style="max-width:1100px;padding:2rem 1rem 3rem">
+  <div class="pk" style="padding:1.2rem;margin-bottom:1rem">
+    <p class="slabel" style="margin-bottom:0.4rem">Developers</p>
+    <h1 style="font-size:1.6rem;font-weight:900;letter-spacing:-0.02em">Documentation API</h1>
+    <p style="margin-top:0.45rem;color:rgba(255,255,255,0.7);font-size:0.9rem">
+      Cette vue charge le schema OpenAPI expose sur <code>{{ schema_url }}</code>.
+    </p>
+  </div>
+
+  <div id="swagger-ui" class="pk" style="padding:0.8rem;min-height:60vh"></div>
+</section>
+
+<link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css" />
+<script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', function () {
+    window.SwaggerUIBundle({
+      url: '{{ schema_url }}',
+      dom_id: '#swagger-ui',
+      deepLinking: true,
+      persistAuthorization: true,
+    });
+  });
+</script>
+{% endblock %}

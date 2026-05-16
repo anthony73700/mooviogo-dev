@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ title }} | Mooviogo{% endblock %}
+
+{% block extra_head %}
+<style>
+  .dl-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.7rem;
+    padding: 0.62rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .dl-row-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #fff;
+  }
+  .dl-row-meta {
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.4);
+    text-align: right;
+  }
+  @media (max-width: 640px) {
+    .dl-row {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .dl-row-meta {
+      text-align: left;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pg-hdr">
+  <div class="mx-auto max-w-5xl px-4">
+    <p class="slabel mb-3">{% trans "Dashboard" %}</p>
+    <h1 style="font-size:2rem;font-weight:900;color:#fff;letter-spacing:-0.03em">{{ title }}</h1>
+    {% if subtitle %}<p style="margin-top:0.55rem;font-size:0.9rem;color:rgba(255,255,255,0.45)">{{ subtitle }}</p>{% endif %}
+  </div>
+</div>
+
+<div class="mx-auto max-w-5xl px-4" style="padding-top:2rem;padding-bottom:4rem">
+  <div class="pk" style="padding:1rem">
+    {% for row in rows_data %}
+    <div class="dl-row">
+      <p class="dl-row-title">{{ row.title }}</p>
+      <p class="dl-row-meta">{{ row.meta }}</p>
+    </div>
+    {% empty %}
+    <p style="font-size:0.8rem;color:rgba(255,255,255,0.4)">{% trans "Aucune donnee pour le moment." %}</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

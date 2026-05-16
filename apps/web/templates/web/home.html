@@ -1,5 +1,6 @@
 {% extends "base.html" %}
-{% block title %}Sorties, restaurants &amp; soirées | Mooviogo{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Sorties, restaurants & soirees" %} | Mooviogo{% endblock %}
 
 {% block extra_head %}
 <style>
@@ -262,6 +263,57 @@
 .kf-seats { display:inline-flex; align-items:center; gap:4px; background:rgba(255,255,255,0.13); border:1px solid rgba(255,255,255,0.2); backdrop-filter:blur(8px); border-radius:999px; padding:3px 10px; font-size:0.7rem; font-weight:600; color:rgba(255,255,255,0.82); }
 /* ─── DOT PATTERN background ─── */
 .dotbg { background-color:#FAFAFA; background-image:radial-gradient(circle, #E5E7EB 1.5px, transparent 1.5px); background-size:22px 22px; }
+
+.hero-cats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:0.75rem; width:100%; max-width:32rem; }
+.hero-cat { height:120px; }
+
+.pro-stats-row {
+  display:flex;
+  gap:2rem;
+  margin-top:2.5rem;
+}
+
+.cta-stats-row {
+  display:flex;
+  gap:2.5rem;
+  margin-top:2rem;
+  padding-top:2rem;
+  border-top:1px solid rgba(255,255,255,0.07);
+}
+
+@media (max-width: 980px) {
+  .search-pill {
+    display:block;
+    border-radius:20px;
+    padding:0.35rem;
+  }
+  .search-pill .seg {
+    border-right:none;
+    border-bottom:1px solid rgba(255,255,255,0.08);
+    padding:0.7rem 0.9rem;
+  }
+  .search-pill .seg:last-of-type {
+    border-bottom:none;
+  }
+  .search-pill button {
+    width:100%;
+    margin:0.35rem 0 0;
+    min-height:2.7rem;
+    border-radius:14px;
+  }
+  .hero-cats { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+
+@media (max-width: 640px) {
+  .hero-section { min-height:auto; padding:4rem 1rem 4.25rem; }
+  .hero-cats { grid-template-columns:1fr; max-width:23rem; }
+  .hero-cat { height:106px; }
+  .cta-main { width:100%; justify-content:center; font-size:1rem !important; }
+  .pro-stats-row { gap:1rem; flex-wrap:wrap; }
+  .pro-stats-row > div { min-width:28%; }
+  .cta-stats-row { gap:1rem; flex-wrap:wrap; }
+  .cta-stats-row > div { min-width:30%; }
+}
 </style>
 {% endblock %}
 
@@ -284,55 +336,55 @@
         <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style="background:#A855F7"></span>
         <span class="relative inline-flex rounded-full h-2 w-2" style="background:#C084FC"></span>
       </span>
-      <span class="text-xs font-bold uppercase tracking-widest" style="color:#D8B4FE">L&apos;Airbnb des sorties &mdash; gratuit</span>
+      <span class="text-xs font-bold uppercase tracking-widest" style="color:#D8B4FE">{% trans "L'Airbnb des sorties - gratuit" %}</span>
     </div>
 
     {# ── C'EST QUOI ── #}
     <h1 class="hero-anim-2 text-center font-black leading-[1.0] tracking-tighter text-white" style="font-size:clamp(2.8rem,8.5vw,6rem)">
-      Tu cherches quoi faire<br>
+      {% trans "Tu cherches quoi faire" %}<br>
       <span class="grad-text">ce soir&nbsp;?</span>
     </h1>
 
     {# ── POURQUOI — valeur immédiate ── #}
     <p class="hero-anim-3 mt-5 text-center text-lg font-medium max-w-xl" style="color:rgba(255,255,255,0.52);line-height:1.65">
-      Mooviogo trouve pour toi les meilleures <strong class="text-white/80">sorties</strong>,
-      <strong class="text-white/80">restaurants</strong> et <strong class="text-white/80">soirées</strong>
-      &mdash; dans ta ville, réservables en 30&nbsp;secondes.
+      {% trans "Mooviogo trouve pour toi les meilleures" %} <strong class="text-white/80">{% trans "sorties" %}</strong>,
+      <strong class="text-white/80">{% trans "restaurants" %}</strong> {% trans "et" %} <strong class="text-white/80">{% trans "soirees" %}</strong>
+      - {% trans "dans ta ville, reservables en 30 secondes." %}
     </p>
 
     {# ── COMMENT — 3 catégories visuelles ── #}
-    <div class="hero-anim-3 mt-10 grid grid-cols-3 gap-3 w-full max-w-2xl">
-      <a href="/sorties/" class="group relative overflow-hidden rounded-2xl" style="height:120px">
+    <div class="hero-anim-3 mt-10 hero-cats">
+      <a href="/sorties/" class="group relative overflow-hidden rounded-2xl hero-cat">
         <img src="https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=500&q=80"
-             alt="Sorties" class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+             alt="{% trans "Sorties" %}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
         <div class="absolute inset-0" style="background:linear-gradient(180deg,rgba(0,0,0,0.05) 0%,rgba(10,5,25,0.82) 100%)"></div>
         <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style="background:rgba(168,85,247,0.18)"></div>
         <div class="absolute inset-0 flex flex-col items-center justify-end p-3">
           <span class="text-2xl mb-1">🎉</span>
-          <span class="text-sm font-bold text-white">Sorties</span>
-          <span class="text-xs" style="color:rgba(255,255,255,0.45)">Ce soir &amp; week-end</span>
+          <span class="text-sm font-bold text-white">{% trans "Sorties" %}</span>
+          <span class="text-xs" style="color:rgba(255,255,255,0.45)">{% trans "Ce soir et week-end" %}</span>
         </div>
       </a>
-      <a href="/restaurants/" class="group relative overflow-hidden rounded-2xl" style="height:120px">
+      <a href="/restaurants/" class="group relative overflow-hidden rounded-2xl hero-cat">
         <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=500&q=80"
-             alt="Restaurants" class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+             alt="{% trans "Restaurants" %}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
         <div class="absolute inset-0" style="background:linear-gradient(180deg,rgba(0,0,0,0.05) 0%,rgba(20,8,5,0.82) 100%)"></div>
         <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style="background:rgba(255,106,77,0.18)"></div>
         <div class="absolute inset-0 flex flex-col items-center justify-end p-3">
           <span class="text-2xl mb-1">🍽️</span>
-          <span class="text-sm font-bold text-white">Restaurants</span>
-          <span class="text-xs" style="color:rgba(255,255,255,0.45)">Tables disponibles</span>
+          <span class="text-sm font-bold text-white">{% trans "Restaurants" %}</span>
+          <span class="text-xs" style="color:rgba(255,255,255,0.45)">{% trans "Tables disponibles" %}</span>
         </div>
       </a>
-      <a href="/evenements/" class="group relative overflow-hidden rounded-2xl" style="height:120px">
+      <a href="/evenements/" class="group relative overflow-hidden rounded-2xl hero-cat">
         <img src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=500&q=80"
-             alt="Soirées" class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+             alt="{% trans "Soirees" %}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
         <div class="absolute inset-0" style="background:linear-gradient(180deg,rgba(0,0,0,0.05) 0%,rgba(15,5,20,0.82) 100%)"></div>
         <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style="background:rgba(244,114,182,0.18)"></div>
         <div class="absolute inset-0 flex flex-col items-center justify-end p-3">
           <span class="text-2xl mb-1">🎶</span>
-          <span class="text-sm font-bold text-white">Soirées</span>
-          <span class="text-xs" style="color:rgba(255,255,255,0.45)">Clubs &amp; événements</span>
+          <span class="text-sm font-bold text-white">{% trans "Soirees" %}</span>
+          <span class="text-xs" style="color:rgba(255,255,255,0.45)">{% trans "Clubs et evenements" %}</span>
         </div>
       </a>
     </div>
@@ -341,7 +393,7 @@
     <div class="hero-anim-4 mt-10 flex flex-col items-center gap-5">
       <a href="/sorties/" class="cta-main" style="font-size:1.15rem;padding:1.1rem 2.8rem">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-        Je veux sortir ce soir
+        {% trans "Je veux sortir ce soir" %}
       </a>
 
       {# Avatars + social proof #}
@@ -354,37 +406,37 @@
           <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold" style="background:rgba(192,132,252,0.22);color:#C084FC;outline:2px solid #070a12">+</div>
         </div>
         <p class="text-sm" style="color:rgba(255,255,255,0.40)">
-          <strong class="text-white">15&nbsp;000+</strong> membres qui ne s&apos;ennuient plus le vendredi soir
+          <strong class="text-white">15&nbsp;000+</strong> {% trans "membres qui ne s'ennuient plus le vendredi soir" %}
         </p>
       </div>
     </div>
 
     {# ── Barre de recherche ── #}
     <div class="hero-anim-5 mt-10 w-full max-w-3xl">
-      <form action="/sorties/" method="get" class="search-pill">
+      <form action="/sorties/" method="get" class="search-pill" aria-label="{% trans "Recherche rapide de sorties" %}">
         <div class="seg">
-          <label>Ville</label>
-          <input type="text" name="city" placeholder="Paris, Lyon, Marseille…" autocomplete="off">
+          <label>{% trans "Ville" %}</label>
+          <input type="text" name="city" placeholder="{% trans "Paris, Lyon, Marseille..." %}" autocomplete="off" aria-label="{% trans "Ville" %}" />
         </div>
         <div class="seg">
-          <label>Type</label>
-          <select name="type">
-            <option value="">Tout</option>
-            <option value="COMMUNAUTAIRE">Sortie</option>
-            <option value="PARTENAIRE">Soirée</option>
+          <label>{% trans "Type" %}</label>
+          <select name="type" aria-label="{% trans "Type de sortie" %}">
+            <option value="">{% trans "Tout" %}</option>
+            <option value="COMMUNAUTAIRE">{% trans "Sortie" %}</option>
+            <option value="PARTENAIRE">{% trans "Soiree" %}</option>
           </select>
         </div>
         <div class="seg" style="flex:0.7">
-          <label>Budget</label>
-          <select name="free">
-            <option value="">Peu importe</option>
-            <option value="1">Gratuit</option>
-            <option value="0">Payant</option>
+          <label>{% trans "Budget" %}</label>
+          <select name="free" aria-label="{% trans "Budget" %}">
+            <option value="">{% trans "Peu importe" %}</option>
+            <option value="1">{% trans "Gratuit" %}</option>
+            <option value="0">{% trans "Payant" %}</option>
           </select>
         </div>
         <button type="submit" class="m-1.5 shrink-0 rounded-full px-7 py-3 text-sm font-bold text-white"
                 style="background:linear-gradient(135deg,#FF6A4D,#C084FC);box-shadow:0 4px 20px rgba(192,132,252,0.35)">
-          Rechercher
+          {% trans "Rechercher" %}
         </button>
       </form>
     </div>
@@ -402,12 +454,12 @@
       <div>
         <span class="sh-label" style="color:#FF6A4D">
           <span class="live-dot" style="color:#22C55E"></span>
-          Ouvert maintenant
+          {% trans "Ouvert maintenant" %}
         </span>
-        <h2>Ce soir &amp; ce week-end</h2>
+        <h2>{% trans "Ce soir et ce week-end" %}</h2>
       </div>
       <a href="/sorties/" class="sh-link" style="color:#FF6A4D">
-        Tout voir
+        {% trans "Tout voir" %}
         <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
       </a>
     </div>
@@ -443,11 +495,11 @@
                 {{ sortie.participant_count|default:0 }}&nbsp;/&nbsp;{{ sortie.max_participants|default:"∞" }}
               </span>
               <span class="kard-price {% if sortie.is_free %}free{% endif %}" style="font-size:1rem;font-weight:900">
-                {% if sortie.is_free %}Gratuit{% else %}{% widthratio sortie.price 100 1 %}&nbsp;€{% endif %}
+                {% if sortie.is_free %}{% trans "Gratuit" %}{% else %}{% widthratio sortie.price 100 1 %}&nbsp;€{% endif %}
               </span>
             </div>
             <span class="kard-cta" style="background:linear-gradient(135deg,#FF6A4D,#F97316);color:#fff">
-              Rejoindre la sortie
+              {% trans "Rejoindre la sortie" %}
               <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
             </span>
           </div>
@@ -457,22 +509,22 @@
           <div class="kard-all-icon">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" style="color:#FF6A4D" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
           </div>
-          <p style="font-size:0.88rem;font-weight:700;color:#111827">Toutes les sorties</p>
-          <p style="font-size:0.72rem;color:#9CA3AF;margin-top:4px;text-align:center;padding:0 1.5rem">Explorer toutes les sorties disponibles</p>
+          <p style="font-size:0.88rem;font-weight:700;color:#111827">{% trans "Toutes les sorties" %}</p>
+          <p style="font-size:0.72rem;color:#9CA3AF;margin-top:4px;text-align:center;padding:0 1.5rem">{% trans "Explorer toutes les sorties disponibles" %}</p>
         </a>
       </div>
-      <button onclick="document.getElementById('sorties-carousel').scrollBy({left:-316,behavior:'smooth'})" class="crsl-btn crsl-btn-l">
+      <button onclick="document.getElementById('sorties-carousel').scrollBy({left:-316,behavior:'smooth'})" class="crsl-btn crsl-btn-l" type="button" aria-label="{% trans "Faire defiler les sorties vers la gauche" %}">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
       </button>
-      <button onclick="document.getElementById('sorties-carousel').scrollBy({left:316,behavior:'smooth'})" class="crsl-btn crsl-btn-r">
+      <button onclick="document.getElementById('sorties-carousel').scrollBy({left:316,behavior:'smooth'})" class="crsl-btn crsl-btn-r" type="button" aria-label="{% trans "Faire defiler les sorties vers la droite" %}">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
       </button>
     </div>
     {% else %}
     <div class="flex flex-col items-center justify-center rounded-2xl border border-dashed py-20 text-center" style="border-color:#E5E7EB">
       <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 mb-3" style="color:#D1D5DB" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-      <p style="color:#9CA3AF;font-size:0.88rem">Aucune sortie ouverte pour le moment.</p>
-      <a href="/sorties/creer/" class="mt-4 btn-brand text-sm">Créer la première sortie</a>
+      <p style="color:#9CA3AF;font-size:0.88rem">{% trans "Aucune sortie ouverte pour le moment." %}</p>
+      <a href="/sorties/creer/" class="mt-4 btn-brand text-sm">{% trans "Creer la premiere sortie" %}</a>
     </div>
     {% endif %}
   </div>
@@ -523,22 +575,22 @@
     <div class="grid grid-cols-2 gap-8 md:grid-cols-4 reveal">
       <div class="text-center">
         <p class="trust-num" data-target="2400" data-suffix="+">2 400+</p>
-        <p class="trust-label">Sorties organisées</p>
+        <p class="trust-label">{% trans "Sorties organisees" %}</p>
         <div class="trust-bar mx-auto" style="background:#FF6A4D"></div>
       </div>
       <div class="text-center">
         <p class="trust-num" data-target="180" data-suffix="+">180+</p>
-        <p class="trust-label">Restaurants partenaires</p>
+        <p class="trust-label">{% trans "Restaurants partenaires" %}</p>
         <div class="trust-bar mx-auto" style="background:#EA580C"></div>
       </div>
       <div class="text-center">
         <p class="trust-num" data-target="15000" data-suffix="+">15 000+</p>
-        <p class="trust-label">Membres actifs</p>
+        <p class="trust-label">{% trans "Membres actifs" %}</p>
         <div class="trust-bar mx-auto" style="background:#22C55E"></div>
       </div>
       <div class="text-center">
         <p class="trust-num">4.9 / 5</p>
-        <p class="trust-label">Note moyenne</p>
+        <p class="trust-label">{% trans "Note moyenne" %}</p>
         <div class="trust-bar mx-auto" style="background:#F59E0B"></div>
       </div>
     </div>
@@ -551,11 +603,11 @@
   <div class="mx-auto max-w-7xl px-4">
     <div class="sh reveal">
       <div>
-        <span class="sh-label" style="color:#EA580C">Réserver une table</span>
-        <h2>Restaurants à découvrir</h2>
+        <span class="sh-label" style="color:#EA580C">{% trans "Reserver une table" %}</span>
+        <h2>{% trans "Restaurants a decouvrir" %}</h2>
       </div>
       <a href="/restaurants/" class="sh-link" style="color:#EA580C">
-        Voir tout
+        {% trans "Voir tout" %}
         <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
       </a>
     </div>
@@ -586,11 +638,11 @@
             <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:0.65rem">
               <span style="display:inline-flex;align-items:center;gap:4px;font-size:0.7rem;color:#10B981;background:#ECFDF5;border-radius:999px;padding:3px 10px;font-weight:600">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20"><circle cx="10" cy="10" r="4"/></svg>
-                Tables disponibles
+                {% trans "Tables disponibles" %}
               </span>
             </div>
             <span class="kard-cta" style="background:linear-gradient(135deg,#EA580C,#F97316);color:#fff">
-              Réserver une table
+              {% trans "Reserver une table" %}
               <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
             </span>
           </div>
@@ -600,14 +652,14 @@
           <div class="kard-all-icon">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" style="color:#EA580C" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
           </div>
-          <p style="font-size:0.88rem;font-weight:700;color:#111827">Tous les restaurants</p>
-          <p style="font-size:0.72rem;color:#9CA3AF;margin-top:4px;text-align:center;padding:0 1.5rem">Toutes les tables disponibles</p>
+          <p style="font-size:0.88rem;font-weight:700;color:#111827">{% trans "Tous les restaurants" %}</p>
+          <p style="font-size:0.72rem;color:#9CA3AF;margin-top:4px;text-align:center;padding:0 1.5rem">{% trans "Toutes les tables disponibles" %}</p>
         </a>
       </div>
-      <button onclick="document.getElementById('resto-carousel').scrollBy({left:-280,behavior:'smooth'})" class="crsl-btn crsl-btn-l">
+      <button onclick="document.getElementById('resto-carousel').scrollBy({left:-280,behavior:'smooth'})" class="crsl-btn crsl-btn-l" type="button" aria-label="{% trans "Faire defiler les restaurants vers la gauche" %}">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
       </button>
-      <button onclick="document.getElementById('resto-carousel').scrollBy({left:280,behavior:'smooth'})" class="crsl-btn crsl-btn-r">
+      <button onclick="document.getElementById('resto-carousel').scrollBy({left:280,behavior:'smooth'})" class="crsl-btn crsl-btn-r" type="button" aria-label="{% trans "Faire defiler les restaurants vers la droite" %}">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
       </button>
     </div>
@@ -621,11 +673,11 @@
   <div class="mx-auto max-w-7xl px-4">
     <div class="sh reveal">
       <div>
-        <span class="sh-label" style="color:#059669">Loisirs &amp; activités</span>
-        <h2>Activités &amp; expériences</h2>
+        <span class="sh-label" style="color:#059669">{% trans "Loisirs et activites" %}</span>
+        <h2>{% trans "Activites et experiences" %}</h2>
       </div>
       <a href="/partenaires/" class="sh-link" style="color:#059669">
-        Voir tout
+        {% trans "Voir tout" %}
         <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
       </a>
     </div>
@@ -641,7 +693,7 @@
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-9 h-9" style="color:#D1D5DB" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
               </div>
             {% endif %}
-            {% if partner.is_verified %}<span class="kard-badge" style="background:rgba(5,150,105,0.85)">&#10003; Vérifié</span>{% endif %}
+            {% if partner.is_verified %}<span class="kard-badge" style="background:rgba(5,150,105,0.85)">&#10003; {% trans "Verifie" %}</span>{% endif %}
             <span class="kard-save">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" style="color:#9CA3AF" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
             </span>
@@ -655,7 +707,7 @@
               {{ partner.city }}
             </p>
             <span class="kard-cta" style="background:linear-gradient(135deg,#059669,#10B981);color:#fff">
-              Découvrir l'activité
+              {% trans "Decouvrir l'activite" %}
               <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
             </span>
           </div>
@@ -665,14 +717,14 @@
           <div class="kard-all-icon">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" style="color:#059669" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
           </div>
-          <p style="font-size:0.88rem;font-weight:700;color:#111827">Toutes les activités</p>
-          <p style="font-size:0.72rem;color:#9CA3AF;margin-top:4px;text-align:center;padding:0 1.5rem">Tous nos partenaires loisirs</p>
+          <p style="font-size:0.88rem;font-weight:700;color:#111827">{% trans "Toutes les activites" %}</p>
+          <p style="font-size:0.72rem;color:#9CA3AF;margin-top:4px;text-align:center;padding:0 1.5rem">{% trans "Tous nos partenaires loisirs" %}</p>
         </a>
       </div>
-      <button onclick="document.getElementById('activities-carousel').scrollBy({left:-316,behavior:'smooth'})" class="crsl-btn crsl-btn-l">
+      <button onclick="document.getElementById('activities-carousel').scrollBy({left:-316,behavior:'smooth'})" class="crsl-btn crsl-btn-l" type="button" aria-label="{% trans "Faire defiler les activites vers la gauche" %}">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
       </button>
-      <button onclick="document.getElementById('activities-carousel').scrollBy({left:316,behavior:'smooth'})" class="crsl-btn crsl-btn-r">
+      <button onclick="document.getElementById('activities-carousel').scrollBy({left:316,behavior:'smooth'})" class="crsl-btn crsl-btn-r" type="button" aria-label="{% trans "Faire defiler les activites vers la droite" %}">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
       </button>
     </div>
@@ -689,14 +741,12 @@
 
     {# ── Header centré ── #}
     <div style="text-align:center;max-width:580px;margin:0 auto 4.5rem" class="reveal">
-      <p style="font-size:0.62rem;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:#FF6A4D;margin-bottom:0.85rem">Comment ça marche</p>
+      <p style="font-size:0.62rem;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:#FF6A4D;margin-bottom:0.85rem">{% trans "Comment ca marche" %}</p>
       <h2 style="font-size:clamp(2.4rem,5vw,3.6rem);font-weight:900;color:#fff;line-height:1.05;letter-spacing:-0.035em">
         Simple. Rapide.<br>
         <span style="background:linear-gradient(90deg,#FF6A4D 0%,#F97316 55%,#FBBF24 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Efficace.</span>
       </h2>
-      <p style="margin-top:1.1rem;font-size:0.88rem;color:rgba(255,255,255,0.3);line-height:1.7">
-        De l'idée à la réservation en quelques clics. Pas de compte requis pour explorer.
-      </p>
+      <p style="margin-top:1.1rem;font-size:0.88rem;color:rgba(255,255,255,0.3);line-height:1.7">{% trans "De l'idee a la reservation en quelques clics. Pas de compte requis pour explorer." %}</p>
     </div>
 
     {# ── 3 étapes ── #}
@@ -708,9 +758,9 @@
         <div class="how-icon" style="background:rgba(255,106,77,0.12)">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" style="color:#FF6A4D" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
         </div>
-        <p class="how-label" style="color:#FF6A4D">Explorer</p>
-        <h3 style="font-size:1.05rem;font-weight:800;color:#fff;line-height:1.3;margin-bottom:0.65rem">Parcours les sorties</h3>
-        <p style="font-size:0.82rem;color:rgba(255,255,255,0.32);line-height:1.7">Filtre par ville, budget ou date. Sorties, restaurants, soirées — tout est là, à portée de main.</p>
+        <p class="how-label" style="color:#FF6A4D">{% trans "Explorer" %}</p>
+        <h3 style="font-size:1.05rem;font-weight:800;color:#fff;line-height:1.3;margin-bottom:0.65rem">{% trans "Parcours les sorties" %}</h3>
+        <p style="font-size:0.82rem;color:rgba(255,255,255,0.32);line-height:1.7">{% trans "Filtre par ville, budget ou date. Sorties, restaurants, soirees - tout est la, a portee de main." %}</p>
       </div>
 
       {# Step 2 #}
@@ -719,9 +769,9 @@
         <div class="how-icon" style="background:rgba(249,115,22,0.12)">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" style="color:#F97316" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
         </div>
-        <p class="how-label" style="color:#F97316">Rejoindre</p>
-        <h3 style="font-size:1.05rem;font-weight:800;color:#fff;line-height:1.3;margin-bottom:0.65rem">Un clic pour réserver</h3>
-        <p style="font-size:0.82rem;color:rgba(255,255,255,0.32);line-height:1.7">Rejoins une sortie ou réserve ta table directement. Zéro commission, zéro engagement.</p>
+        <p class="how-label" style="color:#F97316">{% trans "Rejoindre" %}</p>
+        <h3 style="font-size:1.05rem;font-weight:800;color:#fff;line-height:1.3;margin-bottom:0.65rem">{% trans "Un clic pour reserver" %}</h3>
+        <p style="font-size:0.82rem;color:rgba(255,255,255,0.32);line-height:1.7">{% trans "Rejoins une sortie ou reserve ta table directement. Zero commission, zero engagement." %}</p>
       </div>
 
       {# Step 3 #}
@@ -730,9 +780,9 @@
         <div class="how-icon" style="background:rgba(251,191,36,0.10)">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" style="color:#FBBF24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
         </div>
-        <p class="how-label" style="color:#FBBF24">Profiter</p>
-        <h3 style="font-size:1.05rem;font-weight:800;color:#fff;line-height:1.3;margin-bottom:0.65rem">Vis des moments mémorables</h3>
-        <p style="font-size:0.82rem;color:rgba(255,255,255,0.32);line-height:1.7">Rencontre de nouvelles personnes, explore ta ville autrement. C'est tout ce qu'il faut.</p>
+        <p class="how-label" style="color:#FBBF24">{% trans "Profiter" %}</p>
+        <h3 style="font-size:1.05rem;font-weight:800;color:#fff;line-height:1.3;margin-bottom:0.65rem">{% trans "Vis des moments memorables" %}</h3>
+        <p style="font-size:0.82rem;color:rgba(255,255,255,0.32);line-height:1.7">{% trans "Rencontre de nouvelles personnes, explore ta ville autrement. C'est tout ce qu'il faut." %}</p>
       </div>
 
     </div>
@@ -740,11 +790,11 @@
     {# ── CTA ── #}
     <div style="display:flex;align-items:center;justify-content:center;gap:1.5rem;margin-top:3.5rem;flex-wrap:wrap" class="reveal">
       <a href="/inscription/" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#FF6A4D,#F97316);color:#fff;border-radius:999px;padding:0.95rem 2.4rem;font-weight:700;font-size:0.92rem;text-decoration:none;box-shadow:0 6px 28px rgba(255,106,77,0.22);transition:all 0.2s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 12px 36px rgba(255,106,77,0.35)'" onmouseout="this.style.transform='';this.style.boxShadow='0 6px 28px rgba(255,106,77,0.22)'">
-        Créer mon compte — gratuit
+        {% trans "Creer mon compte - gratuit" %}
         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
       </a>
       <a href="/sorties/" style="font-size:0.85rem;font-weight:600;color:rgba(255,255,255,0.32);text-decoration:none;transition:color 0.2s" onmouseover="this.style.color='rgba(255,255,255,0.65)'" onmouseout="this.style.color='rgba(255,255,255,0.32)'">
-        Explorer sans compte →
+        {% trans "Explorer sans compte" %} →
       </a>
     </div>
 
@@ -768,29 +818,29 @@
       <div style="flex:1;min-width:0">
         <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,106,77,0.09);border:1px solid rgba(255,106,77,0.22);border-radius:999px;padding:5px 14px;margin-bottom:1.25rem">
           <span style="width:6px;height:6px;border-radius:50%;background:#FF6A4D;flex-shrink:0"></span>
-          <span style="font-size:0.6rem;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:#C84E35">Espace professionnel</span>
+          <span style="font-size:0.6rem;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:#C84E35">{% trans "Espace professionnel" %}</span>
         </div>
         <h2 class="mt-0 font-black tracking-tight reveal" style="font-size:clamp(2rem,4.5vw,3rem);color:#0D1117;line-height:1.05;letter-spacing:-0.03em">
           Votre établissement<br>devant&nbsp;<span style="background:linear-gradient(90deg,#FF6A4D,#F97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">15&nbsp;000</span>&nbsp;clients.<br>
           <span style="color:rgba(0,0,0,0.26)">Dès aujourd'hui.</span>
         </h2>
         <p class="mt-5 leading-relaxed reveal" style="font-size:0.95rem;color:#6B7280;max-width:420px;line-height:1.75">
-          Mooviogo connecte les établissements locaux aux personnes qui veulent sortir maintenant. Sans commission cachée, sans contrat long.
+          {% trans "Mooviogo connecte les etablissements locaux aux personnes qui veulent sortir maintenant. Sans commission cachee, sans contrat long." %}
         </p>
 
         {# Stats #}
-        <div class="mt-10 flex gap-8 reveal">
+        <div class="mt-10 pro-stats-row reveal">
           <div style="padding-right:2rem;border-right:1px solid rgba(0,0,0,0.1)">
             <p class="font-black" style="font-size:1.75rem;color:#0D1117;letter-spacing:-0.04em;line-height:1">180+</p>
-            <p style="font-size:0.7rem;color:#9CA3AF;text-transform:uppercase;letter-spacing:.08em;margin-top:3px">Établissements</p>
+            <p style="font-size:0.7rem;color:#9CA3AF;text-transform:uppercase;letter-spacing:.08em;margin-top:3px">{% trans "Etablissements" %}</p>
           </div>
           <div style="padding-right:2rem;border-right:1px solid rgba(0,0,0,0.1)">
             <p class="font-black" style="font-size:1.75rem;color:#0D1117;letter-spacing:-0.04em;line-height:1">15K+</p>
-            <p style="font-size:0.7rem;color:#9CA3AF;text-transform:uppercase;letter-spacing:.08em;margin-top:3px">Utilisateurs actifs</p>
+            <p style="font-size:0.7rem;color:#9CA3AF;text-transform:uppercase;letter-spacing:.08em;margin-top:3px">{% trans "Utilisateurs actifs" %}</p>
           </div>
           <div>
             <p class="font-black" style="font-size:1.75rem;color:#FF6A4D;letter-spacing:-0.04em;line-height:1">0%</p>
-            <p style="font-size:0.7rem;color:#9CA3AF;text-transform:uppercase;letter-spacing:.08em;margin-top:3px">Commission</p>
+            <p style="font-size:0.7rem;color:#9CA3AF;text-transform:uppercase;letter-spacing:.08em;margin-top:3px">{% trans "Commission" %}</p>
           </div>
         </div>
 
@@ -811,10 +861,10 @@
 
         <div class="mt-8 flex items-center gap-5 flex-wrap reveal">
           <a href="/devenir-partenaire/" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#FF6A4D,#F97316);color:#fff;border-radius:999px;padding:0.95rem 2.25rem;font-weight:700;font-size:0.95rem;text-decoration:none;box-shadow:0 6px 24px rgba(255,106,77,0.28);transition:all 0.2s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 12px 36px rgba(255,106,77,0.4)'" onmouseout="this.style.transform='';this.style.boxShadow='0 6px 24px rgba(255,106,77,0.28)'">
-            Rejoindre le réseau
+            {% trans "Rejoindre le reseau" %}
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
           </a>
-          <a href="/connexion/" style="font-size:0.85rem;font-weight:600;color:#6B7280;text-decoration:none;transition:color 0.2s" onmouseover="this.style.color='#111827'" onmouseout="this.style.color='#6B7280'">Déjà partenaire ? Se connecter →</a>
+          <a href="/connexion/" style="font-size:0.85rem;font-weight:600;color:#6B7280;text-decoration:none;transition:color 0.2s" onmouseover="this.style.color='#111827'" onmouseout="this.style.color='#6B7280'">{% trans "Deja partenaire ? Se connecter" %} →</a>
         </div>
       </div>
 
@@ -826,9 +876,9 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" style="color:#EA580C" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
           </div>
           <div style="flex:1;min-width:0">
-            <p style="font-size:0.65rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#EA580C;margin-bottom:0.2rem">Restaurant</p>
-            <p style="font-size:0.9rem;font-weight:700;color:#111827;line-height:1.3">Remplissez vos tables chaque soir</p>
-            <p style="font-size:0.78rem;color:#6B7280;margin-top:0.25rem;line-height:1.5">Publiez vos créneaux et touchez des milliers de clients locaux.</p>
+            <p style="font-size:0.65rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#EA580C;margin-bottom:0.2rem">{% trans "Restaurant" %}</p>
+            <p style="font-size:0.9rem;font-weight:700;color:#111827;line-height:1.3">{% trans "Remplissez vos tables chaque soir" %}</p>
+            <p style="font-size:0.78rem;color:#6B7280;margin-top:0.25rem;line-height:1.5">{% trans "Publiez vos creneaux et touchez des milliers de clients locaux." %}</p>
           </div>
           <div style="color:rgba(0,0,0,0.18);flex-shrink:0;padding-left:0.5rem;margin-top:4px">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
@@ -841,8 +891,8 @@
           </div>
           <div style="flex:1;min-width:0">
             <p style="font-size:0.65rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#9333EA;margin-bottom:0.2rem">Bar &amp; Nightlife</p>
-            <p style="font-size:0.9rem;font-weight:700;color:#111827;line-height:1.3">Salle comble chaque week-end</p>
-            <p style="font-size:0.78rem;color:#6B7280;margin-top:0.25rem;line-height:1.5">Clubs, rooftops, soirées DJ — on amène le public.</p>
+            <p style="font-size:0.9rem;font-weight:700;color:#111827;line-height:1.3">{% trans "Salle comble chaque week-end" %}</p>
+            <p style="font-size:0.78rem;color:#6B7280;margin-top:0.25rem;line-height:1.5">{% trans "Clubs, rooftops, soirees DJ - on amene le public." %}</p>
           </div>
           <div style="color:rgba(0,0,0,0.18);flex-shrink:0;padding-left:0.5rem;margin-top:4px">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
@@ -854,9 +904,9 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" style="color:#059669" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
           </div>
           <div style="flex:1;min-width:0">
-            <p style="font-size:0.65rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#059669;margin-bottom:0.2rem">Loisirs &amp; Évasion</p>
-            <p style="font-size:0.9rem;font-weight:700;color:#111827;line-height:1.3">Groupes prêts à l'aventure</p>
-            <p style="font-size:0.78rem;color:#6B7280;margin-top:0.25rem;line-height:1.5">Paintball, karting, escape game — remplissez vos sessions.</p>
+            <p style="font-size:0.65rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#059669;margin-bottom:0.2rem">{% trans "Loisirs et Evasion" %}</p>
+            <p style="font-size:0.9rem;font-weight:700;color:#111827;line-height:1.3">{% trans "Groupes prets a l'aventure" %}</p>
+            <p style="font-size:0.78rem;color:#6B7280;margin-top:0.25rem;line-height:1.5">{% trans "Paintball, karting, escape game - remplissez vos sessions." %}</p>
           </div>
           <div style="color:rgba(0,0,0,0.18);flex-shrink:0;padding-left:0.5rem;margin-top:4px">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
@@ -888,26 +938,26 @@
 
       {# ─── Left: headline + stats ─── #}
       <div class="reveal">
-        <p style="font-size:0.68rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#FF6A4D;margin-bottom:0.75rem">Gratuit &middot; Pour toujours</p>
+        <p style="font-size:0.68rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#FF6A4D;margin-bottom:0.75rem">{% trans "Gratuit - Pour toujours" %}</p>
         <h2 style="font-size:clamp(2.4rem,5vw,3.6rem);font-weight:900;color:#fff;line-height:1.05;letter-spacing:-0.035em">
           La ville est<br>pleine de<br>
           <span style="background:linear-gradient(90deg,#FF6A4D 0%,#F97316 55%,#FBBF24 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">surprises.</span>
         </h2>
         <p style="margin-top:1.25rem;color:rgba(255,255,255,0.38);font-size:0.9rem;line-height:1.7;max-width:340px">
-          Rejoins 15&nbsp;000+ personnes qui ne s'ennuient plus le vendredi soir.
+          {% trans "Rejoins 15 000+ personnes qui ne s'ennuient plus le vendredi soir." %}
         </p>
-        <div style="display:flex;gap:2.5rem;margin-top:2rem;padding-top:2rem;border-top:1px solid rgba(255,255,255,0.07)">
+        <div class="cta-stats-row">
           <div>
             <p style="font-size:1.45rem;font-weight:900;color:#fff;letter-spacing:-0.03em;line-height:1">2 400<span style="color:#FF6A4D">+</span></p>
-            <p style="font-size:0.62rem;color:rgba(255,255,255,0.28);text-transform:uppercase;letter-spacing:.09em;margin-top:3px">Sorties créées</p>
+            <p style="font-size:0.62rem;color:rgba(255,255,255,0.28);text-transform:uppercase;letter-spacing:.09em;margin-top:3px">{% trans "Sorties creees" %}</p>
           </div>
           <div>
             <p style="font-size:1.45rem;font-weight:900;color:#fff;letter-spacing:-0.03em;line-height:1">4.9<span style="color:#F59E0B"> ★</span></p>
-            <p style="font-size:0.62rem;color:rgba(255,255,255,0.28);text-transform:uppercase;letter-spacing:.09em;margin-top:3px">Note moyenne</p>
+            <p style="font-size:0.62rem;color:rgba(255,255,255,0.28);text-transform:uppercase;letter-spacing:.09em;margin-top:3px">{% trans "Note moyenne" %}</p>
           </div>
           <div>
             <p style="font-size:1.45rem;font-weight:900;color:#FF6A4D;letter-spacing:-0.03em;line-height:1">0 €</p>
-            <p style="font-size:0.62rem;color:rgba(255,255,255,0.28);text-transform:uppercase;letter-spacing:.09em;margin-top:3px">Pour rejoindre</p>
+            <p style="font-size:0.62rem;color:rgba(255,255,255,0.28);text-transform:uppercase;letter-spacing:.09em;margin-top:3px">{% trans "Pour rejoindre" %}</p>
           </div>
         </div>
       </div>
@@ -927,29 +977,29 @@
           </div>
         </div>
         <h3 style="font-size:1.18rem;font-weight:800;color:#fff;line-height:1.35;margin-bottom:1.5rem">
-          Crée ton compte et rejoins<br>la prochaine sortie
+          {% trans "Cree ton compte et rejoins" %}<br>{% trans "la prochaine sortie" %}
           <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 inline-block ml-1" style="color:#FF6A4D" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
         </h3>
         <div style="display:flex;flex-direction:column;gap:0.55rem;margin-bottom:1.75rem">
           <div style="display:flex;align-items:center;gap:0.6rem;font-size:0.8rem;color:rgba(255,255,255,0.48)">
             <span style="width:18px;height:18px;border-radius:50%;background:#FF6A4D;display:flex;align-items:center;justify-content:center;font-size:0.58rem;font-weight:800;color:#fff;flex-shrink:0">&#10003;</span>
-            Sorties, restaurants et soirées près de toi
+            {% trans "Sorties, restaurants et soirees pres de toi" %}
           </div>
           <div style="display:flex;align-items:center;gap:0.6rem;font-size:0.8rem;color:rgba(255,255,255,0.48)">
             <span style="width:18px;height:18px;border-radius:50%;background:#FF6A4D;display:flex;align-items:center;justify-content:center;font-size:0.58rem;font-weight:800;color:#fff;flex-shrink:0">&#10003;</span>
-            Réservation en 30 secondes, sans frais
+            {% trans "Reservation en 30 secondes, sans frais" %}
           </div>
           <div style="display:flex;align-items:center;gap:0.6rem;font-size:0.8rem;color:rgba(255,255,255,0.48)">
             <span style="width:18px;height:18px;border-radius:50%;background:#FF6A4D;display:flex;align-items:center;justify-content:center;font-size:0.58rem;font-weight:800;color:#fff;flex-shrink:0">&#10003;</span>
-            Rencontre des gens, vis des expériences uniques
+            {% trans "Rencontre des gens, vis des experiences uniques" %}
           </div>
         </div>
         <a href="/inscription/" style="display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#FF6A4D,#F97316);color:#fff;border-radius:14px;padding:1rem 1.5rem;font-weight:800;font-size:0.92rem;text-decoration:none;box-shadow:0 6px 28px rgba(255,106,77,0.25);transition:all 0.2s;margin-bottom:0.75rem" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 12px 36px rgba(255,106,77,0.38)'" onmouseout="this.style.transform='';this.style.boxShadow='0 6px 28px rgba(255,106,77,0.25)'">
-          Rejoindre Mooviogo — gratuit
+          {% trans "Rejoindre Mooviogo - gratuit" %}
           <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
         </a>
         <a href="/sorties/" style="display:block;text-align:center;font-size:0.78rem;color:rgba(255,255,255,0.22);text-decoration:none;transition:color 0.2s" onmouseover="this.style.color='rgba(255,255,255,0.52)'" onmouseout="this.style.color='rgba(255,255,255,0.22)'">
-          Explorer sans s'inscrire →
+          {% trans "Explorer sans s'inscrire" %} →
         </a>
       </div>
 

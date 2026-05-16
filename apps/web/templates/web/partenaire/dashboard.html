@@ -1,13 +1,14 @@
 {% extends "base.html" %}
-{% block title %}Espace partenaire | Mooviogo{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Espace partenaire" %} | Mooviogo{% endblock %}
 
 {% block content %}
 
 <div class="pg-hdr">
   <div class="mx-auto max-w-5xl px-4">
-    <p class="slabel mb-3">Tableau de bord</p>
-    <h1 style="font-size:2rem;font-weight:900;color:#fff;letter-spacing:-0.03em">Espace partenaire</h1>
-    <p style="margin-top:0.4rem;font-size:0.88rem;color:rgba(255,255,255,0.4)">Bienvenue, {{ user.display_name|default:user.username }}</p>
+    <p class="slabel mb-3">{% trans "Tableau de bord" %}</p>
+    <h1 style="font-size:2rem;font-weight:900;color:#fff;letter-spacing:-0.03em">{% trans "Espace partenaire" %}</h1>
+    <p style="margin-top:0.4rem;font-size:0.88rem;color:rgba(255,255,255,0.4)">{% trans "Bienvenue," %} {{ user.display_name|default:user.username }}</p>
   </div>
 </div>
 
@@ -18,48 +19,48 @@
       <div style="width:40px;height:40px;border-radius:10px;background:rgba(255,106,77,0.12);display:flex;align-items:center;justify-content:center;margin-bottom:1rem">
         <svg xmlns="http://www.w3.org/2000/svg" style="width:1.2rem;height:1.2rem;color:#FF8A66" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
       </div>
-      <p style="font-size:0.95rem;font-weight:800;color:#fff;margin-bottom:0.3rem">Mes événements</p>
-      <p style="font-size:0.78rem;color:rgba(255,255,255,0.38)">Créer et gérer tes événements</p>
+      <p style="font-size:0.95rem;font-weight:800;color:#fff;margin-bottom:0.3rem">{% trans "Mes evenements" %}</p>
+      <p style="font-size:0.78rem;color:rgba(255,255,255,0.38)">{% trans "Creer et gerer tes evenements" %}</p>
     </a>
 
     <a href="/partenaire/disponibilites/" class="pk" style="padding:1.5rem;text-decoration:none;display:block">
       <div style="width:40px;height:40px;border-radius:10px;background:rgba(96,165,250,0.12);display:flex;align-items:center;justify-content:center;margin-bottom:1rem">
         <svg xmlns="http://www.w3.org/2000/svg" style="width:1.2rem;height:1.2rem;color:#60A5FA" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
       </div>
-      <p style="font-size:0.95rem;font-weight:800;color:#fff;margin-bottom:0.3rem">Disponibilités</p>
-      <p style="font-size:0.78rem;color:rgba(255,255,255,0.38)">Gérer tes créneaux horaires</p>
+      <p style="font-size:0.95rem;font-weight:800;color:#fff;margin-bottom:0.3rem">{% trans "Disponibilites" %}</p>
+      <p style="font-size:0.78rem;color:rgba(255,255,255,0.38)">{% trans "Gerer tes creneaux horaires" %}</p>
     </a>
 
     <a href="/partenaire/demandes/" class="pk" style="padding:1.5rem;text-decoration:none;display:block">
       <div style="width:40px;height:40px;border-radius:10px;background:rgba(74,222,128,0.12);display:flex;align-items:center;justify-content:center;margin-bottom:1rem">
         <svg xmlns="http://www.w3.org/2000/svg" style="width:1.2rem;height:1.2rem;color:#4ADE80" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
       </div>
-      <p style="font-size:0.95rem;font-weight:800;color:#fff;margin-bottom:0.3rem">Demandes</p>
-      <p style="font-size:0.78rem;color:rgba(255,255,255,0.38)">Réservations reçues</p>
+      <p style="font-size:0.95rem;font-weight:800;color:#fff;margin-bottom:0.3rem">{% trans "Demandes" %}</p>
+      <p style="font-size:0.78rem;color:rgba(255,255,255,0.38)">{% trans "Reservations recues" %}</p>
     </a>
 
     <a href="/partenaire/offres/" class="pk" style="padding:1.5rem;text-decoration:none;display:block">
       <div style="width:40px;height:40px;border-radius:10px;background:rgba(234,179,8,0.12);display:flex;align-items:center;justify-content:center;margin-bottom:1rem">
         <svg xmlns="http://www.w3.org/2000/svg" style="width:1.2rem;height:1.2rem;color:#FDE047" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
       </div>
-      <p style="font-size:0.95rem;font-weight:800;color:#fff;margin-bottom:0.3rem">Offres</p>
-      <p style="font-size:0.78rem;color:rgba(255,255,255,0.38)">Tes opportunités partenaires</p>
+      <p style="font-size:0.95rem;font-weight:800;color:#fff;margin-bottom:0.3rem">{% trans "Offres" %}</p>
+      <p style="font-size:0.78rem;color:rgba(255,255,255,0.38)">{% trans "Tes opportunites partenaires" %}</p>
     </a>
 
     <a href="/partenaire/revenus/" class="pk" style="padding:1.5rem;text-decoration:none;display:block">
       <div style="width:40px;height:40px;border-radius:10px;background:rgba(74,222,128,0.1);display:flex;align-items:center;justify-content:center;margin-bottom:1rem">
         <svg xmlns="http://www.w3.org/2000/svg" style="width:1.2rem;height:1.2rem;color:#4ADE80" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
       </div>
-      <p style="font-size:0.95rem;font-weight:800;color:#fff;margin-bottom:0.3rem">Revenus</p>
-      <p style="font-size:0.78rem;color:rgba(255,255,255,0.38)">Paiements et historique</p>
+      <p style="font-size:0.95rem;font-weight:800;color:#fff;margin-bottom:0.3rem">{% trans "Revenus" %}</p>
+      <p style="font-size:0.78rem;color:rgba(255,255,255,0.38)">{% trans "Paiements et historique" %}</p>
     </a>
 
     <a href="/partenaire/profil/" class="pk" style="padding:1.5rem;text-decoration:none;display:block">
       <div style="width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;margin-bottom:1rem">
         <svg xmlns="http://www.w3.org/2000/svg" style="width:1.2rem;height:1.2rem;color:rgba(255,255,255,0.4)" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
       </div>
-      <p style="font-size:0.95rem;font-weight:800;color:#fff;margin-bottom:0.3rem">Profil partenaire</p>
-      <p style="font-size:0.78rem;color:rgba(255,255,255,0.38)">Informations et dossier</p>
+      <p style="font-size:0.95rem;font-weight:800;color:#fff;margin-bottom:0.3rem">{% trans "Profil partenaire" %}</p>
+      <p style="font-size:0.78rem;color:rgba(255,255,255,0.38)">{% trans "Informations et dossier" %}</p>
     </a>
 
   </div>

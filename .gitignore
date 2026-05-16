@@ -24,3 +24,10 @@ build/
 .pytest_cache/
 htmlcov/
 .coverage
+
+# Production secrets — never commit
+.env.production
+.env.*.local
+deploy/certs/
+*.pem
+*.key

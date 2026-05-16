@@ -9,7 +9,7 @@ class SortieListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Sortie
         fields = [
-            "id", "title", "slug", "city", "type", "status",
+            "id", "title", "slug", "city", "latitude", "longitude", "type", "status",
             "starts_at", "price", "is_free", "cover_image_url",
             "participant_count",
         ]
@@ -22,6 +22,7 @@ class SortieDetailSerializer(serializers.ModelSerializer):
         model = Sortie
         fields = [
             "id", "title", "slug", "description", "city", "location",
+            "latitude", "longitude",
             "type", "status", "price", "currency", "is_free",
             "max_participants", "starts_at", "cover_image_url",
             "participant_count", "created_at",
@@ -36,7 +37,7 @@ class SortieCreateSerializer(serializers.ModelSerializer):
         model = Sortie
         fields = [
             "title", "slug", "description", "city", "location",
-            "type", "starts_at", "cover_image_url", "max_participants",
+            "latitude", "longitude", "type", "starts_at", "cover_image_url", "max_participants",
         ]
 
     def create(self, validated_data):

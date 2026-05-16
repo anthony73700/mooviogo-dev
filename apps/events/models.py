@@ -13,6 +13,8 @@ class Event(models.Model):
     description = models.TextField(blank=True)
     city = models.CharField(max_length=100)
     location = models.CharField(max_length=255, blank=True)
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     starts_at = models.DateTimeField()
     ends_at = models.DateTimeField(null=True, blank=True)
     cover_image_url = models.URLField(blank=True)

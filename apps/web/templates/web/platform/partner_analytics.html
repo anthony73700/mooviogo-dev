@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Partner analytics" %} | Mooviogo{% endblock %}
+
+{% block extra_head %}
+<style>
+  .pa-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+  }
+
+  .pa-event-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.7rem;
+    padding: 0.56rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+
+  @media (max-width: 1100px) {
+    .pa-kpi-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 700px) {
+    .pa-kpi-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .pa-event-row {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pg-hdr">
+  <div class="mx-auto max-w-6xl px-4">
+    <p class="slabel mb-3">{% trans "Partner analytics" %}</p>
+    <h1 style="font-size:2rem;font-weight:900;color:#fff;letter-spacing:-0.03em">{% trans "Performance" %} {{ partner.name }}</h1>
+    <p style="margin-top:0.55rem;font-size:0.9rem;color:rgba(255,255,255,0.45)">{% trans "Vue operationnelle des evenements et performances locales." %}</p>
+  </div>
+</div>
+
+<div class="mx-auto max-w-6xl px-4" style="padding-top:2rem;padding-bottom:4rem">
+  <section class="pa-kpi-grid">
+    <div class="pk" style="padding:1rem"><p class="slabel">{% trans "Events total" %}</p><p style="font-size:1.12rem;font-weight:900;color:#fff">{{ kpis.total_events }}</p></div>
+    <div class="pk" style="padding:1rem"><p class="slabel">{% trans "Actifs" %}</p><p style="font-size:1.12rem;font-weight:900;color:#fff">{{ kpis.active_events }}</p></div>
+    <div class="pk" style="padding:1rem"><p class="slabel">{% trans "A venir" %}</p><p style="font-size:1.12rem;font-weight:900;color:#fff">{{ kpis.upcoming_events }}</p></div>
+    <div class="pk" style="padding:1rem"><p class="slabel">{% trans "Conversion ville" %}</p><p style="font-size:1.12rem;font-weight:900;color:#fff">{{ kpis.conversion_rate }}%</p></div>
+    <div class="pk" style="padding:1rem"><p class="slabel">{% trans "Revenue ville" %}</p><p style="font-size:1.12rem;font-weight:900;color:#fff">{{ kpis.city_revenue }} cts</p></div>
+    <div class="pk" style="padding:1rem"><p class="slabel">{% trans "Promos actives" %}</p><p style="font-size:1.12rem;font-weight:900;color:#fff">{{ kpis.active_promotions }}</p></div>
+  </section>
+
+  <section class="pk" style="padding:1rem">
+    <p class="slabel" style="margin-bottom:0.5rem">{% trans "Evenements publies" %}</p>
+    {% for event in events %}
+    <div class="pa-event-row">
+      <p style="font-size:0.8rem;color:#fff">{{ event.title }}</p>
+      <p style="font-size:0.72rem;color:rgba(255,255,255,0.45)">{{ event.city }} · {{ event.starts_at|date:"d/m H:i" }}</p>
+    </div>
+    {% empty %}
+    <p style="font-size:0.8rem;color:rgba(255,255,255,0.45)">{% trans "Aucun evenement publie." %}</p>
+    {% endfor %}
+  </section>
+</div>
+{% endblock %}

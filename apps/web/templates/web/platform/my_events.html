@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Mes evenements | Mooviogo{% endblock %}
+
+{% block content %}
+<div class="pg-hdr">
+  <div class="mx-auto max-w-6xl px-4">
+    <p class="slabel mb-3">Espace personnel</p>
+    <h1 style="font-size:2rem;font-weight:900;color:#fff;letter-spacing:-0.03em">Mes evenements</h1>
+  </div>
+</div>
+
+<div class="mx-auto max-w-6xl px-4" style="padding-top:2rem;padding-bottom:4rem">
+  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0.9rem">
+    <section class="pk" style="padding:1rem">
+      <h2 style="font-size:1rem;font-weight:800;color:#fff;margin-bottom:0.7rem">Sorties que j'organise</h2>
+      {% for sortie in created_sorties %}
+      <a href="/sorties/{{ sortie.id }}/" style="display:block;padding:0.55rem 0;text-decoration:none;border-bottom:1px solid rgba(255,255,255,0.06)">
+        <p style="font-size:0.85rem;font-weight:700;color:#fff">{{ sortie.title }}</p>
+        <p style="font-size:0.72rem;color:rgba(255,255,255,0.35)">{{ sortie.city }} · {{ sortie.get_status_display }}</p>
+      </a>
+      {% empty %}
+      <p style="font-size:0.75rem;color:rgba(255,255,255,0.35)">Aucune sortie creee</p>
+      {% endfor %}
+    </section>
+
+    <section class="pk" style="padding:1rem">
+      <h2 style="font-size:1rem;font-weight:800;color:#fff;margin-bottom:0.7rem">Sorties auxquelles je participe</h2>
+      {% for sortie in joined_sorties %}
+      <a href="/sorties/{{ sortie.id }}/" style="display:block;padding:0.55rem 0;text-decoration:none;border-bottom:1px solid rgba(255,255,255,0.06)">
+        <p style="font-size:0.85rem;font-weight:700;color:#fff">{{ sortie.title }}</p>
+        <p style="font-size:0.72rem;color:rgba(255,255,255,0.35)">{{ sortie.city }} · {{ sortie.get_type_display }}</p>
+      </a>
+      {% empty %}
+      <p style="font-size:0.75rem;color:rgba(255,255,255,0.35)">Aucune participation</p>
+      {% endfor %}
+    </section>
+  </div>
+</div>
+{% endblock %}
