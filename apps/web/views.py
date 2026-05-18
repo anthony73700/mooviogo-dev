@@ -14,6 +14,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.encoding import force_bytes
 from django.utils import timezone
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.utils.text import slugify
 from django.views.i18n import set_language as django_set_language
 from django.views.decorators.http import require_POST
 from xml.sax.saxutils import escape as xml_escape
@@ -50,6 +51,69 @@ from apps.tickets.models import Ticket, TicketScanAudit
 from mooviogo.observability import alert_on_threshold, emit_alert, emit_event
 
 User = get_user_model()
+
+
+def _is_professional_account(user):
+    if not getattr(user, "is_authenticated", False):
+        return False
+    if user.is_staff or user.is_superuser:
+        return False
+    if getattr(user, "is_partner", False):
+        return True
+    if Partner.objects.filter(owner=user).exists():
+        return True
+    return RestaurantVenue.objects.filter(owner=user, is_active=True).exists()
+
+
+def _redirect_professional_account(request):
+    if _is_professional_account(request.user):
+        return redirect("/partenaire/")
+    return None
+
+
+def _ensure_upcoming_slots_for_venue(venue):
+    """Keep demo restaurant booking slots usable by rolling them forward."""
+    today = timezone.localdate()
+    has_upcoming = RestaurantTimeSlot.objects.filter(venue=venue, date__gte=today).exists()
+    if has_upcoming:
+        return
+
+    known_times = list(
+        RestaurantTimeSlot.objects.filter(venue=venue)
+        .order_by("time")
+        .values_list("time", flat=True)
+        .distinct()
+    )
+    if not known_times:
+        known_times = [
+            timezone.datetime(2000, 1, 1, 12, 30).time(),
+            timezone.datetime(2000, 1, 1, 13, 0).time(),
+            timezone.datetime(2000, 1, 1, 19, 30).time(),
+            timezone.datetime(2000, 1, 1, 20, 0).time(),
+            timezone.datetime(2000, 1, 1, 20, 30).time(),
+            timezone.datetime(2000, 1, 1, 21, 0).time(),
+        ]
+
+    default_capacity = (
+        RestaurantTimeSlot.objects.filter(venue=venue)
+        .order_by("-capacity")
+        .values_list("capacity", flat=True)
+        .first()
+    ) or 6
+
+    for day_offset in range(1, 8):
+        slot_date = today + timedelta(days=day_offset)
+        for slot_time in known_times[:6]:
+            RestaurantTimeSlot.objects.get_or_create(
+                venue=venue,
+                date=slot_date,
+                time=slot_time,
+                defaults={
+                    "capacity": default_capacity,
+                    "confirmed_count": 0,
+                    "status": RestaurantTimeSlot.SlotStatus.OPEN,
+                },
+            )
 
 
 def _rate_limit_key(prefix, request, extra=""):
@@ -93,6 +157,10 @@ def set_language_and_preference(request):
 # ──────────────────────────────────────────────────────────────────────────────
 
 def home(request):
+    professional_redirect = _redirect_professional_account(request)
+    if professional_redirect:
+        return professional_redirect
+
     sorties = (
         Sortie.objects.filter(status=Sortie.Status.OPEN)
         .select_related("creator")
@@ -111,7 +179,30 @@ def home(request):
     })
 
 
+def feed_page(request):
+    """TikTok-style vertical feed combining sorties and events."""
+    professional_redirect = _redirect_professional_account(request)
+    if professional_redirect:
+        return professional_redirect
+
+    sorties = (
+        Sortie.objects.filter(status=Sortie.Status.OPEN)
+        .select_related("creator")
+        .annotate(participant_count=Count("participants"))
+        .order_by("-created_at")[:20]
+    )
+    events = Event.objects.filter(status=Event.Status.PUBLISHED).order_by("starts_at")[:10]
+    return render(request, "web/feed.html", {
+        "sorties": sorties,
+        "events": events,
+    })
+
+
 def explore(request):
+    professional_redirect = _redirect_professional_account(request)
+    if professional_redirect:
+        return professional_redirect
+
     q = request.GET.get("q", "").strip()
     city = request.GET.get("city", "").strip()
 
@@ -141,6 +232,10 @@ def explore(request):
     })
 
 def nightlife(request):
+    professional_redirect = _redirect_professional_account(request)
+    if professional_redirect:
+        return professional_redirect
+
     city = request.GET.get("city", "").strip()
     events = Event.objects.filter(status=Event.Status.PUBLISHED, is_partner_event=True).order_by("starts_at")
     if city:
@@ -157,6 +252,10 @@ def nightlife(request):
 
 
 def activities(request):
+    professional_redirect = _redirect_professional_account(request)
+    if professional_redirect:
+        return professional_redirect
+
     city = request.GET.get("city", "").strip()
     category = request.GET.get("category", "").strip()
     partners = Partner.objects.filter(status=Partner.Status.ACTIVE, is_verified=True).order_by("name")
@@ -213,6 +312,10 @@ def payment_cancel_page(request):
 
 
 def search_page(request):
+    professional_redirect = _redirect_professional_account(request)
+    if professional_redirect:
+        return professional_redirect
+
     q = request.GET.get("q", "").strip()
 
     sorties = Sortie.objects.none()
@@ -249,6 +352,8 @@ def search_page(request):
 
 def login_view(request):
     if request.user.is_authenticated:
+        if _is_professional_account(request.user):
+            return redirect("/partenaire/")
         return redirect("/")
     error = None
     if request.method == "POST":
@@ -264,6 +369,8 @@ def login_view(request):
                 pass
         if user:
             login(request, user)
+            if _is_professional_account(user):
+                return redirect("/partenaire/")
             return redirect(request.GET.get("next") or "/")
         error = "Identifiants incorrects."
     return render(request, "web/auth/login.html", {"error": error})
@@ -554,6 +661,10 @@ def logout_view(request):
 # ──────────────────────────────────────────────────────────────────────────────
 
 def sorties_list(request):
+    professional_redirect = _redirect_professional_account(request)
+    if professional_redirect:
+        return professional_redirect
+
     qs = (
         Sortie.objects.all()
         .select_related("creator")
@@ -568,24 +679,54 @@ def sorties_list(request):
         qs = qs.filter(Q(title__icontains=q) | Q(description__icontains=q))
     if city:
         qs = qs.filter(city__icontains=city)
-    if type_:
-        qs = qs.filter(type=type_)
     if free == "1":
         qs = qs.filter(is_free=True)
     elif free == "0":
         qs = qs.filter(is_free=False)
+
+    hero_sortie = qs.exclude(cover_image_url="").first() or qs.first()
+
     total_count = qs.count()
-    paginator = Paginator(qs, 18)
-    page_obj = paginator.get_page(request.GET.get("page"))
+    member_count = qs.filter(type=Sortie.Type.COMMUNAUTAIRE).count()
+    partner_count = qs.filter(type=Sortie.Type.PARTENAIRE).count()
+
+    member_sorties = []
+    partner_sorties = []
+    is_all_types = not type_
+
+    if type_:
+        qs = qs.filter(type=type_)
+        paginator = Paginator(qs, 18)
+        page_obj = paginator.get_page(request.GET.get("page"))
+        sorties = page_obj
+        is_paginated = paginator.num_pages > 1
+    else:
+        # In "Tous" mode, separate the feed to avoid mixing member and partner outings.
+        member_sorties = list(qs.filter(type=Sortie.Type.COMMUNAUTAIRE)[:12])
+        partner_sorties = list(qs.filter(type=Sortie.Type.PARTENAIRE)[:12])
+        sorties = []
+        page_obj = None
+        is_paginated = False
+
     return render(request, "web/sorties/list.html", {
-        "sorties": page_obj,
+        "sorties": sorties,
+        "member_sorties": member_sorties,
+        "partner_sorties": partner_sorties,
+        "is_all_types": is_all_types,
+        "hero_sortie": hero_sortie,
         "page_obj": page_obj,
-        "is_paginated": paginator.num_pages > 1,
+        "is_paginated": is_paginated,
         "total_count": total_count,
+        "member_count": member_count,
+        "partner_count": partner_count,
     })
 
 
 def sortie_detail(request, pk):
+    professional_redirect = _redirect_professional_account(request)
+    if professional_redirect:
+        return professional_redirect
+
     sortie = get_object_or_404(Sortie, pk=pk)
     participants = SortieParticipant.objects.filter(sortie=sortie).select_related("user")
     is_participant = request.user.is_authenticated and participants.filter(user=request.user).exists()
@@ -601,6 +742,8 @@ def sortie_detail(request, pk):
 def sortie_create(request):
     from apps.sorties.models import Sortie
 
+    partners = Partner.objects.filter(status=Partner.Status.ACTIVE, is_verified=True).order_by("name")
+
     def _parse_coord(raw_value, min_value, max_value):
         value = (raw_value or "").strip()
         if not value:
@@ -615,7 +758,14 @@ def sortie_create(request):
         return parsed
 
     errors = {}
-    form_data = {}
+    form_data = {
+        "title": (request.GET.get("title") or "").strip(),
+        "city": (request.GET.get("city") or "").strip(),
+        "location": (request.GET.get("location") or "").strip(),
+        "type": (request.GET.get("type") or Sortie.Type.COMMUNAUTAIRE).strip(),
+        "is_free": True,
+        "price": "0",
+    }
     if request.method == "POST":
         form_data = request.POST
         title = request.POST.get("title", "").strip()
@@ -624,6 +774,7 @@ def sortie_create(request):
         latitude = _parse_coord(request.POST.get("latitude"), -90.0, 90.0)
         longitude = _parse_coord(request.POST.get("longitude"), -180.0, 180.0)
         type_ = request.POST.get("type", Sortie.Type.COMMUNAUTAIRE)
+        partner_id = (request.POST.get("partner_id") or "").strip()
         is_free_raw = bool(request.POST.get("is_free"))
         price_raw = (request.POST.get("price") or "0").strip()
 
@@ -637,6 +788,15 @@ def sortie_create(request):
             errors["longitude"] = "Longitude invalide."
         if type_ not in (Sortie.Type.COMMUNAUTAIRE, Sortie.Type.PARTENAIRE):
             errors["type"] = "Seuls les types entre membres et partenaire sont autorisés."
+
+        selected_partner = None
+        if type_ == Sortie.Type.PARTENAIRE:
+            if not partner_id:
+                errors["partner_id"] = "Sélectionne un partenaire référencé."
+            else:
+                selected_partner = partners.filter(pk=partner_id).first()
+                if selected_partner is None:
+                    errors["partner_id"] = "Le partenaire sélectionné est invalide."
 
         if type_ == Sortie.Type.COMMUNAUTAIRE:
             is_free = True
@@ -668,6 +828,7 @@ def sortie_create(request):
                     latitude=latitude if latitude != "invalid" else None,
                     longitude=longitude if longitude != "invalid" else None,
                     type=type_,
+                    partner=selected_partner,
                     is_free=is_free,
                     price=price_cents,
                     max_participants=request.POST.get("max_participants") or None,
@@ -679,7 +840,11 @@ def sortie_create(request):
             else:
                 messages.success(request, "Sortie créée avec succès !")
                 return redirect(f"/sorties/{sortie.pk}/")
-    return render(request, "web/sorties/create.html", {"form": type("F", (), form_data)(), "errors": errors})
+    return render(request, "web/sorties/create.html", {
+        "form": type("F", (), form_data)(),
+        "errors": errors,
+        "partners": partners,
+    })
 
 
 @login_required
@@ -717,23 +882,75 @@ def sortie_leave(request, pk):
 # ──────────────────────────────────────────────────────────────────────────────
 
 def restaurants_list(request):
+    professional_redirect = _redirect_professional_account(request)
+    if professional_redirect:
+        return professional_redirect
+
     qs = RestaurantVenue.objects.filter(is_active=True)
     q = request.GET.get("q", "")
     city = request.GET.get("city", "")
+
+    def _apply_city_filter(base_qs, city_value):
+        normalized_city = (city_value or "").strip()
+        if not normalized_city:
+            return base_qs
+        normalized_slug = slugify(normalized_city)
+        city_lookup = Q(city_label__icontains=normalized_city)
+        if normalized_slug:
+            city_lookup |= Q(city_slug__icontains=normalized_slug)
+        return base_qs.filter(city_lookup)
+
     if q:
         qs = qs.filter(Q(name__icontains=q) | Q(description__icontains=q))
     if city:
-        qs = qs.filter(city__icontains=city)
-    paginator = Paginator(qs.order_by("name"), 18)
+        qs = _apply_city_filter(qs, city)
+
+    ordered_qs = qs.order_by("name")
+    city_scope = city or (request.user.city if request.user.is_authenticated else "")
+    featured_restaurant = ordered_qs.first()
+    featured_is_promoted = False
+
+    if city_scope:
+        now = timezone.now()
+        promoted_restaurant = (
+            _apply_city_filter(ordered_qs, city_scope)
+            .filter(
+                editorial_boost_starts_at__isnull=False,
+                editorial_boost_ends_at__isnull=False,
+                editorial_boost_starts_at__lte=now,
+                editorial_boost_ends_at__gte=now,
+            )
+            .order_by("-editorial_boost_amount", "-editorial_boost_ends_at", "name")
+            .first()
+        )
+        if promoted_restaurant:
+            featured_restaurant = promoted_restaurant
+            featured_is_promoted = True
+
+    paginator = Paginator(ordered_qs, 18)
     page_obj = paginator.get_page(request.GET.get("page"))
-    return render(request, "web/restaurants/list.html", {"venues": page_obj, "page_obj": page_obj, "is_paginated": paginator.num_pages > 1})
+    return render(request, "web/restaurants/list.html", {
+        "venues": page_obj,
+        "page_obj": page_obj,
+        "is_paginated": paginator.num_pages > 1,
+        "featured_restaurant": featured_restaurant,
+        "featured_is_promoted": featured_is_promoted,
+    })
 
 
 def restaurant_detail(request, city_slug, slug):
+    professional_redirect = _redirect_professional_account(request)
+    if professional_redirect:
+        return professional_redirect
+
     venue = get_object_or_404(RestaurantVenue, city_slug=city_slug, slug=slug)
-    from django.utils import timezone
-    today = timezone.now().date()
-    slots = RestaurantTimeSlot.objects.filter(venue=venue, date__gte=today).order_by("date", "time")[:20]
+    _ensure_upcoming_slots_for_venue(venue)
+    today = timezone.localdate()
+    slots = RestaurantTimeSlot.objects.filter(
+        venue=venue,
+        date__gte=today,
+        status=RestaurantTimeSlot.SlotStatus.OPEN,
+    ).order_by("date", "time")[:20]
     return render(request, "web/restaurants/detail.html", {"venue": venue, "slots": slots})
 
 
@@ -743,18 +960,86 @@ def restaurant_book(request, city_slug, slug):
     venue = get_object_or_404(RestaurantVenue, city_slug=city_slug, slug=slug)
     slot_id = request.POST.get("slot_id")
     slot = get_object_or_404(RestaurantTimeSlot, pk=slot_id, venue=venue)
+    if slot.date < timezone.localdate() or slot.status != RestaurantTimeSlot.SlotStatus.OPEN:
+        messages.error(request, "Ce créneau n'est plus réservable.")
+        return redirect(f"/restaurants/{city_slug}/{slug}/")
+
+    already_booked = Booking.objects.filter(user=request.user, restaurant_slot_id=slot.id).exists()
+    if already_booked:
+        messages.info(request, "Tu as déjà une réservation sur ce créneau.")
+        return redirect(f"/restaurants/{city_slug}/{slug}/")
+
     if slot.confirmed_count < slot.capacity:
+        booking_status = Booking.Status.CONFIRMED
+        if venue.reservation_mode == RestaurantVenue.ReservationMode.MANUAL:
+            booking_status = Booking.Status.PENDING
+
         Booking.objects.create(
             user=request.user,
+            booking_type=Booking.BookingType.RESTAURANT,
             restaurant_slot_id=slot.id,
-            status=Booking.Status.PENDING,
+            status=booking_status,
         )
-        slot.confirmed_count += 1
-        slot.save(update_fields=["confirmed_count"])
-        messages.success(request, "Réservation confirmée !")
+
+        if booking_status == Booking.Status.CONFIRMED:
+            slot.confirmed_count += 1
+            slot.save(update_fields=["confirmed_count"])
+            messages.success(request, "Réservation confirmée !")
+        else:
+            messages.success(request, "Demande envoyée au restaurant. En attente de validation.")
     else:
         messages.error(request, "Ce créneau est complet.")
     return redirect(f"/restaurants/{city_slug}/{slug}/")
+
+
+@login_required
+@require_POST
+def partner_restaurant_booking_decision(request, booking_id):
+    if not _is_professional_account(request.user):
+        messages.error(request, "Accès réservé aux partenaires.")
+        return redirect("/devenir-partenaire/")
+
+    action = (request.POST.get("action") or "").strip().lower()
+    if action not in {"confirm", "reject"}:
+        messages.error(request, "Action invalide.")
+        return redirect("/partner/bookings/")
+
+    booking = get_object_or_404(Booking, pk=booking_id, booking_type=Booking.BookingType.RESTAURANT)
+    if not booking.restaurant_slot_id:
+        messages.error(request, "Réservation restaurant introuvable.")
+        return redirect("/partner/bookings/")
+
+    slot = RestaurantTimeSlot.objects.filter(pk=booking.restaurant_slot_id).select_related("venue").first()
+    if not slot or slot.venue.owner_id != request.user.id:
+        messages.error(request, "Cette réservation ne t'appartient pas.")
+        return redirect("/partner/bookings/")
+
+    if booking.status != Booking.Status.PENDING:
+        messages.info(request, "Cette demande est déjà traitée.")
+        return redirect("/partner/bookings/")
+
+    if action == "reject":
+        booking.status = Booking.Status.CANCELLED
+        booking.save(update_fields=["status", "updated_at"])
+        messages.success(request, "Demande refusée.")
+        return redirect("/partner/bookings/")
+
+    if slot.status != RestaurantTimeSlot.SlotStatus.OPEN or slot.date < timezone.localdate():
+        messages.error(request, "Impossible de valider: créneau fermé ou expiré.")
+        return redirect("/partner/bookings/")
+
+    if slot.confirmed_count >= slot.capacity:
+        booking.status = Booking.Status.CANCELLED
+        booking.save(update_fields=["status", "updated_at"])
+        messages.error(request, "Créneau complet: demande refusée automatiquement.")
+        return redirect("/partner/bookings/")
+
+    booking.status = Booking.Status.CONFIRMED
+    booking.save(update_fields=["status", "updated_at"])
+    slot.confirmed_count += 1
+    slot.save(update_fields=["confirmed_count"])
+    messages.success(request, "Réservation validée.")
+    return redirect("/partner/bookings/")
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -762,6 +1047,10 @@ def restaurant_book(request, city_slug, slug):
 # ──────────────────────────────────────────────────────────────────────────────
 
 def evenements_list(request):
+    professional_redirect = _redirect_professional_account(request)
+    if professional_redirect:
+        return professional_redirect
+
     events = Event.objects.filter(
         status=Event.Status.PUBLISHED,
         is_partner_event=False,
@@ -770,6 +1059,10 @@ def evenements_list(request):
 
 
 def evenement_detail(request, slug):
+    professional_redirect = _redirect_professional_account(request)
+    if professional_redirect:
+        return professional_redirect
+
     event = get_object_or_404(Event, slug=slug, status=Event.Status.PUBLISHED)
     return render(request, "web/evenements/detail.html", {"event": event})
 
@@ -783,6 +1076,10 @@ def events_alias(request):
 # ──────────────────────────────────────────────────────────────────────────────
 
 def villes_list(request):
+    professional_redirect = _redirect_professional_account(request)
+    if professional_redirect:
+        return professional_redirect
+
     cities_qs = (
         Sortie.objects.filter(status=Sortie.Status.OPEN)
         .values("city")
@@ -794,6 +1091,10 @@ def villes_list(request):
 
 
 def ville_detail(request, city_slug):
+    professional_redirect = _redirect_professional_account(request)
+    if professional_redirect:
+        return professional_redirect
+
     city_name = city_slug.replace("-", " ").title()
     sorties = Sortie.objects.filter(status=Sortie.Status.OPEN, city__iexact=city_name).order_by("-created_at")[:6]
     restaurants = RestaurantVenue.objects.filter(is_active=True, city_slug=city_slug)[:6]
@@ -813,6 +1114,10 @@ def ville_detail(request, city_slug):
 # ──────────────────────────────────────────────────────────────────────────────
 
 def partenaires_list(request):
+    professional_redirect = _redirect_professional_account(request)
+    if professional_redirect:
+        return professional_redirect
+
     qs = Partner.objects.filter(status=Partner.Status.ACTIVE).select_related("owner")
     cat = request.GET.get("categorie", "").strip()
     if cat:
@@ -932,8 +1237,60 @@ def create_activity_request(request):
 
 @login_required
 def profil(request):
-    my_sorties = Sortie.objects.filter(creator=request.user).order_by("-created_at")[:5]
-    return render(request, "web/profil/profil.html", {"my_sorties": my_sorties})
+    created_sorties_qs = (
+        Sortie.objects.filter(creator=request.user)
+        .annotate(participant_count=Count("participants"))
+        .order_by("-created_at")
+    )
+    participations_qs = (
+        SortieParticipant.objects.filter(user=request.user)
+        .select_related("sortie")
+        .order_by("-joined_at")
+    )
+    confirmed_bookings_qs = Booking.objects.filter(
+        user=request.user,
+        status=Booking.Status.CONFIRMED,
+    ).order_by("-created_at")
+    active_tickets_qs = Ticket.objects.filter(
+        user=request.user,
+        status=Ticket.Status.ACTIVE,
+    ).order_by("-created_at")
+
+    my_sorties = list(created_sorties_qs[:6])
+    my_participations = list(participations_qs[:4])
+
+    city = (request.user.city or "").strip()
+    nearby_sorties_qs = Sortie.objects.filter(status=Sortie.Status.OPEN)
+    nearby_events_qs = Event.objects.filter(status=Event.Status.PUBLISHED)
+    nearby_members_qs = SortieParticipant.objects.filter(sortie__status=Sortie.Status.OPEN)
+
+    if city:
+        nearby_sorties_qs = nearby_sorties_qs.filter(city__iexact=city)
+        nearby_events_qs = nearby_events_qs.filter(city__iexact=city)
+        nearby_members_qs = nearby_members_qs.filter(sortie__city__iexact=city)
+
+    return render(request, "web/profil/profil.html", {
+        "my_sorties": my_sorties,
+        "my_participations": my_participations,
+        "profile_stats": {
+            "created_sorties_count": created_sorties_qs.count(),
+            "joined_sorties_count": participations_qs.count(),
+            "confirmed_bookings_count": confirmed_bookings_qs.count(),
+            "active_tickets_count": active_tickets_qs.count(),
+        },
+        "profile_highlights": {
+            "recent_sortie": my_sorties[0] if my_sorties else None,
+            "recent_participation": my_participations[0] if my_participations else None,
+            "recent_booking": confirmed_bookings_qs.first(),
+            "recent_ticket": active_tickets_qs.first(),
+        },
+        "community_snapshot": {
+            "city_label": city or "Ta zone",
+            "open_sorties_count": nearby_sorties_qs.count(),
+            "published_events_count": nearby_events_qs.count(),
+            "active_members_count": nearby_members_qs.values("user_id").distinct().count(),
+        },
+    })
 
 
 @login_required
@@ -964,15 +1321,18 @@ def profil_reservations(request):
 
 @login_required
 def partenaire_dashboard(request):
-    if not request.user.is_partner:
+    if not _is_professional_account(request.user):
         messages.error(request, "Accès réservé aux partenaires.")
         return redirect("/devenir-partenaire/")
-    return render(request, "web/partenaire/dashboard.html")
+    return render(request, "web/partenaire/dashboard.html", {
+        "partner_profile": Partner.objects.filter(owner=request.user).first(),
+        "owned_restaurants": RestaurantVenue.objects.filter(owner=request.user, is_active=True).order_by("name"),
+    })
 
 
 @login_required
 def partner_events_page(request):
-    if not request.user.is_partner:
+    if not _is_professional_account(request.user):
         return redirect("/devenir-partenaire/")
     partner_events = Event.objects.filter(is_partner_event=True).order_by("-created_at")[:20]
     rows_data = [{"title": e.title, "meta": e.city} for e in partner_events]
@@ -985,20 +1345,30 @@ def partner_events_page(request):
 
 @login_required
 def partner_bookings_page(request):
-    if not request.user.is_partner:
+    if not _is_professional_account(request.user):
         return redirect("/devenir-partenaire/")
-    rows = Booking.objects.order_by("-created_at")[:25]
-    rows_data = [{"title": f"Reservation #{b.id}", "meta": b.get_status_display()} for b in rows]
-    return render(request, "web/platform/dashboard_list.html", {
-        "title": "Partner bookings",
-        "subtitle": "Reservations recues et statuts",
-        "rows_data": rows_data,
+    owned_venues = RestaurantVenue.objects.filter(owner=request.user, is_active=True).order_by("name")
+    slot_ids = RestaurantTimeSlot.objects.filter(venue_id__in=owned_venues.values_list("id", flat=True)).values_list("id", flat=True)
+    rows = Booking.objects.filter(
+        booking_type=Booking.BookingType.RESTAURANT,
+        restaurant_slot_id__in=slot_ids,
+    ).order_by("-created_at")[:80]
+    slot_by_id = {
+        s.id: s
+        for s in RestaurantTimeSlot.objects.filter(id__in=rows.values_list("restaurant_slot_id", flat=True)).select_related("venue")
+    }
+    booking_rows = [{"booking": b, "slot": slot_by_id.get(b.restaurant_slot_id)} for b in rows]
+    return render(request, "web/partenaire/restaurant_bookings.html", {
+        "title": "Réservations restaurants",
+        "subtitle": "Validation manuelle ou confirmation auto selon la formule de chaque restaurant",
+        "booking_rows": booking_rows,
+        "owned_venues": owned_venues,
     })
 
 
 @login_required
 def partner_analytics_page(request):
-    if not request.user.is_partner:
+    if not _is_professional_account(request.user):
         return redirect("/devenir-partenaire/")
     partner = Partner.objects.filter(owner=request.user).first()
     if not partner:
@@ -1047,7 +1417,7 @@ def partner_analytics_page(request):
 
 @login_required
 def partner_payments_page(request):
-    if not request.user.is_partner:
+    if not _is_professional_account(request.user):
         return redirect("/devenir-partenaire/")
     rows = Payment.objects.order_by("-created_at")[:25]
     rows_data = [{"title": p.stripe_payment_intent_id, "meta": p.get_status_display()} for p in rows]
@@ -1060,7 +1430,7 @@ def partner_payments_page(request):
 
 @login_required
 def partner_requests_page(request):
-    if not request.user.is_partner:
+    if not _is_professional_account(request.user):
         return redirect("/devenir-partenaire/")
     partner = Partner.objects.filter(owner=request.user).first()
     opportunities = PartnerOpportunity.objects.order_by("-created_at")
@@ -1076,7 +1446,7 @@ def partner_requests_page(request):
 
 @login_required
 def partner_settings_page(request):
-    if not request.user.is_partner:
+    if not _is_professional_account(request.user):
         return redirect("/devenir-partenaire/")
     return render(request, "web/platform/simple_page.html", {
         "title": "Partner settings",
@@ -1091,7 +1461,7 @@ def partner_settings_page(request):
 
 @login_required
 def partner_events_create_page(request):
-    if not request.user.is_partner:
+    if not _is_professional_account(request.user):
         return redirect("/devenir-partenaire/")
     return create_activity_request(request)
 

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Villes | Mooviogo{% endblock %}
+{% block description %}Explore les sorties et restaurants Mooviogo dans toutes les villes de France.{% endblock %}
+
+{% block content %}
+
+<div class="pg-hdr">
+  <div class="mx-auto max-w-5xl px-4">
+    <p class="slabel mb-3">Partout en France</p>
+    <h1 style="font-size:2.25rem;font-weight:900;color:#fff;letter-spacing:-0.03em;line-height:1.1">Explorer par ville</h1>
+    <p style="margin-top:0.45rem;font-size:0.9rem;color:rgba(255,255,255,0.4)">Trouve des sorties et restaurants dans ta ville</p>
+  </div>
+</div>
+
+<div class="mx-auto max-w-5xl px-4" style="padding-top:3rem;padding-bottom:5rem">
+  {% if cities %}
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:0.9rem">
+    {% for city in cities %}
+    <a href="/ville/{{ city.slug }}/" class="pk" style="display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.4rem;text-decoration:none">
+      <div>
+        <p style="font-size:1rem;font-weight:800;color:#fff;margin-bottom:0.25rem">{{ city.name }}</p>
+        {% if city.sortie_count %}
+        <p style="font-size:0.72rem;color:rgba(255,255,255,0.35)">{{ city.sortie_count }} sortie{{ city.sortie_count|pluralize }}</p>
+        {% else %}
+        <p style="font-size:0.72rem;color:rgba(255,255,255,0.2)">Découvrir</p>
+        {% endif %}
+      </div>
+      <svg xmlns="http://www.w3.org/2000/svg" style="width:1rem;height:1rem;color:rgba(255,255,255,0.2);flex-shrink:0;transition:color 0.15s" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="city-arrow"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div style="text-align:center;padding:5rem 2rem">
+    <p style="color:rgba(255,255,255,0.3)">Aucune ville disponible pour le moment</p>
+  </div>
+  {% endif %}
+</div>
+
+<style>
+  .pk:hover .city-arrow { color:#FF8A66; }
+</style>
+{% endblock %}

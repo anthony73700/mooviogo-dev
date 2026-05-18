@@ -1,57 +1,178 @@
 {% extends "base.html" %}
 {% block title %}Mon profil | Mooviogo{% endblock %}
 
+{% block extra_head %}
+<style>
+  .prof-cover { height:180px; background:linear-gradient(135deg,#3b0d62 0%,#A832F5 35%,#F31C7F 75%,#FF6A4D 100%); position:relative; overflow:hidden; }
+  .prof-cover::before { content:""; position:absolute; inset:0; background:radial-gradient(circle at 20% 30%, rgba(255,255,255,.10), transparent 50%); }
+  .prof-avatar-ring { background:conic-gradient(from 180deg,#A832F5,#F31C7F,#FF6A4D,#21DCEE,#A832F5); padding:3px; border-radius:9999px; }
+  .prof-shell { position:relative; overflow:hidden; border:1px solid rgba(255,255,255,.08); border-radius:2rem; background:rgba(255,255,255,.035); box-shadow:0 30px 80px -36px rgba(0,0,0,.84); backdrop-filter:blur(16px); }
+  .prof-social-grid { display:grid; grid-template-columns:1.1fr .9fr; gap:1rem; }
+  .prof-social-main, .prof-social-side { border:1px solid rgba(255,255,255,.08); border-radius:1.6rem; background:rgba(255,255,255,.03); padding:1.1rem; box-shadow:0 20px 56px -32px rgba(0,0,0,.8); backdrop-filter:blur(14px); }
+  .prof-post-list { display:grid; gap:.8rem; }
+  .prof-post-card { border:1px solid rgba(255,255,255,.06); border-radius:1.2rem; background:rgba(255,255,255,.025); padding:1rem; }
+  .prof-tribe-grid { display:grid; gap:.8rem; grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .prof-tribe-card { border:1px solid rgba(255,255,255,.08); border-radius:1.1rem; background:rgba(255,255,255,.03); padding:1rem; }
+  @media (max-width: 1024px) { .prof-social-grid, .prof-tribe-grid { grid-template-columns:1fr; } }
+</style>
+{% endblock %}
+
 {% block content %}
 
-<div class="pg-hdr">
-  <div class="mx-auto max-w-3xl px-4">
-    <div style="display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap">
-      {% if user.avatar_url %}
-      <img src="{{ user.avatar_url }}" style="width:60px;height:60px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,0.08)" />
-      {% else %}
-      <div style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#FF6A4D,#F97316);display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:900;color:#fff;flex-shrink:0">
-        {{ user.display_name|default:user.username|first|upper }}
-      </div>
-      {% endif %}
-      <div>
-        <h1 style="font-size:1.75rem;font-weight:900;color:#fff;letter-spacing:-0.025em">{{ user.display_name|default:user.username }}</h1>
-        <p style="font-size:0.8rem;color:rgba(255,255,255,0.35);margin-top:0.2rem">{{ user.email }}</p>
-        {% if user.city %}
-        <p style="font-size:0.78rem;color:rgba(255,255,255,0.3);margin-top:0.2rem;display:flex;align-items:center;gap:4px">
-          <svg xmlns="http://www.w3.org/2000/svg" style="width:0.72rem;height:0.72rem" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-          {{ user.city }}
-        </p>
+<div class="prof-cover"></div>
+
+<div class="mx-auto max-w-5xl px-4 -mt-16 relative z-10">
+
+  <div class="prof-shell p-6 sm:p-8">
+
+  <div class="flex items-end gap-5 flex-wrap">
+    <div class="prof-avatar-ring shrink-0">
+      <div class="relative">
+        {% if user.avatar_url %}
+        <img src="{{ user.avatar_url }}" alt="{{ user.display_name|default:user.username }}" class="h-28 w-28 rounded-full object-cover ring-4 ring-night-950" />
+        {% else %}
+        <div class="grid h-28 w-28 place-items-center rounded-full bg-grad-brand text-white font-display text-4xl font-extrabold ring-4 ring-night-950">{{ user.display_name|default:user.username|first|upper }}</div>
         {% endif %}
       </div>
     </div>
-  </div>
-</div>
-
-<div class="mx-auto max-w-3xl px-4" style="padding-top:2.5rem;padding-bottom:5rem">
-
-  {# Bio + actions #}
-  <div class="pk" style="padding:1.5rem 1.75rem;margin-bottom:1.75rem">
-    {% if user.bio %}<p style="font-size:0.9rem;color:rgba(255,255,255,0.65);line-height:1.7;margin-bottom:1.25rem">{{ user.bio }}</p>{% endif %}
-    <div style="display:flex;flex-wrap:wrap;gap:0.75rem">
-      <a href="/profil/modifier/" style="display:inline-flex;align-items:center;gap:6px;padding:0.52rem 1.1rem;border-radius:999px;border:1px solid rgba(255,255,255,0.1);font-size:0.8rem;font-weight:600;color:rgba(255,255,255,0.7);text-decoration:none;transition:border-color 0.15s,color 0.15s">Modifier le profil</a>
-      <a href="/profil/reservations/" style="display:inline-flex;align-items:center;gap:6px;padding:0.52rem 1.1rem;border-radius:999px;border:1px solid rgba(255,255,255,0.1);font-size:0.8rem;font-weight:600;color:rgba(255,255,255,0.7);text-decoration:none;transition:border-color 0.15s,color 0.15s">Mes réservations</a>
-      {% if user.is_partner %}
-      <a href="/partenaire/" class="btn-brand" style="font-size:0.8rem;padding:0.52rem 1.1rem;border-radius:999px">Espace partenaire</a>
+    <div class="flex-1 min-w-0 pb-2">
+      <div class="flex items-center gap-2 flex-wrap">
+        <h1 class="font-display text-3xl font-extrabold text-white">{{ user.display_name|default:user.username }}</h1>
+        {% if user.is_partner %}<span class="chip chip-electric">✓ Partenaire</span>{% endif %}
+      </div>
+      <p class="mt-1 text-sm text-white/55">@{{ user.username }} · {{ user.email }}</p>
+      {% if user.city %}
+      <p class="mt-1 text-sm text-white/65 flex items-center gap-1.5">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        {{ user.city }}
+      </p>
       {% endif %}
     </div>
   </div>
 
-  {% if my_sorties %}
-  <p class="slabel" style="margin-bottom:1.1rem">Mes sorties</p>
-  <div style="display:flex;flex-direction:column;gap:0.75rem">
-    {% for sortie in my_sorties %}
-    <a href="/sorties/{{ sortie.id }}/" class="pk" style="padding:0.9rem 1.25rem;display:flex;align-items:center;justify-content:space-between;text-decoration:none">
-      <span style="font-size:0.9rem;font-weight:700;color:#fff">{{ sortie.title }}</span>
-      <span class="tag tag-gray" style="font-size:0.65rem">{{ sortie.get_status_display }}</span>
-    </a>
-    {% endfor %}
+  {# Stats Instagram-style #}
+  <div class="mt-6 grid grid-cols-2 gap-3 sm:gap-6 max-w-4xl lg:grid-cols-4">
+    <div class="panel-soft text-center p-4">
+      <p class="font-display text-2xl font-extrabold text-white">{{ profile_stats.created_sorties_count }}</p>
+      <p class="text-[0.7rem] uppercase tracking-wider text-white/45 font-semibold mt-0.5">Sorties créées</p>
+    </div>
+    <div class="panel-soft text-center p-4">
+      <p class="font-display text-2xl font-extrabold text-white">{{ profile_stats.joined_sorties_count }}</p>
+      <p class="text-[0.7rem] uppercase tracking-wider text-white/45 font-semibold mt-0.5">Participations</p>
+    </div>
+    <div class="panel-soft text-center p-4">
+      <p class="font-display text-2xl font-extrabold text-white">{{ profile_stats.confirmed_bookings_count }}</p>
+      <p class="text-[0.7rem] uppercase tracking-wider text-white/45 font-semibold mt-0.5">Réservations</p>
+    </div>
+    <div class="panel-soft text-center p-4">
+      <p class="font-display text-2xl font-extrabold text-white">{{ profile_stats.active_tickets_count }}</p>
+      <p class="text-[0.7rem] uppercase tracking-wider text-white/45 font-semibold mt-0.5">Tickets actifs</p>
+    </div>
   </div>
+
+  {# Bio #}
+  {% if user.bio %}
+  <p class="mt-5 text-sm text-white/75 leading-relaxed max-w-2xl">{{ user.bio }}</p>
   {% endif %}
+
+  {# Actions #}
+  <div class="mt-5 flex flex-wrap gap-2.5">
+    <a href="/profil/modifier/" class="btn-secondary btn-sm">Modifier le profil</a>
+    <a href="/profil/reservations/" class="btn-secondary btn-sm">Mes réservations</a>
+    <a href="/sorties/creer/" class="btn-ghost btn-sm">+ Créer une sortie</a>
+    {% if user.is_partner %}
+    <a href="/partenaire/" class="btn-primary btn-sm">Espace partenaire</a>
+    {% endif %}
+  </div>
+
+  {# Tabs #}
+  <div class="mt-10 border-t border-white/10">
+    <div class="flex gap-1 -mt-px">
+      <span class="border-t-2 border-flamingo-500 px-4 py-3 text-xs font-bold uppercase tracking-wider text-white">▦ Mes sorties</span>
+    </div>
+  </div>
+
+  {# Sorties grid #}
+  <div class="mt-6 pb-16">
+    <div class="prof-social-grid mb-8 fade-up">
+      <section class="prof-social-main">
+        <div class="flex items-end justify-between gap-4 mb-4">
+          <div>
+            <span class="h-eyebrow">Profil social</span>
+            <h2 class="mt-2 font-display text-2xl font-extrabold text-white">Ton signal sur Mooviogo</h2>
+          </div>
+          <span class="chip chip-flamingo">Live profile</span>
+        </div>
+        <div class="prof-post-list">
+          <article class="prof-post-card ambient-ring micro-float">
+            <p class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-white/42">Dernière publication</p>
+            {% if profile_highlights.recent_sortie %}
+            <h3 class="mt-2 text-lg font-bold text-white">{{ profile_highlights.recent_sortie.title }}</h3>
+            <p class="mt-2 text-sm text-white/62">{{ profile_highlights.recent_sortie.participant_count|default:0 }} participants · {% if profile_highlights.recent_sortie.starts_at %}{{ profile_highlights.recent_sortie.starts_at|date:"d M, H:i" }}{% else %}Date à confirmer{% endif %}</p>
+            {% else %}
+            <h3 class="mt-2 text-lg font-bold text-white">Ta prochaine sortie à poster</h3>
+            <p class="mt-2 text-sm text-white/62">Crée une première sortie pour faire apparaître ton premier signal public ici.</p>
+            {% endif %}
+          </article>
+          <article class="prof-post-card ambient-ring micro-float">
+            <p class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-white/42">Dernière participation</p>
+            {% if profile_highlights.recent_participation %}
+            <h3 class="mt-2 text-lg font-bold text-white">{{ profile_highlights.recent_participation.sortie.title }}</h3>
+            <p class="mt-2 text-sm text-white/62">Rejointe le {{ profile_highlights.recent_participation.joined_at|date:"d M, H:i" }} · {{ profile_highlights.recent_participation.sortie.city }}</p>
+            {% else %}
+            <h3 class="mt-2 text-lg font-bold text-white">Aucune participation pour le moment</h3>
+            <p class="mt-2 text-sm text-white/62">Quand tu rejoins une sortie, elle remonte ici comme trace réelle de ton activité sociale.</p>
+            {% endif %}
+          </article>
+          <article class="prof-post-card ambient-ring micro-float">
+            <p class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-white/42">Réservations & tickets</p>
+            {% if profile_highlights.recent_booking or profile_highlights.recent_ticket %}
+            <h3 class="mt-2 text-lg font-bold text-white">{{ profile_stats.confirmed_bookings_count }} réservation{{ profile_stats.confirmed_bookings_count|pluralize }} confirmée{{ profile_stats.confirmed_bookings_count|pluralize }}</h3>
+            <p class="mt-2 text-sm text-white/62">{{ profile_stats.active_tickets_count }} ticket{{ profile_stats.active_tickets_count|pluralize }} actif{{ profile_stats.active_tickets_count|pluralize }}{% if profile_highlights.recent_booking %} · Dernier flux {{ profile_highlights.recent_booking.get_booking_type_display }}{% endif %}</p>
+            {% else %}
+            <h3 class="mt-2 text-lg font-bold text-white">Aucune réservation active</h3>
+            <p class="mt-2 text-sm text-white/62">Tes réservations confirmées et tes tickets actifs s’afficheront ici dès la prochaine conversion.</p>
+            {% endif %}
+          </article>
+        </div>
+      </section>
+
+      <aside class="prof-social-side">
+        <span class="chip chip-electric">Communauté</span>
+        <h3 class="mt-4 font-display text-2xl font-extrabold text-white">Ce qui bouge autour de toi</h3>
+        <div class="prof-tribe-grid mt-5">
+          <div class="prof-tribe-card ambient-ring micro-float"><p class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-white/42">Zone</p><p class="mt-2 text-lg font-bold text-white">{{ community_snapshot.city_label }}</p><p class="mt-2 text-sm text-white/60">Point d’ancrage</p></div>
+          <div class="prof-tribe-card ambient-ring micro-float"><p class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-white/42">Sorties ouvertes</p><p class="mt-2 text-lg font-bold text-white">{{ community_snapshot.open_sorties_count }}</p><p class="mt-2 text-sm text-white/60">Autour de toi</p></div>
+          <div class="prof-tribe-card ambient-ring micro-float"><p class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-white/42">Événements live</p><p class="mt-2 text-lg font-bold text-white">{{ community_snapshot.published_events_count }}</p><p class="mt-2 text-sm text-white/60">En publication</p></div>
+          <div class="prof-tribe-card ambient-ring micro-float"><p class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-white/42">Membres actifs</p><p class="mt-2 text-lg font-bold text-white">{{ community_snapshot.active_members_count }}</p><p class="mt-2 text-sm text-white/60">Dans le flux</p></div>
+        </div>
+      </aside>
+    </div>
+
+    {% if my_sorties %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {% for sortie in my_sorties %}
+      <a href="/sorties/{{ sortie.slug|default:sortie.id }}/" class="card card-hover">
+        <div class="card-media bg-grad-aurora aspect-[4/5] relative">
+          <div class="absolute inset-0 flex items-end p-4">
+            <div>
+              <span class="chip chip-neutral text-[0.65rem]">{{ sortie.get_status_display }}</span>
+              <p class="mt-2 font-display text-base font-extrabold text-white line-clamp-2 leading-tight">{{ sortie.title }}</p>
+            </div>
+          </div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="panel p-12 text-center">
+      <p class="text-white/55">Tu n'as pas encore créé de sortie.</p>
+      <a href="/sorties/creer/" class="btn-primary btn-sm mt-4 inline-flex">Créer ma première sortie</a>
+    </div>
+    {% endif %}
+  </div>
+
+  </div>
 
 </div>
 {% endblock %}

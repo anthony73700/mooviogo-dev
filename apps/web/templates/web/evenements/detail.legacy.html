@@ -1,0 +1,434 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ event.title }} | Mooviogo{% endblock %}
+{% block description %}{{ event.description|default:event.title|striptags|truncatechars:160 }}{% endblock %}
+{% block og_title %}{{ event.title }}{% endblock %}
+{% block og_description %}{{ event.description|default:event.title|striptags|truncatechars:200 }}{% endblock %}
+{% block og_image %}{% if event.cover_image_url %}{{ event.cover_image_url }}{% else %}{{ APP_BASE_URL }}/static/og/default-og.svg{% endif %}{% endblock %}
+
+{% block schema_jsonld %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Event",
+  "name": "{{ event.title|escapejs }}",
+  "description": "{{ event.description|default:event.title|striptags|truncatechars:300|escapejs }}",
+  {% if event.cover_image_url %}"image": "{{ event.cover_image_url }}",{% endif %}
+  {% if event.starts_at %}"startDate": "{{ event.starts_at|date:'c' }}",{% endif %}
+  "eventStatus": "https://schema.org/EventScheduled",
+  "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+  "location": {
+    "@type": "Place",
+    "name": "{{ event.city|default:'Mooviogo'|escapejs }}",
+    "address": "{{ event.city|escapejs }}"
+    {% if event.latitude and event.longitude %},"geo": {"@type": "GeoCoordinates", "latitude": {{ event.latitude }}, "longitude": {{ event.longitude }}}{% endif %}
+  },
+  "organizer": {"@type": "Organization", "name": "Mooviogo", "url": "{{ APP_BASE_URL }}"},
+  "offers": {
+    "@type": "Offer",
+    "price": "{% if event.price %}{{ event.price }}{% else %}0{% endif %}",
+    "priceCurrency": "EUR",
+    "availability": "{% if event.status == 'PUBLISHED' %}https://schema.org/InStock{% else %}https://schema.org/Discontinued{% endif %}",
+    "url": "{{ APP_BASE_URL }}{{ request.path }}"
+  }
+}
+</script>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+.ev-page {
+  background:
+    radial-gradient(circle at 8% 0%, rgba(232,205,158,.22), transparent 44%),
+    radial-gradient(circle at 100% 10%, rgba(184,198,214,.2), transparent 42%),
+    linear-gradient(180deg, #f7f5f1 0%, #ffffff 62%);
+}
+
+.ev-hero {
+  position: relative;
+  min-height: 430px;
+  overflow: hidden;
+}
+
+.ev-hero-bg {
+  position: absolute;
+  inset: 0;
+}
+
+.ev-hero-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ev-hero-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(8,13,20,.16) 0%, rgba(8,13,20,.66) 74%, rgba(8,13,20,.86) 100%),
+    radial-gradient(circle at 22% 16%, rgba(224,189,126,.26), transparent 48%);
+}
+
+.ev-hero-inner {
+  position: relative;
+  z-index: 2;
+  min-height: 430px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 2rem 1rem 2rem;
+  max-width: 74rem;
+  margin: 0 auto;
+}
+
+.ev-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255,255,255,.72);
+  text-decoration: none;
+  font-size: .82rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.ev-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .45rem;
+  margin-bottom: .75rem;
+}
+
+.ev-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  border-radius: 999px;
+  padding: .34rem .75rem;
+  font-size: .64rem;
+  font-weight: 900;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.ev-badge-main {
+  color: #fff;
+  background: linear-gradient(135deg,#8d7447,#b69763 58%,#dbc089);
+  box-shadow: 0 8px 20px rgba(141,116,71,.35);
+}
+
+.ev-badge-soft {
+  color: rgba(255,255,255,.9);
+  background: rgba(255,255,255,.16);
+  border: 1px solid rgba(255,255,255,.24);
+  backdrop-filter: blur(8px);
+}
+
+.ev-title {
+  font-size: clamp(1.9rem, 4.4vw, 3.4rem);
+  font-family: "Playfair Display", Georgia, "Times New Roman", serif;
+  font-weight: 700;
+  letter-spacing: -.03em;
+  line-height: 1.02;
+  color: #fff;
+  margin-bottom: .75rem;
+  max-width: 18ch;
+}
+
+.ev-sub {
+  color: rgba(255,255,255,.8);
+  font-size: .95rem;
+  line-height: 1.75;
+  max-width: 58ch;
+}
+
+.ev-layout {
+  max-width: 74rem;
+  margin: 0 auto;
+  padding: 1.25rem 1rem 4rem;
+  display: grid;
+  grid-template-columns: 1.25fr .75fr;
+  gap: 1rem;
+}
+
+.ev-card {
+  background: rgba(255,255,255,.93);
+  border: 1px solid rgba(141,116,71,.17);
+  border-radius: 22px;
+  box-shadow: 0 16px 38px rgba(19,31,49,.08);
+}
+
+.ev-main {
+  padding: 1.35rem;
+}
+
+.ev-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .7rem;
+  margin-bottom: .95rem;
+}
+
+.ev-metric {
+  border-radius: 14px;
+  border: 1px solid rgba(141,116,71,.16);
+  background: linear-gradient(145deg, #fdfaf5, #ffffff);
+  padding: .8rem;
+}
+
+.ev-metric-label {
+  font-size: .6rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  font-weight: 900;
+  color: #7c766a;
+  margin-bottom: .3rem;
+}
+
+.ev-metric-val {
+  font-size: .88rem;
+  font-weight: 800;
+  color: #27364a;
+}
+
+.ev-section-title {
+  font-size: .78rem;
+  text-transform: uppercase;
+  letter-spacing: .09em;
+  color: #7c766a;
+  font-weight: 900;
+  margin-bottom: .55rem;
+}
+
+.ev-desc {
+  color: #3c4656;
+  line-height: 1.8;
+  font-size: .92rem;
+}
+
+.ev-reasons {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .65rem;
+  margin-top: 1rem;
+}
+
+.ev-reason {
+  border-radius: 12px;
+  background: #faf8f3;
+  border: 1px solid #ece3d1;
+  padding: .72rem;
+  font-size: .8rem;
+  color: #3f4a5b;
+  font-weight: 700;
+}
+
+.ev-aside {
+  position: sticky;
+  top: 5.5rem;
+  padding: 1.2rem;
+  height: fit-content;
+}
+
+.ev-price-label {
+  font-size: .62rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  font-weight: 900;
+  color: #7c766a;
+}
+
+.ev-price {
+  margin-top: .25rem;
+  margin-bottom: .7rem;
+  font-size: 2rem;
+  line-height: 1;
+  font-weight: 900;
+  color: #23354c;
+}
+
+.ev-price.free { color: #2d8b67; }
+
+.ev-proof {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  margin-bottom: .85rem;
+  padding: .38rem .68rem;
+  border-radius: 999px;
+  border: 1px solid rgba(141,116,71,.3);
+  background: #f8f0e1;
+  color: #7f6538;
+  font-size: .72rem;
+  font-weight: 800;
+}
+
+.ev-cta {
+  width: 100%;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: .45rem;
+  border-radius: 14px;
+  padding: .9rem 1.1rem;
+  text-decoration: none;
+  background: linear-gradient(135deg,#8d7447 0%, #b69763 55%, #dbc089 100%);
+  color: #fff;
+  font-size: .92rem;
+  font-weight: 900;
+  box-shadow: 0 12px 28px rgba(141,116,71,.35);
+}
+
+.ev-note {
+  margin-top: .8rem;
+  font-size: .74rem;
+  color: #5f6571;
+  line-height: 1.6;
+}
+
+@media (max-width: 980px) {
+  .ev-layout {
+    grid-template-columns: 1fr;
+  }
+  .ev-aside {
+    position: static;
+  }
+}
+
+@media (max-width: 640px) {
+  .ev-hero,
+  .ev-hero-inner {
+    min-height: 360px;
+  }
+  .ev-hero-inner {
+    padding: 1rem 0.85rem 1.35rem;
+  }
+  .ev-back {
+    font-size: .76rem;
+    margin-bottom: .75rem;
+  }
+  .ev-badge {
+    font-size: .58rem;
+    padding: .28rem .62rem;
+  }
+  .ev-sub {
+    font-size: .88rem;
+    line-height: 1.58;
+  }
+  .ev-layout {
+    padding: .9rem .8rem 2.4rem;
+    gap: .8rem;
+  }
+  .ev-card {
+    border-radius: 18px;
+  }
+  .ev-main,
+  .ev-aside {
+    padding: 1rem;
+  }
+  .ev-price {
+    font-size: 1.75rem;
+  }
+  .ev-cta {
+    min-height: 2.9rem;
+    font-size: .86rem;
+    text-align: center;
+  }
+  .ev-metrics {
+    grid-template-columns: 1fr;
+  }
+  .ev-reasons {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ev-page">
+  <section class="ev-hero">
+    <div class="ev-hero-bg">
+      {% if event.cover_image_url %}
+      <img src="{{ event.cover_image_url }}" alt="{{ event.title }}" />
+      {% else %}
+      <img src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1600&q=85" alt="{% trans "Ambiance evenement" %}" />
+      {% endif %}
+    </div>
+
+    <div class="ev-hero-inner">
+      <a href="/evenements/" class="ev-back">← {% trans "Retour aux evenements" %}</a>
+
+      <div class="ev-badges">
+        <span class="ev-badge ev-badge-main">{% trans "Officiel Mooviogo" %}</span>
+        {% if event.city %}<span class="ev-badge ev-badge-soft">📍 {{ event.city }}</span>{% endif %}
+        {% if event.starts_at %}<span class="ev-badge ev-badge-soft">🗓 {{ event.starts_at|date:"d M · H:i" }}</span>{% endif %}
+      </div>
+
+      <h1 class="ev-title">{{ event.title }}</h1>
+      <p class="ev-sub">{% trans "Une experience pensee pour faire des rencontres, vivre un vrai moment et repartir avec des souvenirs." %}</p>
+    </div>
+  </section>
+
+  <section class="ev-layout">
+    <article class="ev-card ev-main">
+      <div class="ev-metrics">
+        <div class="ev-metric">
+          <p class="ev-metric-label">{% trans "Ville" %}</p>
+          <p class="ev-metric-val">{% if event.city %}{{ event.city }}{% else %}{% trans "A confirmer" %}{% endif %}</p>
+        </div>
+        <div class="ev-metric">
+          <p class="ev-metric-label">{% trans "Date" %}</p>
+          <p class="ev-metric-val">{% if event.starts_at %}{{ event.starts_at|date:"d M Y" }}{% else %}{% trans "A venir" %}{% endif %}</p>
+        </div>
+        <div class="ev-metric">
+          <p class="ev-metric-label">{% trans "Horaire" %}</p>
+          <p class="ev-metric-val">{% if event.starts_at %}{{ event.starts_at|date:"H:i" }}{% else %}{% trans "Bientot" %}{% endif %}</p>
+        </div>
+      </div>
+
+      <p class="ev-section-title">{% trans "A propos de cet evenement" %}</p>
+      <p class="ev-desc">
+        {% if event.description %}
+        {{ event.description }}
+        {% else %}
+        {% trans "Viens partager une ambiance unique, rencontrer de nouvelles personnes et profiter d'un format pense pour passer une excellente soiree." %}
+        {% endif %}
+      </p>
+
+      <div class="ev-reasons">
+        <div class="ev-reason">⚡ {% trans "Ambiance conviviale et dynamique" %}</div>
+        <div class="ev-reason">🎯 {% trans "Accueil pense pour les nouveaux" %}</div>
+        <div class="ev-reason">📸 {% trans "Cadre ideal pour une vraie sortie" %}</div>
+        <div class="ev-reason">🤝 {% trans "Rencontres faciles sur place" %}</div>
+      </div>
+    </article>
+
+    <aside class="ev-card ev-aside">
+      <p class="ev-price-label">{% trans "Tarif" %}</p>
+      <p class="ev-price {% if not event.price %}free{% endif %}">
+        {% if event.price %}{{ event.price }} €{% else %}{% trans "Gratuit" %}{% endif %}
+      </p>
+
+      <div class="ev-proof">🔥 {% trans "Les places partent vite" %}</div>
+
+      {% if user.is_authenticated %}
+      <a href="/reservation/?event={{ event.id }}" class="ev-cta">{% trans "Reserver ma place maintenant" %}</a>
+      {% else %}
+      <a href="/connexion/?next=/evenements/{{ event.slug }}/" class="ev-cta">{% trans "Se connecter pour participer" %}</a>
+      {% endif %}
+
+      <p class="ev-note">{% trans "Confirmation rapide. Acces simple. Plus tu reserves tot, plus tu as de chances d'etre avec les premiers inscrits." %}</p>
+    </aside>
+  </section>
+
+  {% if event.latitude and event.longitude %}
+  <section class="ev-layout" style="margin-top:1rem">
+    <article class="ev-card ev-main" style="grid-column:1/-1">
+      <p class="ev-section-title">{% trans "Lieu sur la carte" %}</p>
+      {% include "web/partials/map.html" with map_lat=event.latitude map_lng=event.longitude map_label=event.city %}
+    </article>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

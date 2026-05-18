@@ -2,32 +2,37 @@
 {% block title %}Mes réservations | Mooviogo{% endblock %}
 
 {% block content %}
+<div class="mx-auto max-w-3xl px-4 py-12">
+  <a href="/profil/" class="inline-flex items-center text-sm text-white/60 hover:text-white mb-4">← Mon profil</a>
+  <h1 class="font-display text-3xl font-extrabold text-white">Mes réservations</h1>
+  <p class="mt-2 text-sm text-white/55">Toutes tes réservations restos et events.</p>
 
-<div class="pg-hdr">
-  <div class="mx-auto max-w-3xl px-4">
-    <a href="/profil/" class="back-link">← Mon profil</a>
-    <h1 style="font-size:1.8rem;font-weight:900;color:#fff;letter-spacing:-0.025em">Mes réservations</h1>
-  </div>
-</div>
-
-<div class="mx-auto max-w-3xl px-4" style="padding-top:3rem;padding-bottom:5rem">
   {% if bookings %}
-  <div style="display:flex;flex-direction:column;gap:0.75rem">
+  <div class="mt-8 space-y-3">
     {% for booking in bookings %}
-    <div class="pk" style="padding:1.1rem 1.4rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap">
-      <div>
-        <p style="font-size:0.92rem;font-weight:700;color:#fff">Réservation #{{ booking.id }}</p>
-        <p style="font-size:0.72rem;color:rgba(255,255,255,0.3);margin-top:0.2rem">{{ booking.created_at|date:"d M Y à H:i" }}</p>
+    <div class="panel p-5 flex items-center justify-between gap-4 flex-wrap">
+      <div class="flex items-center gap-4">
+        <div class="grid h-12 w-12 place-items-center rounded-2xl bg-grad-brand text-white font-display font-extrabold">#{{ forloop.counter }}</div>
+        <div>
+          <p class="font-display text-base font-extrabold text-white">Réservation #{{ booking.id }}</p>
+          <p class="text-xs text-white/45 mt-0.5">{{ booking.created_at|date:"d M Y · H:i" }}</p>
+        </div>
       </div>
-      <span class="tag {% if booking.status == 'CONFIRMED' %}tag-green{% elif booking.status == 'PENDING' %}tag-yellow{% elif booking.status == 'CANCELLED' %}tag-red{% else %}tag-gray{% endif %}">{{ booking.get_status_display }}</span>
+      <span class="chip {% if booking.status == 'CONFIRMED' %}chip-green{% elif booking.status == 'PENDING' %}chip-sunset{% elif booking.status == 'CANCELLED' %}chip-flamingo{% else %}chip-neutral{% endif %}">{{ booking.get_status_display }}</span>
     </div>
     {% endfor %}
   </div>
   {% else %}
-  <div style="border:1px dashed rgba(255,255,255,0.08);border-radius:24px;padding:5rem 2rem;text-align:center">
-    <svg xmlns="http://www.w3.org/2000/svg" style="width:2.5rem;height:2.5rem;color:rgba(255,255,255,0.1);margin:0 auto 1rem" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-    <p style="font-size:0.95rem;font-weight:700;color:rgba(255,255,255,0.4);margin-bottom:1.25rem">Aucune réservation pour le moment</p>
-    <a href="/restaurants/" class="btn-brand" style="font-size:0.85rem">Réserver un restaurant</a>
+  <div class="mt-10 panel p-12 text-center">
+    <div class="mx-auto h-14 w-14 grid place-items-center rounded-2xl bg-white/5">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+    </div>
+    <p class="mt-4 font-display text-lg font-extrabold text-white">Aucune réservation</p>
+    <p class="mt-1 text-sm text-white/55">Réserve ton premier resto ou event pour commencer.</p>
+    <div class="mt-5 flex gap-3 justify-center flex-wrap">
+      <a href="/restaurants/" class="btn-primary btn-sm">Trouver un resto</a>
+      <a href="/evenements/" class="btn-secondary btn-sm">Voir les events</a>
+    </div>
   </div>
   {% endif %}
 </div>

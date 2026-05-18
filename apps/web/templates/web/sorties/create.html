@@ -47,6 +47,17 @@
           </div>
         </div>
 
+        <div id="partner-field" style="display:none">
+          <label style="display:block;font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.45);margin-bottom:0.5rem">{% trans "Partenaire référencé" %} *</label>
+          <select name="partner_id" class="fi-input">
+            <option value="">{% trans "Sélectionner un partenaire" %}</option>
+            {% for p in partners %}
+            <option value="{{ p.id }}" {% if form.partner_id == p.id|stringformat:"s" %}selected{% endif %}>{{ p.name }} · {{ p.city }}</option>
+            {% endfor %}
+          </select>
+          {% if errors.partner_id %}<p style="margin-top:0.3rem;font-size:0.72rem;color:#F87171">{{ errors.partner_id }}</p>{% endif %}
+        </div>
+
         <div>
           <label style="display:block;font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.45);margin-bottom:0.5rem">{% trans "Adresse / lieu" %}</label>
           <div style="display:grid;grid-template-columns:1fr auto;gap:0.6rem;align-items:center">
@@ -141,10 +152,12 @@
     if (typeSelect.value === 'COMMUNAUTAIRE') {
       checkbox.checked = true;
       checkbox.disabled = true;
+      document.getElementById('partner-field').style.display = 'none';
       priceField.style.display = 'none';
       return;
     }
     checkbox.disabled = false;
+    document.getElementById('partner-field').style.display = 'block';
     priceField.style.display = checkbox.checked ? 'none' : 'block';
   }
 

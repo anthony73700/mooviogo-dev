@@ -1,997 +1,478 @@
 {% extends "base.html" %}
 {% load i18n %}
 {% block title %}{% trans "Sorties" %} | Mooviogo{% endblock %}
-{% block description %}{% trans "Sorties entre membres et experiences partenaires dans un format guide d'attractions." %}{% endblock %}
+{% block description %}{% trans "Sorties entre membres, soirées, restos, concerts — réservez et rejoignez la nuit." %}{% endblock %}
 
 {% block extra_head %}
 <style>
   :root {
-    --ta-green: #00aa6c;
-    --ta-green-700: #008a58;
-    --ta-ink: #1f2937;
-    --ta-muted: #6b7280;
-    --ta-line: #e5e7eb;
-    --ta-bg: #f6f8fb;
-    --ta-brand: linear-gradient(135deg, #ff6a4d 0%, #c084fc 62%, #f472b6 100%);
+    --apple-ink: #f5f7fb;
+    --apple-muted: rgba(235, 241, 250, 0.62);
+    --apple-glass: rgba(255, 255, 255, 0.045);
+    --apple-line: rgba(255, 255, 255, 0.12);
+    --apple-blue: #8ec5ff;
+    --apple-mint: #77e7c6;
+    --apple-rose: #ff9db4;
+    --apple-shell: #f6f7fa;
+    --apple-shell-line: rgba(12, 20, 34, 0.09);
+    --apple-shadow-soft: 0 26px 70px -42px rgba(13, 18, 28, 0.55);
+    --apple-shadow-float: 0 45px 100px -50px rgba(0, 0, 0, 0.9);
   }
-
-  .ta-page {
+  .store-list-grid { display:grid; grid-template-columns:minmax(0,1.08fr) minmax(300px,.92fr); gap:1rem; }
+  .store-list-card { position:relative; overflow:hidden; border:1px solid rgba(255,255,255,.08); border-radius:2rem; box-shadow:0 30px 80px -40px rgba(0,0,0,.82); }
+  .store-list-card.light {
     background:
-      radial-gradient(circle at 0% 0%, #eefcf6 0%, transparent 36%),
-      linear-gradient(180deg, #f8fafc 0%, #ffffff 40%);
-    min-height: 100vh;
-    color: var(--ta-ink);
+      radial-gradient(130% 110% at -15% -22%, rgba(142,197,255,.2), rgba(142,197,255,0)),
+      radial-gradient(120% 90% at 102% -8%, rgba(119,231,198,.16), rgba(119,231,198,0)),
+      linear-gradient(180deg, #fbfbfd 0%, #eef1f6 100%);
+    color:#0a0f16;
+    border-color: var(--apple-shell-line);
+    box-shadow: var(--apple-shadow-soft);
   }
-
-  .ta-wrap {
-    max-width: 1240px;
-    margin: 0 auto;
-    padding: 0 1rem;
+  .store-list-eyebrow {
+    display:inline-flex;
+    align-items:center;
+    gap:.4rem;
+    padding:.32rem .62rem;
+    border-radius:999px;
+    border:1px solid rgba(10,15,22,.12);
+    background:rgba(255,255,255,.62);
+    font-size:.66rem;
+    font-weight:700;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:rgba(10,15,22,.68);
   }
-
-  .ta-top {
-    padding: 1rem 0 0.7rem;
+  .store-list-card.dark { background:linear-gradient(180deg,#0e1218 0%,#090c12 100%); color:#fff; }
+  .store-list-body { position:relative; padding:1.7rem; }
+  .store-list-body::before {
+    content:"";
+    position:absolute;
+    top:-20%;
+    left:-16%;
+    width:320px;
+    height:320px;
+    border-radius:999px;
+    background:radial-gradient(circle, rgba(142,197,255,.2), rgba(142,197,255,0));
+    pointer-events:none;
   }
-
-  .ta-crumbs {
-    margin: 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.38rem;
-    font-size: 0.68rem;
-    font-weight: 700;
-    color: var(--ta-muted);
+  .store-list-title { font-family:"SF Pro Display","Geist",Inter,sans-serif; font-size:clamp(2.5rem,5vw,5rem); line-height:.96; letter-spacing:-.055em; font-weight:800; }
+  .store-list-copy { margin-top:1rem; max-width:40rem; font-size:1rem; line-height:1.78; color:rgba(255,255,255,.64); }
+  .store-list-card.light .store-list-copy { color:rgba(10,15,22,.62); }
+  .store-list-meta { display:grid; gap:.75rem; grid-template-columns:repeat(3,minmax(0,1fr)); margin-top:1.4rem; }
+  .store-list-meta > div {
+    border:1px solid rgba(10,15,22,.08);
+    border-radius:1.1rem;
+    background:linear-gradient(180deg, rgba(255,255,255,.66), rgba(255,255,255,.4));
+    backdrop-filter: blur(6px);
+    padding:1rem 1.05rem;
   }
-
-  .ta-crumbs a {
-    color: #2563eb;
-    text-decoration: none;
-  }
-
-  .ta-title {
-    margin: 0.45rem 0 0;
-    font-size: clamp(1.6rem, 3.8vw, 2.5rem);
-    line-height: 1.08;
-    letter-spacing: -0.02em;
-    font-weight: 900;
-    color: #0f172a;
-  }
-
-  .ta-sub {
-    margin: 0.42rem 0 0;
-    max-width: 78ch;
-    font-size: 0.83rem;
-    color: #334155;
-    line-height: 1.6;
-  }
-
-  .ta-search {
-    margin-top: 0.78rem;
-    display: grid;
-    grid-template-columns: 1.5fr 1fr auto;
-    gap: 0.45rem;
-    padding: 0.45rem;
-    background: #fff;
-    border: 1px solid var(--ta-line);
-    border-radius: 13px;
-    box-shadow: 0 10px 24px rgba(17, 24, 39, 0.06);
-  }
-
-  .ta-input {
-    min-height: 2.55rem;
-    border: 1px solid #d1d5db;
-    border-radius: 10px;
-    background: #fff;
-    color: #111827;
-    padding: 0 0.78rem;
-    font-size: 0.79rem;
-    outline: none;
-  }
-
-  .ta-input:focus {
-    border-color: rgba(0, 170, 108, 0.55);
-    box-shadow: 0 0 0 3px rgba(0, 170, 108, 0.14);
-  }
-
-  .ta-search-btn {
-    min-height: 2.55rem;
-    border: 0;
-    border-radius: 10px;
-    background: var(--ta-green);
-    color: #fff;
-    font-size: 0.73rem;
-    font-weight: 900;
-    letter-spacing: 0.02em;
-    cursor: pointer;
-    padding: 0 1rem;
-  }
-
-  .ta-search-btn:hover {
-    background: var(--ta-green-700);
-  }
-
-  .ta-sections {
-    margin-top: 0.72rem;
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 0.6rem;
-  }
-
-  .ta-sec {
-    border-radius: 12px;
-    border: 1px solid var(--ta-line);
-    background: #fff;
-    padding: 0.72rem;
-    box-shadow: 0 8px 20px rgba(17, 24, 39, 0.04);
-  }
-
-  .ta-sec b {
-    display: block;
-    color: #0f172a;
-    font-size: 0.77rem;
-    font-weight: 900;
-    line-height: 1.35;
-  }
-
-  .ta-sec span {
-    display: block;
-    margin-top: 0.22rem;
-    color: #64748b;
-    font-size: 0.66rem;
-    font-weight: 700;
-  }
-
-  .ta-featured {
-    margin-top: 0.75rem;
-    border-radius: 14px;
-    border: 1px solid var(--ta-line);
-    background: #fff;
-    padding: 0.78rem;
-    box-shadow: 0 10px 24px rgba(17, 24, 39, 0.05);
-  }
-
-  .ta-featured-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.6rem;
-    flex-wrap: wrap;
-    margin-bottom: 0.65rem;
-  }
-
-  .ta-featured-head h2 {
-    margin: 0;
-    font-size: 0.98rem;
-    font-weight: 900;
-    color: #0f172a;
-  }
-
-  .ta-featured-head p {
-    margin: 0;
-    font-size: 0.68rem;
-    font-weight: 700;
-    color: #64748b;
-  }
-
-  .ta-featured-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.65rem;
-  }
-
-  .ta-f-card {
-    border-radius: 11px;
-    overflow: hidden;
-    text-decoration: none;
-    border: 1px solid var(--ta-line);
-    background: #fff;
-    color: inherit;
-  }
-
-  .ta-f-media {
-    height: 130px;
-    background: #0f172a;
-  }
-
-  .ta-f-media img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-
-  .ta-f-ph {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: rgba(255, 255, 255, 0.82);
-    font-size: 1.6rem;
-    background: linear-gradient(150deg, #334155, #0f172a);
-  }
-
-  .ta-f-body {
-    padding: 0.58rem 0.62rem 0.65rem;
-  }
-
-  .ta-f-body p {
-    margin: 0;
-    font-size: 0.72rem;
-    font-weight: 900;
-    color: #0f172a;
-    line-height: 1.35;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  .ta-f-meta {
-    margin-top: 0.26rem;
-    font-size: 0.62rem;
-    color: #64748b;
-    font-weight: 700;
-  }
-
-  .ta-sticky {
-    position: sticky;
-    top: 68px;
-    z-index: 30;
-    margin-top: 0.78rem;
-    border: 1px solid var(--ta-line);
-    border-radius: 13px;
-    background: rgba(255, 255, 255, 0.96);
-    backdrop-filter: blur(10px);
-    box-shadow: 0 9px 22px rgba(17, 24, 39, 0.06);
-    padding: 0.45rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-  }
-
-  .ta-tabs {
-    display: flex;
-    align-items: center;
-    gap: 0.38rem;
-    flex-wrap: wrap;
-  }
-
-  .ta-tab {
-    min-height: 2rem;
-    border: 1px solid #d1d5db;
-    background: #fff;
-    color: #334155;
-    border-radius: 999px;
-    font-size: 0.67rem;
-    font-weight: 900;
-    padding: 0 0.72rem;
-    cursor: pointer;
-  }
-
-  .ta-tab.active {
-    border-color: transparent;
-    color: #fff;
-    background: var(--ta-green);
-  }
-
-  .ta-sort {
-    min-height: 2rem;
-    border-radius: 10px;
-    border: 1px solid #d1d5db;
-    background: #fff;
-    color: #0f172a;
-    padding: 0 0.62rem;
-    font-size: 0.68rem;
+  .store-list-pill { display:inline-flex; align-items:center; gap:.45rem; border-radius:999px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.05); padding:.48rem .78rem; font-size:.72rem; font-weight:700; }
+  .hero-btn-lg {
+    min-height: 52px;
+    padding: .88rem 1.35rem;
+    border-radius: 16px;
+    font-size: .94rem;
     font-weight: 800;
+    border: 1px solid rgba(255,255,255,.2);
+    box-shadow: 0 14px 32px -20px rgba(0,0,0,.9);
+    transition: transform .24s cubic-bezier(.22,1,.36,1), box-shadow .24s ease, filter .2s ease;
   }
-
-  .ta-main {
-    padding: 0.95rem 0 4rem;
+  .hero-btn-lg:hover { transform: translateY(-2px) scale(1.01); box-shadow: 0 22px 42px -24px rgba(0,0,0,.95); filter: saturate(1.06); }
+  .hero-visual { position:relative; min-height:430px; }
+  .hero-visual-media { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  .hero-visual::before {
+    content:"";
+    position:absolute;
+    inset:-20% -20% auto auto;
+    width:340px;
+    height:340px;
+    border-radius:999px;
+    background:radial-gradient(circle, rgba(142,197,255,.22), rgba(142,197,255,0));
+    z-index:0;
+    pointer-events:none;
   }
-
-  .ta-layout {
-    display: grid;
-    grid-template-columns: 292px minmax(0, 1fr);
-    gap: 0.9rem;
-    align-items: start;
+  .hero-visual::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(6,10,18,.06) 12%,rgba(6,10,18,.34) 52%,rgba(6,10,18,.95) 100%); }
+  .hero-film {
+    position:absolute;
+    inset:0;
+    z-index:1;
+    pointer-events:none;
+    background:
+      radial-gradient(130% 82% at 50% 0%, rgba(255,255,255,.12), rgba(255,255,255,0)),
+      linear-gradient(180deg, rgba(8,12,18,0) 0%, rgba(8,12,18,.24) 60%, rgba(8,12,18,.48) 100%);
+    mix-blend-mode:screen;
   }
-
-  .ta-filter {
-    position: sticky;
-    top: 142px;
+  .hero-visual-content { position:relative; z-index:1; padding:1.25rem; display:flex; min-height:430px; flex-direction:column; justify-content:space-between; }
+  .hero-glass {
+    border:1px solid rgba(255,255,255,.22);
+    border-radius:18px;
+    background:linear-gradient(180deg, rgba(11,14,22,.58), rgba(11,14,22,.37));
+    backdrop-filter:blur(16px) saturate(125%);
+    box-shadow: var(--apple-shadow-float);
+    padding:1rem;
   }
-
-  .ta-box {
-    border: 1px solid var(--ta-line);
-    border-radius: 12px;
-    background: #fff;
-    box-shadow: 0 8px 20px rgba(17, 24, 39, 0.05);
-    padding: 0.72rem;
-    margin-bottom: 0.62rem;
+  .hero-title {
+    font-family:"SF Pro Display","Geist",Inter,sans-serif;
+    font-size:clamp(1.68rem,2.2vw,2.15rem);
+    line-height:1.03;
+    letter-spacing:-.03em;
+    font-weight:800;
+    color:#fff;
   }
-
-  .ta-box h3 {
-    margin: 0;
-    font-size: 0.78rem;
-    font-weight: 900;
-    color: #0f172a;
+  .hero-kicker {
+    display:inline-flex;
+    align-items:center;
+    gap:.45rem;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.2);
+    background:rgba(255,255,255,.08);
+    color:rgba(255,255,255,.9);
+    font-size:.68rem;
+    font-weight:700;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    padding:.34rem .64rem;
   }
-
-  .ta-box p {
-    margin: 0.4rem 0 0;
-    color: #64748b;
-    font-size: 0.65rem;
-    line-height: 1.5;
+  .hero-sub {
+    margin-top:.55rem;
+    font-size:.95rem;
+    line-height:1.7;
+    color:rgba(255,255,255,.8);
+    max-width:42ch;
   }
-
-  .ta-city-list {
-    list-style: none;
-    margin: 0.55rem 0 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
+  .hero-pill-minimal {
+    display:inline-flex;
+    align-items:center;
+    gap:.35rem;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.18);
+    background:rgba(255,255,255,.08);
+    color:rgba(255,255,255,.92);
+    font-size:.68rem;
+    font-weight:700;
+    letter-spacing:.03em;
+    padding:.4rem .66rem;
   }
-
-  .ta-city-list a {
-    min-height: 2rem;
-    border: 1px solid var(--ta-line);
-    border-radius: 9px;
-    background: #fff;
-    text-decoration: none;
-    color: #374151;
-    font-size: 0.66rem;
+  .hero-action-row { margin-top:1rem; display:grid; grid-template-columns:1fr; gap:.62rem; }
+  .hero-action-row a { justify-content:center; }
+  .hero-btn-primary {
+    background:linear-gradient(180deg, rgba(255,255,255,.96), rgba(236,242,250,.94));
+    color:#0c1420;
+    border-color:rgba(255,255,255,.7);
+  }
+  .hero-btn-secondary {
+    background:linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.07));
+    color:#fff;
+    border-color:rgba(255,255,255,.3);
+  }
+  .hero-btn-caption {
+    display:block;
+    margin-top:.2rem;
+    font-size:.67rem;
+    letter-spacing:.02em;
+    font-weight:600;
+    opacity:.72;
+  }
+  .list-hero-grid { display:grid; grid-template-columns:minmax(0,1.15fr) minmax(280px,.85fr); gap:1.25rem; }
+  .list-side-panel { border:1px solid rgba(255,255,255,.08); border-radius:30px; background:rgba(255,255,255,.035); padding:1.25rem; box-shadow:0 24px 60px -34px rgba(0,0,0,.82); backdrop-filter:blur(14px); }
+  .list-photo-card {
+    position:relative;
+    min-height:420px;
+    overflow:hidden;
+    border-radius:30px;
+    border:1px solid var(--apple-line);
+    box-shadow:0 30px 80px -36px rgba(0,0,0,.85);
+    transform:translateY(0);
+    transition:transform .3s cubic-bezier(.22,1,.36,1), box-shadow .35s ease, border-color .25s ease;
+  }
+  .list-photo-card::after {
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(180deg,rgba(7,10,18,.05) 8%,rgba(7,10,18,.2) 46%,rgba(7,10,18,.94) 100%);
+    pointer-events:none;
+  }
+  .list-photo-card:hover { transform:translateY(-4px); box-shadow:0 38px 92px -40px rgba(0,0,0,.95); }
+  .list-photo-card.card-member { border-color:rgba(119,231,198,.36); box-shadow:0 30px 78px -36px rgba(39,197,156,.42); }
+  .list-photo-card.card-member::before { content:""; position:absolute; inset:-35% auto auto -20%; height:280px; width:280px; border-radius:999px; background:radial-gradient(circle,rgba(52,211,153,.16),rgba(52,211,153,0)); z-index:1; pointer-events:none; }
+  .list-photo-card.card-partner { border-color:rgba(255,157,180,.36); box-shadow:0 30px 78px -36px rgba(244,63,94,.45); }
+  .list-photo-card.card-partner::before { content:""; position:absolute; inset:-35% -20% auto auto; height:280px; width:280px; border-radius:999px; background:radial-gradient(circle,rgba(251,113,133,.16),rgba(251,113,133,0)); z-index:1; pointer-events:none; }
+  .list-photo-media { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; transition:transform .75s cubic-bezier(.22,1,.36,1), filter .35s ease; filter:saturate(.98) contrast(1.02); }
+  .group:hover .list-photo-media { transform:scale(1.055); filter:saturate(1.1) contrast(1.05); }
+  .list-photo-top { position:absolute; inset:1rem 1rem auto 1rem; z-index:2; display:flex; align-items:flex-start; justify-content:space-between; gap:.75rem; }
+  .list-photo-bottom { position:absolute; inset:auto 0 0 0; z-index:2; padding:1.1rem; }
+  .split-wrap {
+    border:1px solid var(--apple-line);
+    border-radius:28px;
+    padding:1rem;
+    background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.015));
+    backdrop-filter:blur(16px);
+  }
+  .split-wrap.member-wrap {
+    background:
+      radial-gradient(120% 110% at -8% -15%, rgba(119,231,198,.14), rgba(119,231,198,0)),
+      linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.015));
+  }
+  .split-wrap.partner-wrap {
+    background:
+      radial-gradient(120% 110% at 108% -15%, rgba(255,157,180,.14), rgba(255,157,180,0)),
+      linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.015));
+  }
+  .reveal-up {
+    opacity: 0;
+    transform: translateY(16px) scale(.985);
+    animation: revealUp .7s cubic-bezier(.22,1,.36,1) forwards;
+  }
+  .reveal-up.d2 { animation-delay: .08s; }
+  .reveal-up.d3 { animation-delay: .16s; }
+  .reveal-up.d4 { animation-delay: .24s; }
+  .reveal-up.d5 { animation-delay: .32s; }
+  @keyframes revealUp {
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  .filter-pill { position:relative; }
+  .filter-pill input { position:absolute; opacity:0; inset:0; cursor:pointer; }
+  .pill-face,
+  .filter-pill .pill-face {
+    display:inline-flex;
+    align-items:center;
+    gap:.4rem;
+    padding:.5rem 1rem;
+    border-radius:9999px;
+    border:1px solid rgba(255,255,255,0.16);
+    background:rgba(255,255,255,0.05);
+    color:rgba(255,255,255,0.9);
+    font-size:.82rem;
+    font-weight:700;
+    transition:all .18s;
+    cursor:pointer;
+    white-space:nowrap;
+    text-decoration:none;
+  }
+  .filter-pill input:checked + .pill-face,
+  .filter-pill:hover .pill-face,
+  .pill-face:hover { background:rgba(255,255,255,0.12); border-color:rgba(255,255,255,0.28); color:#fff; box-shadow:0 6px 20px -8px rgba(0,0,0,.5); }
+  .tab-active-all { background:linear-gradient(180deg,rgba(142,197,255,.3),rgba(142,197,255,.12)); border-color:rgba(142,197,255,.6); box-shadow:0 10px 26px -14px rgba(142,197,255,.75); }
+  .tab-active-member { background:linear-gradient(180deg,rgba(119,231,198,.3),rgba(119,231,198,.12)); border-color:rgba(119,231,198,.6); box-shadow:0 10px 26px -14px rgba(119,231,198,.75); }
+  .tab-active-partner { background:linear-gradient(180deg,rgba(255,157,180,.3),rgba(255,157,180,.12)); border-color:rgba(255,157,180,.6); box-shadow:0 10px 26px -14px rgba(255,157,180,.75); }
+  .mode-banner {
+    margin-bottom: 1.1rem;
+    border-radius: 18px;
+    border: 1px solid rgba(255,255,255,.16);
+    padding: .9rem 1rem;
     font-weight: 800;
-    padding: 0 0.55rem;
+    letter-spacing: .01em;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0.35rem;
+    gap: .75rem;
   }
-
-  .ta-city-list .count {
-    font-size: 0.58rem;
-    color: #64748b;
-    font-weight: 900;
-  }
-
-  .ta-results-head {
-    border: 1px solid var(--ta-line);
-    border-radius: 12px;
-    background: #fff;
-    padding: 0.74rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-bottom: 0.65rem;
-  }
-
-  .ta-results-head h2 {
-    margin: 0;
-    font-size: 0.98rem;
-    font-weight: 900;
-    color: #0f172a;
-  }
-
-  .ta-results-head p {
-    margin: 0;
-    font-size: 0.68rem;
-    color: #64748b;
-    font-weight: 700;
-  }
-
-  .ta-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.68rem;
-  }
-
-  .ta-item {
-    border: 1px solid var(--ta-line);
-    border-radius: 12px;
-    background: #fff;
-    overflow: hidden;
-    text-decoration: none;
-    color: inherit;
-    display: grid;
-    grid-template-columns: 236px minmax(0, 1fr);
-    box-shadow: 0 10px 24px rgba(17, 24, 39, 0.05);
-    transition: transform 0.16s ease, box-shadow 0.16s ease;
-  }
-
-  .ta-item:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 14px 32px rgba(17, 24, 39, 0.1);
-  }
-
-  .ta-media {
-    position: relative;
-    min-height: 198px;
-    background: #0f172a;
-  }
-
-  .ta-media img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-
-  .ta-ph {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: rgba(255, 255, 255, 0.82);
-    font-size: 2rem;
-    background: linear-gradient(150deg, #334155, #0f172a);
-  }
-
-  .ta-badge {
-    position: absolute;
-    top: 0.5rem;
-    left: 0.5rem;
-    border-radius: 999px;
-    min-height: 1.35rem;
-    padding: 0 0.5rem;
-    display: inline-flex;
-    align-items: center;
-    font-size: 0.55rem;
-    font-weight: 900;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: #fff;
-    background: var(--ta-brand);
-    border: 1px solid rgba(255, 255, 255, 0.25);
-  }
-
-  .ta-body {
-    padding: 0.75rem 0.78rem 0.8rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-  }
-
-  .ta-rank {
-    margin: 0;
-    font-size: 0.62rem;
-    font-weight: 900;
-    color: #64748b;
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
-  }
-
-  .ta-name {
-    margin: 0;
-    color: #0f172a;
-    font-size: 1rem;
-    font-weight: 900;
-    line-height: 1.3;
-  }
-
-  .ta-rating {
-    display: flex;
-    align-items: center;
-    gap: 0.28rem;
-    flex-wrap: wrap;
-  }
-
-  .ta-dots {
-    display: inline-flex;
-    gap: 0.15rem;
-  }
-
-  .ta-dot {
-    width: 0.53rem;
-    height: 0.53rem;
-    border-radius: 999px;
-    background: #cbd5e1;
-  }
-
-  .ta-dot.on {
-    background: var(--ta-green);
-  }
-
-  .ta-rating span {
-    font-size: 0.65rem;
-    color: #334155;
-    font-weight: 800;
-  }
-
-  .ta-meta {
-    margin: 0;
-    color: #475569;
-    font-size: 0.68rem;
-    line-height: 1.5;
-  }
-
-  .ta-desc {
-    margin: 0;
-    color: #64748b;
-    font-size: 0.68rem;
-    line-height: 1.56;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  .ta-foot {
-    margin-top: auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.45rem;
-    flex-wrap: wrap;
-    padding-top: 0.25rem;
-  }
-
-  .ta-pills {
-    display: flex;
-    align-items: center;
-    gap: 0.34rem;
-    flex-wrap: wrap;
-  }
-
-  .ta-pill {
-    min-height: 1.38rem;
-    border-radius: 999px;
-    border: 1px solid #d1d5db;
-    background: #fff;
-    padding: 0 0.5rem;
-    display: inline-flex;
-    align-items: center;
-    font-size: 0.6rem;
-    font-weight: 900;
-    color: #334155;
-  }
-
-  .ta-pill.price {
-    border-color: #bbf7d0;
-    color: #065f46;
-    background: #ecfdf5;
-  }
-
-  .ta-cta {
-    min-height: 2rem;
-    border-radius: 10px;
-    padding: 0 0.82rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-    color: #fff;
-    background: var(--ta-green);
-    font-size: 0.68rem;
-    font-weight: 900;
-    white-space: nowrap;
-  }
-
-  .ta-cta:hover {
-    background: var(--ta-green-700);
-  }
-
-  .ta-empty {
-    border-radius: 12px;
-    border: 1px dashed #cbd5e1;
-    background: #fff;
-    text-align: center;
-    padding: 3rem 1rem;
-  }
-
-  .ta-empty h3 {
-    margin: 0;
-    font-size: 1.05rem;
-    font-weight: 900;
-  }
-
-  .ta-empty p {
-    margin: 0.5rem 0 0;
-    color: #64748b;
-    font-size: 0.8rem;
-  }
-
-  .ta-pag {
-    margin-top: 0.95rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-  }
-
-  .ta-pag a {
-    min-height: 2rem;
-    border-radius: 10px;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    padding: 0 0.9rem;
-    color: #fff;
-    font-size: 0.69rem;
-    font-weight: 900;
-    background: var(--ta-green);
-  }
-
-  .ta-pag span {
-    font-size: 0.69rem;
-    font-weight: 800;
-    color: #64748b;
-  }
-
-  .ta-join {
-    margin-top: 1rem;
-    border: 1px solid #bbf7d0;
-    border-radius: 12px;
-    background: linear-gradient(160deg, #effef6 0%, #ffffff 100%);
-    text-align: center;
-    padding: 1rem;
-  }
-
-  .ta-join h3 {
-    margin: 0;
-    font-size: 1.1rem;
-    font-weight: 900;
-  }
-
-  .ta-join p {
-    margin: 0.5rem auto 0.82rem;
-    max-width: 64ch;
-    font-size: 0.77rem;
-    line-height: 1.58;
-    color: #64748b;
-  }
-
-  .ta-join a {
-    min-height: 2.2rem;
-    border-radius: 10px;
-    text-decoration: none;
-    color: #fff;
-    font-size: 0.72rem;
-    font-weight: 900;
-    padding: 0 0.95rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--ta-brand);
-    box-shadow: 0 10px 20px rgba(192, 132, 252, 0.3);
-  }
-
-  @media (max-width: 1080px) {
-    .ta-sections {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .ta-featured-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .ta-layout {
-      grid-template-columns: 1fr;
-    }
-
-    .ta-filter {
-      position: static;
-      order: 2;
-    }
-  }
-
-  @media (max-width: 860px) {
-    .ta-search {
-      grid-template-columns: 1fr;
-    }
-
-    .ta-item {
-      grid-template-columns: 1fr;
-    }
-
-    .ta-media {
-      min-height: 220px;
-    }
-  }
-
-  @media (max-width: 720px) {
-    .ta-sections,
-    .ta-featured-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .ta-sticky {
-      position: static;
-    }
-
-    .ta-tab,
-    .ta-sort,
-    .ta-cta,
-    .ta-pag a,
-    .ta-join a {
-      min-height: 2.6rem;
-      font-size: 0.74rem;
-    }
-  }
+  .mode-banner small { display:block; font-weight:500; color:rgba(255,255,255,.72); margin-top:.2rem; }
+  .mode-all { background:linear-gradient(90deg,rgba(142,197,255,.22),rgba(142,197,255,.08)); }
+  .mode-member { background:linear-gradient(90deg,rgba(119,231,198,.22),rgba(119,231,198,.08)); }
+  .mode-partner { background:linear-gradient(90deg,rgba(255,157,180,.22),rgba(255,157,180,.08)); }
+  .rank-badge { position:absolute; top:.7rem; left:.7rem; z-index:2; display:inline-flex; align-items:center; justify-content:center; height:1.9rem; min-width:1.9rem; padding:0 .5rem; border-radius:9999px; background:rgba(0,0,0,0.55); backdrop-filter:blur(8px); color:#fff; font-weight:800; font-size:.75rem; border:1px solid rgba(255,255,255,0.15); }
+  .save-btn { position:absolute; top:.55rem; right:.55rem; z-index:2; display:grid; place-items:center; height:2rem; width:2rem; border-radius:9999px; background:rgba(0,0,0,0.36); backdrop-filter:blur(10px); color:#fff; border:1px solid rgba(255,255,255,0.2); transition:all .2s; }
+  .save-btn:hover { background:rgba(255,255,255,0.14); border-color:rgba(255,255,255,0.22); }
+  @media (max-width: 1024px) { .list-hero-grid, .store-list-grid, .store-list-meta { grid-template-columns:1fr; } .hero-action-row { grid-template-columns:1fr; } .store-list-title { font-size:clamp(2rem,8vw,3.1rem); } }
+  @media (min-width: 520px) { .hero-action-row { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="ta-page">
-  <section class="ta-top">
-    <div class="ta-wrap">
-      <p class="ta-crumbs">
-        <a href="/">{% trans "Accueil" %}</a>
-        <span>/</span>
-        <span>{% trans "Sorties" %}</span>
-      </p>
 
-      <h1 class="ta-title">{% trans "Attractions et sorties a faire pres de chez toi" %}</h1>
-      <p class="ta-sub">{% trans "Meme logique de disposition qu'une page guide: sections claires, filtres visibles, grandes images, informations de decision et actions directes." %}</p>
-
-      <form method="get" action="/sorties/" class="ta-search" aria-label="{% trans "Recherche de sorties" %}">
-        <input type="hidden" name="type" value="{{ request.GET.type }}" />
-        <input type="hidden" name="free" value="{{ request.GET.free }}" />
-        <input class="ta-input" type="text" name="q" value="{{ request.GET.q }}" placeholder="{% trans "Que veux-tu faire ?" %}" aria-label="{% trans "Recherche" %}" />
-        <input class="ta-input" type="text" name="city" value="{{ request.GET.city }}" placeholder="{% trans "Ville" %}" aria-label="{% trans "Ville" %}" />
-        <button type="submit" class="ta-search-btn">{% trans "Rechercher" %}</button>
-      </form>
-
-      <div class="ta-sections">
-        <div class="ta-sec"><b>{{ total_count }} {% trans "sortie" %}{{ total_count|pluralize }}</b><span>{% trans "Resultats disponibles maintenant" %}</span></div>
-        <div class="ta-sec"><b>{% trans "Sorties entre membres" %}</b><span>{% trans "Toujours gratuites" %}</span></div>
-        <div class="ta-sec"><b>{% trans "Sorties partenaires" %}</b><span>{% trans "Prix et infos verifies" %}</span></div>
-        <div class="ta-sec"><b>{% trans "Nightlife separee" %}</b><span>{% trans "Accessible via la section events" %}</span></div>
-      </div>
-
-      {% if sorties %}
-      <section class="ta-featured">
-        <div class="ta-featured-head">
-          <h2>{% trans "Experiences a ne pas manquer" %}</h2>
-          <p>{% trans "Selection basee sur les sorties affichees" %}</p>
+{# ───────── Hero compact ───────── #}
+<section class="mx-auto max-w-7xl px-4 pt-10 pb-8 sm:pt-14 sm:pb-10">
+  <nav class="text-xs text-white/50 mb-3 flex items-center gap-2" aria-label="Breadcrumb">
+    <a href="/" class="hover:text-white">{% trans "Accueil" %}</a>
+    <span>›</span>
+    <span class="text-white/80">{% trans "Sorties" %}</span>
+  </nav>
+  <div class="store-list-grid">
+    <div class="store-list-card light">
+      <div class="store-list-body">
+        <span class="store-list-eyebrow">{% trans "Sorties curatées" %}</span>
+        <h1 class="store-list-title mt-3">{% trans "Les sorties à rejoindre ce soir." %}</h1>
+        <p class="store-list-copy">{% trans "Une lecture plus simple et plus éditoriale des sorties communautaires et partenaires, pour comprendre l’ambiance et décider plus vite." %}</p>
+        <div class="store-list-meta">
+          <div><div class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-black/38">{% trans "Résultats" %}</div><div class="mt-2 text-sm font-semibold text-black/88">{{ total_count|default:0 }} {% trans "sorties" %}</div></div>
+          <div><div class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-black/38">{% trans "Lecture" %}</div><div class="mt-2 text-sm font-semibold text-black/88">{% trans "Mood d’abord" %}</div></div>
+          <div><div class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-black/38">{% trans "Action" %}</div><div class="mt-2 text-sm font-semibold text-black/88">{% trans "Rejoindre vite" %}</div></div>
         </div>
+        <form method="get" class="mt-6 flex items-stretch rounded-full border border-black/10 bg-white/60 p-1.5 shadow-[0_12px_26px_-20px_rgba(0,0,0,.5)] max-w-3xl">
+          <input name="q" value="{{ request.GET.q }}" type="search" placeholder="{% trans 'Mot-clé, type de sortie…' %}" class="flex-1 bg-transparent border-0 px-5 text-sm sm:text-base text-black placeholder:text-black/35 focus:ring-0 focus:outline-none" />
+          <input name="city" value="{{ request.GET.city }}" type="text" placeholder="{% trans 'Ville' %}" class="hidden sm:block w-36 bg-transparent border-0 border-l border-black/10 px-5 text-sm text-black placeholder:text-black/35 focus:ring-0 focus:outline-none" />
+          <button type="submit" class="btn-dice hero-btn-lg rounded-full">{% trans "Rechercher" %}</button>
+        </form>
+      </div>
+    </div>
+    <aside class="store-list-card dark hero-visual">
+      {% if hero_sortie and hero_sortie.cover_image_url %}
+      <img src="{{ hero_sortie.cover_image_url }}" alt="{{ hero_sortie.title }}" class="hero-visual-media" />
+      {% else %}
+      <div class="absolute inset-0 bg-grad-brand"></div>
+      {% endif %}
+      <div class="hero-film"></div>
+      <div class="hero-visual-content">
+        <div class="flex flex-wrap gap-2">
+          <span class="hero-pill-minimal">{{ total_count|default:0 }} {% trans "résultats" %}</span>
+          <span class="hero-pill-minimal">{% trans "Social first" %}</span>
+        </div>
+        <div class="hero-glass">
+          <span class="hero-kicker">{% trans "Créer plus vite" %}</span>
+          <h2 class="hero-title">{% trans "Les groupes que tu comprends en un regard" %}</h2>
+          <p class="hero-sub">{% trans "Moins de friction, plus de projection: qui organise, où, combien de monde, et si ça vaut le clic." %}</p>
+          <div class="hero-action-row">
+            {% if user.is_authenticated %}
+            <a href="/sorties/creer/?type=COMMUNAUTAIRE" class="hero-btn-lg hero-btn-primary">{% trans "Créer une sortie entre membres" %}<span class="hero-btn-caption">{% trans "Ambiance communautaire" %}</span></a>
+            <a href="/sorties/creer/?type=PARTENAIRE" class="hero-btn-lg hero-btn-secondary">{% trans "Créer une sortie chez un partenaire" %}<span class="hero-btn-caption">{% trans "Lieu validé par un établissement" %}</span></a>
+            {% else %}
+            <a href="/connexion/?next=/sorties/creer/%3Ftype%3DCOMMUNAUTAIRE" class="hero-btn-lg hero-btn-primary">{% trans "Créer une sortie entre membres" %}<span class="hero-btn-caption">{% trans "Ambiance communautaire" %}</span></a>
+            <a href="/connexion/?next=/sorties/creer/%3Ftype%3DPARTENAIRE" class="hero-btn-lg hero-btn-secondary">{% trans "Créer une sortie chez un partenaire" %}<span class="hero-btn-caption">{% trans "Lieu validé par un établissement" %}</span></a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</section>
 
-        <div class="ta-featured-grid">
-          {% for sortie in sorties|slice:":3" %}
-          <a href="/sorties/{{ sortie.id }}/" class="ta-f-card">
-            <div class="ta-f-media">
-              {% if sortie.cover_image_url %}
-              <img src="{{ sortie.cover_image_url }}" alt="{{ sortie.title }}" loading="lazy" />
-              {% else %}
-              <div class="ta-f-ph">{% if sortie.type == 'PARTENAIRE' %}🎯{% else %}👥{% endif %}</div>
-              {% endif %}
+{# ───────── Filter strip sticky ───────── #}
+<section class="glass-strong border-y border-white/[0.06]">
+  <div class="mx-auto max-w-7xl px-4 py-3">
+    <form method="get" id="filtersForm" class="flex flex-wrap items-center gap-2">
+      {% if request.GET.q %}<input type="hidden" name="q" value="{{ request.GET.q }}" />{% endif %}
+      {% if request.GET.city %}<input type="hidden" name="city" value="{{ request.GET.city }}" />{% endif %}
+
+      <span class="text-[0.7rem] uppercase tracking-wider text-white/45 font-semibold mr-2">{% trans "Type" %}</span>
+      <a href="/sorties/?{% if request.GET.q %}q={{ request.GET.q|urlencode }}&{% endif %}{% if request.GET.city %}city={{ request.GET.city|urlencode }}&{% endif %}{% if request.GET.free %}free={{ request.GET.free|urlencode }}&{% endif %}" class="pill-face {% if not request.GET.type %}tab-active-all{% endif %}">🌐 {% trans "Tous" %} ({{ total_count }})</a>
+      <a href="/sorties/?type=COMMUNAUTAIRE{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city|urlencode }}{% endif %}{% if request.GET.free %}&free={{ request.GET.free|urlencode }}{% endif %}" class="pill-face {% if request.GET.type == "COMMUNAUTAIRE" %}tab-active-member{% endif %}">👥 {% trans "Membres" %} ({{ member_count }})</a>
+      <a href="/sorties/?type=PARTENAIRE{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city|urlencode }}{% endif %}{% if request.GET.free %}&free={{ request.GET.free|urlencode }}{% endif %}" class="pill-face {% if request.GET.type == "PARTENAIRE" %}tab-active-partner{% endif %}">🤝 {% trans "Partenaire" %} ({{ partner_count }})</a>
+
+      <span class="mx-2 h-5 w-px bg-white/10"></span>
+
+      <span class="text-[0.7rem] uppercase tracking-wider text-white/45 font-semibold mr-2">{% trans "Prix" %}</span>
+      <label class="filter-pill"><input type="radio" name="free" value="" {% if not request.GET.free %}checked{% endif %} onchange="this.form.submit()"><span class="pill-face">💸 {% trans "Tous" %}</span></label>
+      <label class="filter-pill"><input type="radio" name="free" value="1" {% if request.GET.free == "1" %}checked{% endif %} onchange="this.form.submit()"><span class="pill-face">✨ {% trans "Gratuit" %}</span></label>
+      <label class="filter-pill"><input type="radio" name="free" value="0" {% if request.GET.free == "0" %}checked{% endif %} onchange="this.form.submit()"><span class="pill-face">🎟️ {% trans "Payant" %}</span></label>
+
+      {% if request.GET.type or request.GET.free or request.GET.q or request.GET.city %}
+      <a href="/sorties/" class="ml-auto text-xs text-white/55 hover:text-white underline">{% trans "Effacer" %}</a>
+      {% endif %}
+    </form>
+  </div>
+</section>
+
+{# ───────── Grid ───────── #}
+<section class="mx-auto max-w-7xl px-4 py-10">
+  {% if is_all_types %}
+    <div class="space-y-10">
+      <div>
+        <div class="split-wrap member-wrap reveal-up d2">
+        <div class="mb-4 flex items-center justify-between">
+          <h3 class="font-display text-xl font-bold text-white">👥 {% trans "Sorties membres" %}</h3>
+          <span class="chip chip-dark">{{ member_count }} {% trans "résultats" %}</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+          {% for s in member_sorties %}
+          <a href="/sorties/{{ s.id }}/" class="list-photo-card card-member block group reveal-up d3">
+            <div class="list-photo-top">
+              <div class="flex flex-wrap gap-2"><span class="chip chip-neon">👥 {% trans "Membres" %}</span></div>
+              <button type="button" class="save-btn" aria-label="{% trans 'Enregistrer' %}" onclick="event.preventDefault();this.classList.toggle('text-flamingo-400');"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21s-7-4.534-9.5-9C1.07 9.36 2.5 6 5.5 6c1.74 0 3.41 1 4.5 2.5C11.09 7 12.76 6 14.5 6c3 0 4.43 3.36 3 6-2.5 4.466-9.5 9-9.5 9z" stroke="currentColor" stroke-width="1.5" fill="none"/></svg></button>
             </div>
-            <div class="ta-f-body">
-              <p>{{ sortie.title }}</p>
-              <div class="ta-f-meta">{{ sortie.city }}{% if sortie.starts_at %} · {{ sortie.starts_at|date:"d M" }}{% endif %}</div>
+            {% if s.cover_image_url %}<img src="{{ s.cover_image_url }}" alt="{{ s.title }}" loading="lazy" class="list-photo-media" />{% else %}<div class="absolute inset-0 bg-grad-brand"></div>{% endif %}
+            <div class="list-photo-bottom">
+              <div class="flex items-center gap-2 mb-2 flex-wrap">{% if s.is_free %}<span class="chip chip-green">{% trans "Gratuit" %}</span>{% else %}<span class="chip chip-sunset">{{ s.price|floatformat:0 }}€</span>{% endif %}<span class="chip chip-dark">📍 {{ s.city }}</span></div>
+              <div class="font-display text-2xl font-extrabold tracking-tight text-white">{{ s.title }}</div>
+              <p class="mt-2 text-sm leading-6 text-white/65 line-clamp-2">{{ s.description|default:_('Une sortie sociale pensée pour déclencher une décision rapide.')|truncatechars:100 }}</p>
+              <div class="mt-3 pt-3 border-t border-white/10 flex items-center justify-between text-xs"><span class="text-white/55">👤 {{ s.participant_count|default:0 }}{% if s.max_participants %} / {{ s.max_participants }}{% endif %} {% trans "participants" %}</span><span class="text-flamingo-400 font-semibold group-hover:translate-x-1 transition-transform">{% trans "Voir →" %}</span></div>
             </div>
           </a>
+          {% empty %}
+          <div class="col-span-full panel text-center py-12"><p class="text-white/55">{% trans "Aucune sortie membre selon ces filtres." %}</p></div>
           {% endfor %}
         </div>
-      </section>
-      {% endif %}
-
-      <div class="ta-sticky">
-        <div class="ta-tabs">
-          <button type="button" class="ta-tab {% if not request.GET.type and not request.GET.free %}active{% endif %}" onclick="setFilter('type','');setFilter('free','')" aria-pressed="{% if not request.GET.type and not request.GET.free %}true{% else %}false{% endif %}">{% trans "Toutes" %}</button>
-          <button type="button" class="ta-tab {% if request.GET.type == 'COMMUNAUTAIRE' %}active{% endif %}" onclick="setFilter('type','COMMUNAUTAIRE');setFilter('free','')" aria-pressed="{% if request.GET.type == 'COMMUNAUTAIRE' %}true{% else %}false{% endif %}">{% trans "Entre membres" %}</button>
-          <button type="button" class="ta-tab {% if request.GET.type == 'PARTENAIRE' %}active{% endif %}" onclick="setFilter('type','PARTENAIRE');setFilter('free','')" aria-pressed="{% if request.GET.type == 'PARTENAIRE' %}true{% else %}false{% endif %}">{% trans "Partenaires" %}</button>
-          <button type="button" class="ta-tab {% if request.GET.free == '1' %}active{% endif %}" onclick="setFilter('free','{% if request.GET.free == '1' %}{% else %}1{% endif %}')" aria-pressed="{% if request.GET.free == '1' %}true{% else %}false{% endif %}">{% trans "Gratuit" %}</button>
-          <button type="button" class="ta-tab" onclick="window.location.href='/evenements/'" aria-pressed="false">{% trans "Events nightlife" %}</button>
-        </div>
-
-        <select id="ta-sort" class="ta-sort" aria-label="{% trans "Trier les sorties" %}">
-          <option value="relevance">{% trans "Trier: recommande" %}</option>
-          <option value="popular">{% trans "Popularite" %}</option>
-          <option value="price_low">{% trans "Prix croissant" %}</option>
-          <option value="soon">{% trans "Ce soir / bientot" %}</option>
-        </select>
-      </div>
-    </div>
-  </section>
-
-  <section class="ta-main" id="sorties">
-    <div class="ta-wrap">
-      {% if sorties %}
-      <div class="ta-layout">
-        <aside class="ta-filter">
-          <div class="ta-box">
-            <h3>{% trans "Filtrer par ville" %}</h3>
-            <p>{% trans "Acces rapide aux villes les plus frequentes de ces resultats." %}</p>
-            <ul class="ta-city-list" id="ta-city-list"></ul>
-          </div>
-
-          <div class="ta-box">
-            <h3>{% trans "Type de sortie" %}</h3>
-            <p>{% trans "Entre membres pour les sorties gratuites, partenaires pour les experiences reservees." %}</p>
-          </div>
-        </aside>
-
-        <div>
-          <div class="ta-results-head">
-            <h2>{% trans "Sorties recommandees pour toi" %}</h2>
-            <p>{{ total_count }} {% trans "resultat" %}{{ total_count|pluralize }}</p>
-          </div>
-
-          <div class="ta-list" id="ta-list">
-            {% for sortie in sorties %}
-            <a href="/sorties/{{ sortie.id }}/" class="ta-item" data-city="{{ sortie.city|default:''|lower }}" data-participants="{{ sortie.participant_count|default:0 }}" data-price="{% if sortie.type == 'COMMUNAUTAIRE' or sortie.is_free %}0{% else %}{{ sortie.price_euros|floatformat:2 }}{% endif %}" data-start-ts="{% if sortie.starts_at %}{{ sortie.starts_at|date:'U' }}{% else %}0{% endif %}" data-order="{{ forloop.counter0 }}">
-              <div class="ta-media">
-                {% if sortie.cover_image_url %}
-                <img src="{{ sortie.cover_image_url }}" alt="{{ sortie.title }}" loading="{% if forloop.first %}eager{% else %}lazy{% endif %}" />
-                {% else %}
-                <div class="ta-ph">{% if sortie.type == 'PARTENAIRE' %}🎯{% else %}👥{% endif %}</div>
-                {% endif %}
-                <span class="ta-badge">{% if sortie.type == 'PARTENAIRE' %}{% trans "Partenaire" %}{% else %}{% trans "Membres" %}{% endif %}</span>
-              </div>
-
-              <div class="ta-body">
-                <p class="ta-rank">#{{ forloop.counter }} {% trans "dans les recommandations" %}</p>
-                <p class="ta-name">{{ sortie.title }}</p>
-
-                <div class="ta-rating">
-                  <div class="ta-dots" aria-hidden="true">
-                    <span class="ta-dot on"></span>
-                    <span class="ta-dot on"></span>
-                    <span class="ta-dot on"></span>
-                    <span class="ta-dot on"></span>
-                    <span class="ta-dot {% if sortie.participant_count|default:0 > 5 %}on{% endif %}"></span>
-                  </div>
-                  <span>{{ sortie.participant_count|default:0 }} {% trans "avis membres" %}</span>
-                </div>
-
-                <p class="ta-meta">
-                  {% if sortie.starts_at %}{{ sortie.starts_at|date:"d M Y" }} · {{ sortie.starts_at|date:"H:i" }}{% else %}{% trans "Date a confirmer" %}{% endif %}
-                  {% if sortie.city %} · {{ sortie.city }}{% endif %}
-                  {% if sortie.location %} · {{ sortie.location }}{% endif %}
-                </p>
-
-                {% if sortie.description %}
-                <p class="ta-desc">{{ sortie.description }}</p>
-                {% endif %}
-
-                <div class="ta-foot">
-                  <div class="ta-pills">
-                    <span class="ta-pill">{{ sortie.participant_count|default:0 }} {% trans "participant" %}{{ sortie.participant_count|default:0|pluralize }}</span>
-                    {% if sortie.max_participants %}
-                    <span class="ta-pill">{{ sortie.max_participants }} {% trans "places" %}</span>
-                    {% endif %}
-                    {% if sortie.type == 'COMMUNAUTAIRE' or sortie.is_free %}
-                    <span class="ta-pill price">{% trans "Gratuit" %}</span>
-                    {% else %}
-                    <span class="ta-pill price">{{ sortie.price_euros|floatformat:2 }} EUR</span>
-                    {% endif %}
-                  </div>
-
-                  <span class="ta-cta">{% if sortie.type == 'PARTENAIRE' %}{% trans "Reserver" %}{% else %}{% trans "Rejoindre" %}{% endif %}</span>
-                </div>
-              </div>
-            </a>
-            {% endfor %}
-          </div>
-
-          {% if is_paginated %}
-          <div class="ta-pag">
-            {% if page_obj.has_previous %}
-            <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.free %}&free={{ request.GET.free }}{% endif %}">{% trans "Precedent" %}</a>
-            {% endif %}
-            <span>{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
-            {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.free %}&free={{ request.GET.free }}{% endif %}">{% trans "Suivant" %}</a>
-            {% endif %}
-          </div>
-          {% endif %}
-
-          <div class="ta-join">
-            {% if user.is_authenticated %}
-            <h3>{% trans "Tu veux aussi organiser une sortie ?" %}</h3>
-            <p>{% trans "Creer une sortie prend deux minutes. Les sorties entre membres restent gratuites, les sorties partenaires s'organisent en mode reservation." %}</p>
-            <a href="/sorties/creer/">{% trans "Creer ma sortie" %}</a>
-            {% else %}
-            <h3>{% trans "Rejoins Mooviogo" %}</h3>
-            <p>{% trans "Inscris-toi pour participer aux sorties entre membres et reserver les experiences partenaires de ta ville." %}</p>
-            <a href="/inscription/">{% trans "Creer un compte gratuit" %}</a>
-            {% endif %}
-          </div>
         </div>
       </div>
-      {% else %}
-      <div class="ta-empty">
-        <h3>{% trans "Aucune sortie trouvee" %}</h3>
-        <p>{% trans "Essaie une autre ville ou retire un filtre pour afficher plus de resultats." %}</p>
+
+      <div>
+        <div class="split-wrap partner-wrap reveal-up d4">
+        <div class="mb-4 flex items-center justify-between">
+          <h3 class="font-display text-xl font-bold text-white">🤝 {% trans "Sorties partenaires" %}</h3>
+          <span class="chip chip-dark">{{ partner_count }} {% trans "résultats" %}</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+          {% for s in partner_sorties %}
+          <a href="/sorties/{{ s.id }}/" class="list-photo-card card-partner block group reveal-up d5">
+            <div class="list-photo-top">
+              <div class="flex flex-wrap gap-2"><span class="chip chip-flamingo">🤝 {% trans "Partenaire" %}</span></div>
+              <button type="button" class="save-btn" aria-label="{% trans 'Enregistrer' %}" onclick="event.preventDefault();this.classList.toggle('text-flamingo-400');"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21s-7-4.534-9.5-9C1.07 9.36 2.5 6 5.5 6c1.74 0 3.41 1 4.5 2.5C11.09 7 12.76 6 14.5 6c3 0 4.43 3.36 3 6-2.5 4.466-9.5 9-9.5 9z" stroke="currentColor" stroke-width="1.5" fill="none"/></svg></button>
+            </div>
+            {% if s.cover_image_url %}<img src="{{ s.cover_image_url }}" alt="{{ s.title }}" loading="lazy" class="list-photo-media" />{% else %}<div class="absolute inset-0 bg-grad-brand"></div>{% endif %}
+            <div class="list-photo-bottom">
+              <div class="flex items-center gap-2 mb-2 flex-wrap">{% if s.is_free %}<span class="chip chip-green">{% trans "Gratuit" %}</span>{% else %}<span class="chip chip-sunset">{{ s.price|floatformat:0 }}€</span>{% endif %}<span class="chip chip-dark">📍 {{ s.city }}</span></div>
+              <div class="font-display text-2xl font-extrabold tracking-tight text-white">{{ s.title }}</div>
+              <p class="mt-2 text-sm leading-6 text-white/65 line-clamp-2">{{ s.description|default:_('Une sortie sociale pensée pour déclencher une décision rapide.')|truncatechars:100 }}</p>
+              <div class="mt-3 pt-3 border-t border-white/10 flex items-center justify-between text-xs"><span class="text-white/55">👤 {{ s.participant_count|default:0 }}{% if s.max_participants %} / {{ s.max_participants }}{% endif %} {% trans "participants" %}</span><span class="text-flamingo-400 font-semibold group-hover:translate-x-1 transition-transform">{% trans "Voir →" %}</span></div>
+            </div>
+          </a>
+          {% empty %}
+          <div class="col-span-full panel text-center py-12"><p class="text-white/55">{% trans "Aucune sortie partenaire selon ces filtres." %}</p></div>
+          {% endfor %}
+        </div>
+        </div>
       </div>
-      {% endif %}
     </div>
-  </section>
-</div>
+  {% else %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+      {% for s in sorties %}
+      <a href="/sorties/{{ s.id }}/" class="list-photo-card {% if s.type == 'COMMUNAUTAIRE' %}card-member{% else %}card-partner{% endif %} block group reveal-up d2">
+        <div class="list-photo-top">
+          <div class="flex flex-wrap gap-2">
+            {% if forloop.counter <= 3 and page_obj and page_obj.number == 1 %}<span class="rank-badge">🔥 #{{ forloop.counter }}</span>{% endif %}
+            {% if s.type == "COMMUNAUTAIRE" %}<span class="chip chip-neon">👥 {% trans "Membres" %}</span>{% else %}<span class="chip chip-flamingo">🤝 {% trans "Partenaire" %}</span>{% endif %}
+          </div>
+          <button type="button" class="save-btn" aria-label="{% trans 'Enregistrer' %}" onclick="event.preventDefault();this.classList.toggle('text-flamingo-400');"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21s-7-4.534-9.5-9C1.07 9.36 2.5 6 5.5 6c1.74 0 3.41 1 4.5 2.5C11.09 7 12.76 6 14.5 6c3 0 4.43 3.36 3 6-2.5 4.466-9.5 9-9.5 9z" stroke="currentColor" stroke-width="1.5" fill="none"/></svg></button>
+        </div>
+        {% if s.cover_image_url %}<img src="{{ s.cover_image_url }}" alt="{{ s.title }}" loading="lazy" class="list-photo-media" />{% else %}<div class="absolute inset-0 bg-grad-brand"></div>{% endif %}
+        <div class="list-photo-bottom">
+          <div class="flex items-center gap-2 mb-2 flex-wrap">{% if s.is_free %}<span class="chip chip-green">{% trans "Gratuit" %}</span>{% else %}<span class="chip chip-sunset">{{ s.price|floatformat:0 }}€</span>{% endif %}<span class="chip chip-dark">📍 {{ s.city }}</span></div>
+          <div class="font-display text-2xl font-extrabold tracking-tight text-white">{{ s.title }}</div>
+          <p class="mt-2 text-sm leading-6 text-white/65 line-clamp-2">{{ s.description|default:_('Une sortie sociale pensée pour déclencher une décision rapide.')|truncatechars:100 }}</p>
+          <div class="mt-3 flex flex-wrap items-center gap-2 text-xs text-white/72">{% if s.starts_at %}<span>•</span><time>{{ s.starts_at|date:"d M, H:i" }}</time>{% endif %}</div>
+          <div class="mt-3 pt-3 border-t border-white/10 flex items-center justify-between text-xs"><span class="text-white/55">👤 {{ s.participant_count|default:0 }}{% if s.max_participants %} / {{ s.max_participants }}{% endif %} {% trans "participants" %}</span><span class="text-flamingo-400 font-semibold group-hover:translate-x-1 transition-transform">{% trans "Voir →" %}</span></div>
+        </div>
+      </a>
+      {% empty %}
+      <div class="col-span-full panel text-center py-16">
+        <div class="text-5xl mb-4">🌙</div>
+        <h3 class="font-display text-xl font-bold text-white">{% trans "Aucune sortie ne correspond à ta recherche" %}</h3>
+        <p class="text-white/55 mt-2">{% trans "Essaie d'autres filtres ou crée la première !" %}</p>
+        <div class="mt-6 flex gap-2 justify-center">
+          <a href="/sorties/" class="btn-secondary btn-sm">{% trans "Réinitialiser" %}</a>
+          {% if user.is_authenticated %}<a href="/sorties/creer/" class="btn-primary btn-sm">+ {% trans "Créer une sortie" %}</a>{% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  {% endif %}
 
-<script>
-function setFilter(key, val) {
-  const p = new URLSearchParams(window.location.search);
-  if (!val) { p.delete(key); } else { p.set(key, val); }
-  p.delete('page');
-  window.location.href = '/sorties/?' + p.toString();
-}
+  {# ───────── Pagination ───────── #}
+  {% if is_paginated %}
+  <nav class="mt-12 flex items-center justify-center gap-2" aria-label="Pagination">
+    {% if page_obj.has_previous %}
+      <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.free %}&free={{ request.GET.free }}{% endif %}" class="btn-secondary btn-sm">←</a>
+    {% endif %}
+    <span class="chip chip-neutral">{% blocktrans with cur=page_obj.number total=page_obj.paginator.num_pages %}Page {{ cur }} sur {{ total }}{% endblocktrans %}</span>
+    {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.free %}&free={{ request.GET.free }}{% endif %}" class="btn-secondary btn-sm">→</a>
+    {% endif %}
+  </nav>
+  {% endif %}
+</section>
 
-(function () {
-  var sortSelect = document.getElementById('ta-sort');
-  var list = document.getElementById('ta-list');
-  var cityList = document.getElementById('ta-city-list');
-  if (!list) return;
-
-  var items = Array.prototype.slice.call(list.querySelectorAll('.ta-item'));
-
-  function toNumber(v) {
-    var n = parseFloat(v);
-    return isNaN(n) ? 0 : n;
-  }
-
-  function sortItems(mode) {
-    var now = Math.floor(Date.now() / 1000);
-    items.sort(function (a, b) {
-      if (mode === 'popular') {
-        return toNumber(b.getAttribute('data-participants')) - toNumber(a.getAttribute('data-participants'));
-      }
-      if (mode === 'price_low') {
-        var pa = toNumber(a.getAttribute('data-price'));
-        var pb = toNumber(b.getAttribute('data-price'));
-        if (pa !== pb) return pa - pb;
-        return toNumber(b.getAttribute('data-participants')) - toNumber(a.getAttribute('data-participants'));
-      }
-      if (mode === 'soon') {
-        var sa = toNumber(a.getAttribute('data-start-ts'));
-        var sb = toNumber(b.getAttribute('data-start-ts'));
-        var da = sa > 0 ? Math.abs(sa - now) : 999999999;
-        var db = sb > 0 ? Math.abs(sb - now) : 999999999;
-        if (da !== db) return da - db;
-        return toNumber(b.getAttribute('data-participants')) - toNumber(a.getAttribute('data-participants'));
-      }
-      return toNumber(a.getAttribute('data-order')) - toNumber(b.getAttribute('data-order'));
-    });
-
-    items.forEach(function (item) { list.appendChild(item); });
-  }
-
-  function buildCityList() {
-    if (!cityList) return;
-    var counts = {};
-
-    items.forEach(function (item) {
-      var city = (item.getAttribute('data-city') || '').trim();
-      if (!city) return;
-      counts[city] = (counts[city] || 0) + 1;
-    });
-
-    var entries = Object.keys(counts)
-      .map(function (city) { return { city: city, count: counts[city] }; })
-      .sort(function (a, b) { return b.count - a.count; })
-      .slice(0, 10);
-
-    cityList.innerHTML = '';
-
-    entries.forEach(function (entry) {
-      var li = document.createElement('li');
-      var a = document.createElement('a');
-      a.href = '#';
-      a.innerHTML = '<span>' + entry.city.charAt(0).toUpperCase() + entry.city.slice(1) + '</span><span class="count">' + entry.count + '</span>';
-      a.addEventListener('click', function (e) {
-        e.preventDefault();
-        setFilter('city', entry.city);
-      });
-      li.appendChild(a);
-      cityList.appendChild(li);
-    });
-  }
-
-  if (sortSelect) {
-    sortSelect.addEventListener('change', function () {
-      sortItems(sortSelect.value);
-    });
-  }
-
-  buildCityList();
-})();
-</script>
 {% endblock %}

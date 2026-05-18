@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Inscription" %} | Mooviogo{% endblock %}
+
+{% block content %}
+<div style="min-height:80vh;display:flex;align-items:center;justify-content:center;padding:4rem 1rem;background:radial-gradient(ellipse at 50% -20%,rgba(255,106,77,0.07) 0%,transparent 60%)">
+  <div style="width:100%;max-width:400px">
+
+    <div style="text-align:center;margin-bottom:2.25rem">
+      <a href="/" style="display:inline-flex;align-items:center;gap:9px;text-decoration:none;margin-bottom:1.25rem">
+        <span style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#FF6A4D,#F97316);display:flex;align-items:center;justify-content:center;font-size:0.8rem;color:#fff;font-weight:900">M</span>
+        <span style="font-size:1.15rem;font-weight:900;color:#fff;letter-spacing:-0.02em">Mooviogo</span>
+      </a>
+      <p style="font-size:1.5rem;font-weight:900;color:#fff;letter-spacing:-0.025em;margin-bottom:0.35rem">{% trans "Rejoins-nous" %}</p>
+      <p style="font-size:0.85rem;color:rgba(255,255,255,0.38)">{% trans "Cree ton compte en 30 secondes - c'est gratuit" %}</p>
+    </div>
+
+    <div class="pk" style="padding:2rem">
+      {% if error %}
+      <div style="margin-bottom:1.25rem;border-radius:12px;border:1px solid rgba(248,113,113,0.2);background:rgba(248,113,113,0.08);padding:0.85rem 1rem;font-size:0.82rem;color:#F87171">{{ error }}</div>
+      {% endif %}
+
+      <form method="post">
+        {% csrf_token %}
+        <div style="display:flex;flex-direction:column;gap:1rem">
+          <div>
+            <label style="display:block;font-size:0.75rem;font-weight:600;color:rgba(255,255,255,0.4);margin-bottom:0.45rem">{% trans "Nom d'utilisateur" %} *</label>
+            <input type="text" name="username" required autofocus class="fi-input" placeholder="{% trans "ton_pseudo" %}" />
+          </div>
+          <div>
+            <label style="display:block;font-size:0.75rem;font-weight:600;color:rgba(255,255,255,0.4);margin-bottom:0.45rem">{% trans "Email" %} *</label>
+            <input type="email" name="email" required class="fi-input" placeholder="{% trans "toi@example.com" %}" />
+          </div>
+          <div>
+            <label style="display:block;font-size:0.75rem;font-weight:600;color:rgba(255,255,255,0.4);margin-bottom:0.45rem">{% trans "Telephone" %} *</label>
+            <div style="display:grid;grid-template-columns:1fr auto;gap:0.5rem;align-items:center">
+              <input type="tel" id="signup-phone" name="phone" required class="fi-input" placeholder="+33612345678" />
+              <button type="button" id="signup-request-otp" class="btn-ghost" style="padding:0.75rem 0.95rem;border-radius:12px;font-size:0.78rem;white-space:nowrap">{% trans "Envoyer code" %}</button>
+            </div>
+            <p id="signup-otp-feedback" style="margin-top:0.5rem;font-size:0.75rem;color:rgba(255,255,255,0.5)"></p>
+          </div>
+          <div>
+            <label style="display:block;font-size:0.75rem;font-weight:600;color:rgba(255,255,255,0.4);margin-bottom:0.45rem">{% trans "Code OTP" %} *</label>
+            <input type="text" name="otp_code" required class="fi-input" placeholder="{% trans "Code recu par SMS" %}" maxlength="6" />
+          </div>
+          <div>
+            <label style="display:block;font-size:0.75rem;font-weight:600;color:rgba(255,255,255,0.4);margin-bottom:0.45rem">{% trans "Date de naissance" %} *</label>
+            <input type="date" name="birth_date" required class="fi-input" />
+          </div>
+          <div>
+            <label style="display:block;font-size:0.75rem;font-weight:600;color:rgba(255,255,255,0.4);margin-bottom:0.45rem">{% trans "Mot de passe" %} *</label>
+            <input type="password" name="password" required class="fi-input" placeholder="{% trans "8 caracteres minimum" %}" />
+          </div>
+          <div>
+            <label style="display:block;font-size:0.75rem;font-weight:600;color:rgba(255,255,255,0.4);margin-bottom:0.45rem">{% trans "Confirmer le mot de passe" %} *</label>
+            <input type="password" name="password2" required class="fi-input" placeholder="••••••••" />
+          </div>
+        </div>
+        {% if TURNSTILE_SITE_KEY %}
+        <div class="cf-turnstile" data-sitekey="{{ TURNSTILE_SITE_KEY }}" style="margin-top:1.25rem"></div>
+        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+        {% endif %}
+        <button type="submit" class="btn-brand" style="margin-top:1.5rem;width:100%;padding:0.9rem;font-size:0.92rem;border-radius:14px;justify-content:center;font-weight:800">
+          {% trans "Creer mon compte" %}
+        </button>
+      </form>
+
+      <div class="hdiv"></div>
+
+      <p style="text-align:center;font-size:0.82rem;color:rgba(255,255,255,0.35)">
+        {% trans "Deja un compte ?" %}
+        <a href="/connexion/" style="color:#FF8A66;text-decoration:none;font-weight:600">{% trans "Se connecter" %}</a>
+      </p>
+    </div>
+
+  </div>
+</div>
+<script>
+  (function () {
+    const btn = document.getElementById('signup-request-otp');
+    const phoneInput = document.getElementById('signup-phone');
+    const feedback = document.getElementById('signup-otp-feedback');
+    if (!btn || !phoneInput || !feedback) {
+      return;
+    }
+
+    btn.addEventListener('click', async function () {
+      const phone = (phoneInput.value || '').trim();
+      if (!phone) {
+        feedback.style.color = '#F87171';
+        feedback.textContent = '{% trans "Renseigne ton numero avant d'envoyer le code." %}';
+        return;
+      }
+
+      const csrf = document.querySelector('input[name="csrfmiddlewaretoken"]')?.value || '';
+      btn.disabled = true;
+      feedback.style.color = 'rgba(255,255,255,0.6)';
+      feedback.textContent = '{% trans "Envoi du code en cours..." %}';
+
+      try {
+        const body = new URLSearchParams();
+        body.set('phone', phone);
+
+        const response = await fetch('/inscription/request-otp/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': csrf,
+          },
+          body: body.toString(),
+        });
+        const payload = await response.json();
+
+        if (!response.ok) {
+          feedback.style.color = '#F87171';
+          feedback.textContent = payload.detail || '{% trans "Impossible d'envoyer le code." %}';
+          return;
+        }
+
+        feedback.style.color = '#4ADE80';
+        feedback.textContent = payload.debug_code
+          ? `{% trans "Code envoye." %} (DEBUG: ${payload.debug_code})`
+          : '{% trans "Code envoye par SMS. Verifie ton telephone." %}';
+      } catch (_err) {
+        feedback.style.color = '#F87171';
+        feedback.textContent = '{% trans "Erreur reseau pendant l'envoi du code." %}';
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  })();
+</script>
+{% endblock %}

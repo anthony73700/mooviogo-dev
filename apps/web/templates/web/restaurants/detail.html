@@ -1,133 +1,347 @@
 {% extends "base.html" %}
 {% load i18n %}
 {% block title %}{{ venue.name }} | Mooviogo{% endblock %}
-{% block description %}{{ venue.name }} à {{ venue.city_label }} — réservation rapide sur Mooviogo.{% endblock %}
-{% block og_title %}{{ venue.name }}{% endblock %}
-{% block og_description %}Réservez {{ venue.name }} à {{ venue.city_label }} en quelques clics.{% endblock %}
-{% block og_image %}{% if venue.cover_image_url %}{{ venue.cover_image_url }}{% else %}{{ APP_BASE_URL }}/static/og/default-og.svg{% endif %}{% endblock %}
-
-{% block schema_jsonld %}
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "Restaurant",
-  "name": "{{ venue.name|escapejs }}",
-  {% if venue.cover_image_url %}"image": "{{ venue.cover_image_url }}",{% endif %}
-  {% if venue.cuisine_type %}"servesCuisine": "{{ venue.cuisine_type|escapejs }}",{% endif %}
-  {% if venue.price_range %}"priceRange": "{{ venue.price_range|escapejs }}",{% endif %}
-  {% if venue.phone %}"telephone": "{{ venue.phone|escapejs }}",{% endif %}
-  {% if venue.website %}"url": "{{ venue.website|escapejs }}",{% endif %}
-  "address": {
-    "@type": "PostalAddress",
-    "addressLocality": "{{ venue.city_label|escapejs }}",
-    "streetAddress": "{{ venue.address|default:''|escapejs }}",
-    "addressCountry": "FR"
-  }
-}
-</script>
-{% endblock %}
+{% block description %}{{ venue.description|truncatechars:160 }}{% endblock %}
 
 {% block extra_head %}
 <style>
-  .rd-hero {
-    position: relative;
-    height: 340px;
-    overflow: hidden;
-  }
-
-  .rd-hero-inner {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 1.5rem max(1rem, (100vw - 48rem) / 2);
-  }
-
-  .rd-card {
-    padding: 2rem;
-  }
-
-  @media (max-width: 760px) {
-    .rd-hero {
-      height: 260px;
-    }
-
-    .rd-hero-inner {
-      padding: 1rem;
-    }
-
-    .rd-card {
-      padding: 1.15rem;
-    }
-  }
+  .detail-store-grid { display:grid; grid-template-columns:minmax(0,1.08fr) minmax(320px,.92fr); gap:1rem; }
+  .detail-store-card { position:relative; overflow:hidden; border:1px solid rgba(255,255,255,.08); border-radius:2rem; box-shadow:0 30px 80px -40px rgba(0,0,0,.82); }
+  .detail-store-card.light { background:linear-gradient(180deg,#fbfbfd 0%,#eef1f6 100%); color:#0a0f16; }
+  .detail-store-card.dark { background:linear-gradient(180deg,#0e1218 0%,#090c12 100%); color:#fff; }
+  .detail-store-body { padding:1.5rem; }
+  .detail-store-title { font-family:"Geist",Inter,sans-serif; font-size:clamp(2.3rem,5vw,4.9rem); line-height:.98; letter-spacing:-.05em; font-weight:800; }
+  .detail-store-copy { margin-top:1rem; max-width:38rem; font-size:1rem; line-height:1.75; color:rgba(255,255,255,.64); }
+  .detail-store-card.light .detail-store-copy { color:rgba(10,15,22,.62); }
+  .detail-store-meta { display:grid; gap:.75rem; grid-template-columns:repeat(3,minmax(0,1fr)); margin-top:1.4rem; }
+  .detail-store-meta > div { border:1px solid rgba(255,255,255,.08); border-radius:1.1rem; background:rgba(255,255,255,.04); padding:.95rem 1rem; }
+  .detail-store-card.light .detail-store-meta > div { background:rgba(10,15,22,.04); border-color:rgba(10,15,22,.08); }
+  .detail-store-figure { position:relative; min-height:520px; }
+  .detail-store-figure img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  .detail-store-figure::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(6,8,12,.04) 12%,rgba(6,8,12,.18) 46%,rgba(6,8,12,.88) 100%); }
+  .detail-store-overlay { position:absolute; inset:auto 0 0 0; z-index:1; padding:1.25rem; }
+  .detail-store-pill { display:inline-flex; align-items:center; gap:.45rem; border-radius:999px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.05); padding:.48rem .78rem; font-size:.72rem; font-weight:700; }
+  .detail-store-link { display:inline-flex; align-items:center; gap:.45rem; margin-top:1.15rem; font-size:.88rem; font-weight:700; }
+  .detail-store-link::after { content:"→"; }
+  .detail-hero { position:relative; overflow:hidden; min-height:560px; border-radius:2rem; border:1px solid rgba(255,255,255,.08); box-shadow:0 36px 100px -42px rgba(0,0,0,.88); }
+  .detail-hero-media { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  .detail-hero::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(6,4,14,.15) 8%,rgba(6,4,14,.18) 32%,rgba(6,4,14,.78) 72%,rgba(6,4,14,.96) 100%); }
+  .detail-hero-content { position:relative; z-index:1; display:flex; min-height:560px; flex-direction:column; justify-content:space-between; padding:1.25rem; }
+  .detail-hero-panel { border:1px solid rgba(255,255,255,.1); border-radius:1.5rem; background:rgba(8,7,18,.46); padding:1rem; backdrop-filter:blur(18px); }
+  .detail-meta-grid { display:grid; gap:.75rem; grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .booking-sticky { position:sticky; top:140px; }
+  .ring-avatar { display:inline-grid; place-items:center; height:2.5rem; width:2.5rem; border-radius:9999px; background:linear-gradient(135deg,#A832F5,#F31C7F); color:#fff; font-weight:700; box-shadow:0 0 0 2px rgba(255,255,255,0.06); }
+  .star-row svg { color:#FF6A4D; }
+  .slot-radio input { position:absolute; opacity:0; inset:0; cursor:pointer; }
+  .slot-radio .face { display:flex; flex-direction:column; align-items:center; padding:.7rem .5rem; border-radius:.85rem; border:1px solid rgba(255,255,255,0.10); background:rgba(255,255,255,0.04); cursor:pointer; transition:all .15s; }
+  .slot-radio input:checked + .face { background:linear-gradient(180deg,#f7f9fc 0%,#dfe6ef 100%); border-color:transparent; color:#081018; box-shadow:0 6px 20px -8px rgba(0,0,0,.45); }
+  .slot-radio .face .d { font-size:.65rem; color:rgba(255,255,255,0.55); text-transform:uppercase; letter-spacing:.06em; }
+  .slot-radio .face .t { font-size:1rem; font-weight:800; color:#fff; }
+  .slot-radio input:checked + .face .d { color:rgba(255,255,255,0.85); }
+  .detail-signal-rail { display:grid; gap:.75rem; grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .detail-signal-card { border:1px solid rgba(255,255,255,.08); border-radius:1.2rem; background:rgba(255,255,255,.03); padding:1rem; box-shadow:inset 0 1px 0 rgba(255,255,255,.04); backdrop-filter:blur(14px); }
+  .detail-gallery-grid { display:grid; gap:1rem; grid-template-columns:1.15fr .85fr; }
+  .detail-gallery-main, .detail-gallery-stack > * { position:relative; overflow:hidden; border-radius:1.5rem; border:1px solid rgba(255,255,255,.08); min-height:220px; box-shadow:0 22px 54px -32px rgba(0,0,0,.82); }
+  .detail-gallery-main { min-height:420px; }
+  .detail-gallery-main::after, .detail-gallery-stack > *::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(6,4,14,.08) 8%,rgba(6,4,14,.14) 38%,rgba(6,4,14,.92) 100%); }
+  .detail-gallery-stack { display:grid; gap:1rem; }
+  .detail-gallery-copy { position:absolute; inset:auto 0 0 0; z-index:1; padding:1rem; }
+  .detail-buzz-grid { display:grid; gap:1rem; grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .detail-buzz-card { border:1px solid rgba(255,255,255,.08); border-radius:1.3rem; background:rgba(255,255,255,.03); padding:1rem; backdrop-filter:blur(14px); }
+  .detail-booking-note { border:1px solid rgba(255,255,255,.08); border-radius:1.3rem; background:rgba(255,255,255,.03); padding:1rem; }
+  @media (max-width:1024px){ .detail-signal-rail, .detail-buzz-grid, .detail-gallery-grid, .detail-store-grid, .detail-store-meta { grid-template-columns:1fr; } .detail-store-figure { min-height:360px; } }
+  @media (max-width:768px){ .detail-hero, .detail-hero-content { min-height:460px; } .detail-meta-grid { grid-template-columns:1fr; } }
 </style>
 {% endblock %}
 
 {% block content %}
+<div class="mx-auto max-w-7xl px-4 py-8">
 
-{# ── Image hero ── #}
-{% if venue.cover_image_url %}
-<div class="rd-hero">
-  <img src="{{ venue.cover_image_url }}" alt="{{ venue.name }}" style="width:100%;height:100%;object-fit:cover" />
-  <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,10,18,0.15) 0%,rgba(7,10,18,0.8) 100%)"></div>
-  <div class="rd-hero-inner">
-    <a href="/restaurants/" class="back-link" style="margin-bottom:0.75rem;color:rgba(255,255,255,0.5)">← {% trans "Restaurants" %}</a>
-    {% if venue.cuisine_type %}<span class="tag tag-orange" style="margin-bottom:0.6rem;display:inline-flex">{{ venue.cuisine_type }}</span>{% endif %}
-    <h1 style="font-size:2rem;font-weight:900;color:#fff;letter-spacing:-0.02em;line-height:1.15">{{ venue.name }}</h1>
-  </div>
-</div>
-{% else %}
-<div class="pg-hdr">
-  <div class="mx-auto max-w-3xl px-4">
-    <a href="/restaurants/" class="back-link">← {% trans "Restaurants" %}</a>
-    {% if venue.cuisine_type %}<span class="tag tag-orange" style="margin-bottom:0.7rem;display:inline-flex">{{ venue.cuisine_type }}</span>{% endif %}
-    <h1 style="font-size:2rem;font-weight:900;color:#fff;letter-spacing:-0.02em">{{ venue.name }}</h1>
-  </div>
-</div>
-{% endif %}
-
-<div class="mx-auto max-w-3xl px-4" style="padding-top:2rem;padding-bottom:5rem">
-
-  <div class="pk rd-card" style="margin-bottom:1.25rem">
-    <div style="display:flex;align-items:center;gap:6px;font-size:0.82rem;color:rgba(255,255,255,0.38);margin-bottom:{% if venue.description %}1rem{% else %}0{% endif %}">
-      <svg xmlns="http://www.w3.org/2000/svg" style="width:0.85rem;height:0.85rem;flex-shrink:0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-      {{ venue.address|default:venue.city_label }}
-      {% if venue.price_range %}&nbsp;&middot;&nbsp;{{ venue.price_range }}{% endif %}
+  <nav class="flex items-center justify-between gap-4 mb-5">
+    <div class="text-xs text-white/50 flex items-center gap-2">
+      <a href="/" class="hover:text-white">{% trans "Accueil" %}</a><span>›</span>
+      <a href="/restaurants/" class="hover:text-white">{% trans "Restaurants" %}</a><span>›</span>
+      <span class="text-white/80 truncate max-w-[200px]">{{ venue.name }}</span>
     </div>
-    {% if venue.description %}
-    <p style="color:rgba(255,255,255,0.65);line-height:1.75;font-size:0.92rem">{{ venue.description }}</p>
-    {% endif %}
-  </div>
+    <div class="flex items-center gap-2">
+      <button type="button" class="btn-secondary btn-sm" onclick="navigator.share?navigator.share({title:document.title,url:location.href}):navigator.clipboard.writeText(location.href);this.innerText='✓ {% trans "Copié" %}';">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8m-4-6l-4-4-4 4m4-4v12"/></svg><span class="hidden sm:inline">{% trans "Partager" %}</span>
+      </button>
+      <button type="button" class="btn-secondary btn-sm" onclick="this.classList.toggle('text-flamingo-400')">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21s-7-4.534-9.5-9C1.07 9.36 2.5 6 5.5 6c1.74 0 3.41 1 4.5 2.5C11.09 7 12.76 6 14.5 6c3 0 4.43 3.36 3 6-2.5 4.466-9.5 9-9.5 9z" stroke="currentColor" stroke-width="1.5" fill="none"/></svg><span class="hidden sm:inline">{% trans "Enregistrer" %}</span>
+      </button>
+    </div>
+  </nav>
 
-  {# Créneaux #}
-  <div class="pk rd-card" style="padding:1.75rem">
-    <p style="font-size:0.72rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,0.22);margin-bottom:1.25rem">{% trans "Creneaux disponibles" %}</p>
-    {% if slots %}
-    <div style="display:grid;gap:0.75rem;grid-template-columns:repeat(auto-fill,minmax(200px,1fr))">
-      {% for slot in slots %}
-      {% if slot.confirmed_count < slot.capacity %}
-      <form method="post" action="/restaurants/{{ venue.city_slug }}/{{ venue.slug }}/reserver/">
-        {% csrf_token %}
-        <input type="hidden" name="slot_id" value="{{ slot.id }}" />
-        <button type="submit" style="width:100%;border-radius:14px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.04);padding:1rem;text-align:left;cursor:pointer;transition:border-color 0.2s,background 0.2s" onmouseover="this.style.borderColor='rgba(255,106,77,0.35)';this.style.background='rgba(255,106,77,0.06)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)';this.style.background='rgba(255,255,255,0.04)'">
-          <p style="font-size:0.88rem;font-weight:700;color:#fff;margin-bottom:0.3rem">{{ slot.date|date:"d M Y" }} à {{ slot.time|time:"H:i" }}</p>
-          <p style="font-size:0.72rem;color:rgba(255,255,255,0.35)">{{ slot.capacity }} {% trans "places" %} · {% trans "Reserver" %} →</p>
-        </button>
-      </form>
+  <section class="mb-10 detail-store-grid fade-up">
+    <div class="detail-store-card light">
+      <div class="detail-store-body">
+        <span class="text-[0.8rem] font-semibold tracking-tight text-black/70">{% trans "Restaurant" %}</span>
+        <h1 class="detail-store-title mt-3">{{ venue.name }}</h1>
+        <p class="detail-store-copy">{{ venue.description|default:_('Une entrée de page plus proche de l’hospitality premium: calme, lisible, et orientée décision.')|truncatechars:190 }}</p>
+        <div class="detail-store-meta">
+          <div>
+            <div class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-black/38">{% trans "Adresse" %}</div>
+            <div class="mt-2 text-sm font-semibold text-black/88">{{ venue.address|default:venue.city_label|default:venue.city_slug }}</div>
+          </div>
+          <div>
+            <div class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-black/38">{% trans "Cuisine" %}</div>
+            <div class="mt-2 text-sm font-semibold text-black/88">{{ venue.cuisine_type|default:_('Signature maison') }}</div>
+          </div>
+          <div>
+            <div class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-black/38">{% trans "Réservation" %}</div>
+            <div class="mt-2 text-sm font-semibold text-black/88">{% trans "Confirmation instantanée" %}</div>
+          </div>
+        </div>
+        <a href="#booking-panel" class="detail-store-link text-black/85">{% trans "Choisir un créneau" %}</a>
+      </div>
+    </div>
+
+    <div class="detail-store-card dark detail-store-figure">
+      {% if venue.cover_image_url %}<img src="{{ venue.cover_image_url }}" alt="{{ venue.name }}" />{% else %}<div class="absolute inset-0 bg-grad-brand"></div>{% endif %}
+      <div class="detail-store-overlay">
+        <div class="flex flex-wrap gap-2">
+          {% if venue.cuisine_type %}<span class="detail-store-pill">{{ venue.cuisine_type }}</span>{% endif %}
+          {% if venue.price_range %}<span class="detail-store-pill">{{ venue.price_range }}</span>{% endif %}
+          <span class="detail-store-pill">📍 {{ venue.city_label|default:venue.city_slug }}</span>
+        </div>
+        <h2 class="mt-4 font-display text-3xl font-extrabold tracking-tight text-white">{% trans "La bonne table doit se comprendre en un regard" %}</h2>
+        <p class="mt-2 max-w-lg text-sm leading-7 text-white/66">{% trans "Cadre, niveau de service, type de soirée et prochain clic utile: tout doit être évident avant la réservation." %}</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="mt-10 grid grid-cols-1 lg:grid-cols-12 gap-10">
+
+    <div class="lg:col-span-7 xl:col-span-8 space-y-10">
+
+      <section class="card p-6 fade-up stagger-1">
+        <div class="flex items-end justify-between gap-4 mb-5">
+          <div>
+            <span class="h-eyebrow">{% trans "Dinner intel" %}</span>
+            <h2 class="mt-2 font-display text-2xl font-bold text-white">{% trans "Une lecture plus premium avant réservation" %}</h2>
+          </div>
+          <span class="chip chip-dark">{% trans "Table decision" %}</span>
+        </div>
+        <div class="detail-signal-rail">
+          <div class="detail-signal-card micro-float ambient-ring"><div class="text-[0.65rem] uppercase tracking-wider text-white/45">{% trans "Signal" %}</div><div class="mt-2 text-lg font-bold text-white">{% trans "Très partagé ce soir" %}</div><p class="mt-2 text-sm text-white/58">{% trans "La fiche ressemble plus à un choix de soirée qu’à une page utilitaire." %}</p></div>
+          <div class="detail-signal-card micro-float ambient-ring"><div class="text-[0.65rem] uppercase tracking-wider text-white/45">{% trans "Mood" %}</div><div class="mt-2 text-lg font-bold text-white">{% trans "Dinner date / rooftop" %}</div><p class="mt-2 text-sm text-white/58">{% trans "Plus de désir, plus de projection, moins de friction." %}</p></div>
+          <div class="detail-signal-card micro-float ambient-ring"><div class="text-[0.65rem] uppercase tracking-wider text-white/45">{% trans "Booking" %}</div><div class="mt-2 text-lg font-bold text-white">{% trans "Créneaux ultra lisibles" %}</div><p class="mt-2 text-sm text-white/58">{% trans "Le bon slot est visible sans scroller longtemps." %}</p></div>
+        </div>
+      </section>
+
+      {# Quick facts #}
+      <section class="card p-6 grid grid-cols-2 sm:grid-cols-4 gap-3 fade-up stagger-1">
+        <div class="panel text-center"><div class="text-2xl">🍴</div><div class="text-[0.7rem] text-white/55 mt-1 uppercase tracking-wider">{% trans "Cuisine" %}</div><div class="text-sm font-bold text-white">{{ venue.cuisine_type|default:"—" }}</div></div>
+        <div class="panel text-center"><div class="text-2xl">💰</div><div class="text-[0.7rem] text-white/55 mt-1 uppercase tracking-wider">{% trans "Prix" %}</div><div class="text-sm font-bold text-white">{{ venue.price_range|default:"€€" }}</div></div>
+        <div class="panel text-center"><div class="text-2xl">⏰</div><div class="text-[0.7rem] text-white/55 mt-1 uppercase tracking-wider">{% trans "Ouvert" %}</div><div class="text-sm font-bold text-white">19h-23h</div></div>
+        <div class="panel text-center"><div class="text-2xl">📅</div><div class="text-[0.7rem] text-white/55 mt-1 uppercase tracking-wider">{% trans "Réservation" %}</div><div class="text-sm font-bold text-white">{% trans "Instantanée" %}</div></div>
+      </section>
+
+      <section class="card p-6 fade-up stagger-2">
+        <div class="flex items-end justify-between gap-4 mb-5">
+          <div>
+            <span class="h-eyebrow">{% trans "Highlights" %}</span>
+            <h2 class="mt-2 font-display text-xl font-bold text-white">{% trans "Une page plus magazine, plus lifestyle" %}</h2>
+          </div>
+          <span class="chip chip-sunset">{% trans "Photo-led" %}</span>
+        </div>
+        <div class="detail-gallery-grid">
+          <div class="detail-gallery-main ambient-ring micro-float">
+            {% if venue.cover_image_url %}<img src="{{ venue.cover_image_url }}" alt="{{ venue.name }}" class="absolute inset-0 h-full w-full object-cover ken-burns" />{% else %}<div class="absolute inset-0 bg-grad-brand"></div>{% endif %}
+            <div class="detail-gallery-copy">
+              <p class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-white/42">{% trans "Highlight room" %}</p>
+              <h3 class="mt-2 font-display text-3xl font-extrabold text-white">{{ venue.name }}</h3>
+              <p class="mt-2 text-sm text-white/65">{% trans "Le visuel principal doit vendre l’envie avant même le détail pratique." %}</p>
+            </div>
+          </div>
+          <div class="detail-gallery-stack">
+            <div class="ambient-ring micro-float">
+              <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,.06),_transparent_60%)]"></div>
+              <div class="detail-gallery-copy">
+                <p class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-white/42">{% trans "Crowd note" %}</p>
+                <h3 class="mt-2 text-xl font-bold text-white">{% trans "Très partagé dans les stories" %}</h3>
+              </div>
+            </div>
+            <div class="ambient-ring micro-float">
+              <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,.05),_transparent_60%)]"></div>
+              <div class="detail-gallery-copy">
+                <p class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-white/42">{% trans "Booking note" %}</p>
+                <h3 class="mt-2 text-xl font-bold text-white">{% trans "Créneaux qui partent vite entre 20h et 21h" %}</h3>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {% if venue.description %}
+      <section class="card p-6 fade-up stagger-2">
+        <h2 class="font-display text-xl font-bold text-white mb-3">{% trans "À propos" %}</h2>
+        <p class="text-white/75 whitespace-pre-line leading-relaxed">{{ venue.description }}</p>
+      </section>
       {% endif %}
-      {% endfor %}
-    </div>
-    {% else %}
-    <div style="padding:2rem;text-align:center">
-      <p style="font-size:0.88rem;color:rgba(255,255,255,0.32)">{% trans "Aucun creneau disponible pour le moment" %}</p>
-    </div>
-    {% endif %}
-    {% if not user.is_authenticated %}
-    <p style="margin-top:1rem;font-size:0.78rem;color:rgba(255,255,255,0.3);text-align:center">
-      <a href="/connexion/?next=/restaurants/{{ venue.city_slug }}/{{ venue.slug }}/" style="color:#FF8A66;text-decoration:none">{% trans "Connecte-toi" %}</a> {% trans "pour reserver" %}
-    </p>
-    {% endif %}
-  </div>
 
+      {# Infos pratiques #}
+      <section class="card p-6 space-y-4 fade-up stagger-3">
+        <h2 class="font-display text-xl font-bold text-white">{% trans "Infos pratiques" %}</h2>
+        {% if venue.address %}
+        <div class="flex items-start gap-3">
+          <span class="grid h-10 w-10 place-items-center rounded-xl bg-neon-500/15 text-xl shrink-0">📍</span>
+          <div><h3 class="font-bold text-white text-sm">{% trans "Adresse" %}</h3><p class="text-sm text-white/65 mt-0.5">{{ venue.address }}, {{ venue.city_label|default:venue.city_slug }}</p></div>
+        </div>
+        {% endif %}
+        {% if venue.phone %}
+        <div class="flex items-start gap-3">
+          <span class="grid h-10 w-10 place-items-center rounded-xl bg-flamingo-500/15 text-xl shrink-0">📞</span>
+          <div><h3 class="font-bold text-white text-sm">{% trans "Téléphone" %}</h3><a href="tel:{{ venue.phone }}" class="text-sm text-flamingo-300 hover:text-flamingo-200 mt-0.5 block">{{ venue.phone }}</a></div>
+        </div>
+        {% endif %}
+        {% if venue.website %}
+        <div class="flex items-start gap-3">
+          <span class="grid h-10 w-10 place-items-center rounded-xl bg-electric-400/15 text-xl shrink-0">🌐</span>
+          <div><h3 class="font-bold text-white text-sm">{% trans "Site web" %}</h3><a href="{{ venue.website }}" rel="noopener noreferrer nofollow" target="_blank" class="text-sm text-electric-300 hover:text-electric-200 mt-0.5 break-all">{{ venue.website }}</a></div>
+        </div>
+        {% endif %}
+      </section>
+
+      <section class="card p-6 fade-up stagger-3">
+        <div class="flex items-end justify-between gap-4 mb-5">
+          <div>
+            <span class="h-eyebrow">{% trans "Buzz table" %}</span>
+            <h2 class="mt-2 font-display text-xl font-bold text-white">{% trans "Ce que les gens retiennent vraiment" %}</h2>
+          </div>
+          <span class="chip chip-electric">{% trans "Social discovery" %}</span>
+        </div>
+        <div class="detail-buzz-grid">
+          <div class="detail-buzz-card ambient-ring micro-float"><p class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-white/42">{% trans "Saved" %}</p><p class="mt-2 text-lg font-bold text-white">1.8k</p><p class="mt-2 text-sm text-white/60">{% trans "Enregistré dans les listes “dîner ce soir”." %}</p></div>
+          <div class="detail-buzz-card ambient-ring micro-float"><p class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-white/42">{% trans "Stories" %}</p><p class="mt-2 text-lg font-bold text-white">326</p><p class="mt-2 text-sm text-white/60">{% trans "Mentions dans les highlights communautaires." %}</p></div>
+          <div class="detail-buzz-card ambient-ring micro-float"><p class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-white/42">{% trans "Mood" %}</p><p class="mt-2 text-lg font-bold text-white">{% trans "Date / friends" %}</p><p class="mt-2 text-sm text-white/60">{% trans "Le type de signal qui aide à choisir plus vite." %}</p></div>
+        </div>
+      </section>
+
+      {# Reviews mock #}
+      <section class="card p-6 fade-up stagger-3">
+        <div class="flex items-end justify-between mb-5">
+          <h2 class="font-display text-xl font-bold text-white inline-flex items-center gap-2">
+            <span class="star-row inline-flex"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></span>
+            4.7 · 243 {% trans "avis" %}
+          </h2>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          {% for n in "ABCD" %}
+          <div class="panel">
+            <div class="flex items-center gap-3 mb-3">
+              <span class="ring-avatar">{{ n }}</span>
+              <div>
+                <div class="text-sm font-bold text-white">{% if forloop.counter == 1 %}Antoine V.{% elif forloop.counter == 2 %}Camille B.{% elif forloop.counter == 3 %}Mehdi K.{% else %}Julie T.{% endif %}</div>
+                <div class="text-xs text-white/45">{% trans "Il y a" %} {{ forloop.counter }} {% trans "jours" %}</div>
+              </div>
+            </div>
+            <div class="star-row flex gap-0.5 mb-2">{% for _ in "12345" %}<svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>{% endfor %}</div>
+            <p class="text-sm text-white/70 line-clamp-3">{% if forloop.counter == 1 %}{% trans "Cuisine excellente, service impeccable, cadre magnifique. À refaire !" %}{% elif forloop.counter == 2 %}{% trans "Super resto pour un date, plats raffinés et carte des vins au top." %}{% elif forloop.counter == 3 %}{% trans "Adresse à connaître, ambiance chaleureuse et personnel adorable." %}{% else %}{% trans "Très bonne découverte, je recommande sans hésitation." %}{% endif %}</p>
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+
+    </div>
+
+    {# ───── Booking sidebar ───── #}
+    <aside class="lg:col-span-5 xl:col-span-4">
+      <div id="booking-panel" class="booking-sticky card p-6 fade-up ambient-ring">
+        <div class="mb-4 flex flex-wrap gap-2">
+          <span class="chip chip-electric">{% trans "Confirmation instantanée" %}</span>
+          <span class="chip chip-dark">{% trans "Annulation souple" %}</span>
+          <span class="chip chip-flamingo">{% trans "Table highlight" %}</span>
+        </div>
+        <div class="flex items-baseline justify-between mb-1">
+          <span class="font-display text-2xl font-extrabold text-white">{% trans "Réserver" %}</span>
+          <span class="inline-flex items-center gap-1 text-xs text-white font-semibold">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-sunset-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>4.7
+          </span>
+        </div>
+        <p class="text-sm text-white/55 mt-1 mb-1">{% trans "Choisis ton créneau ci-dessous" %}</p>
+        {% if venue.reservation_mode == "MANUAL" %}
+        <p class="text-xs text-amber-300/90 mb-5">{% trans "Validation manuelle: le restaurant confirme ou refuse ta demande." %}</p>
+        {% else %}
+        <p class="text-xs text-emerald-300/90 mb-5">{% trans "Confirmation automatique selon les places restantes." %}</p>
+        {% endif %}
+
+        {% if user.is_authenticated %}
+        <a href="/sorties/creer/?city={{ venue.city_label|default:venue.city_slug|urlencode }}&location={{ venue.name|add:' - '|add:venue.address|urlencode }}&type=COMMUNAUTAIRE"
+           class="btn-secondary w-full text-center block mb-4">
+          {% trans "Organiser une sortie ici" %}
+        </a>
+        {% else %}
+        <a href="/connexion/?next=/sorties/creer/?city={{ venue.city_label|default:venue.city_slug|urlencode }}&location={{ venue.name|add:' - '|add:venue.address|urlencode }}&type=COMMUNAUTAIRE"
+           class="btn-secondary w-full text-center block mb-4">
+          {% trans "Connecte-toi pour organiser une sortie ici" %}
+        </a>
+        {% endif %}
+
+        {% if slots %}
+        <form method="post" action="/restaurants/{{ venue.city_slug }}/{{ venue.slug }}/reserver/" class="space-y-4">
+          {% csrf_token %}
+          <div class="panel py-3 px-4">
+            <div class="text-[0.65rem] uppercase tracking-wider text-white/45">{% trans "Pourquoi réserver ici" %}</div>
+            <div class="mt-1 text-sm font-bold text-white">{% trans "Meilleurs créneaux visibles en un regard" %}</div>
+            <p class="mt-2 text-xs text-white/50">{% trans "Lecture rapide, choix immédiat, et moins de friction avant le clic." %}</p>
+          </div>
+          <div class="grid grid-cols-3 gap-2">
+            {% for s in slots|slice:":9" %}
+            <label class="slot-radio relative">
+              <input type="radio" name="slot_id" value="{{ s.id }}" {% if forloop.first %}checked{% endif %} {% if s.confirmed_count >= s.capacity %}disabled{% endif %} />
+              <span class="face {% if s.confirmed_count >= s.capacity %}opacity-40{% endif %}">
+                <span class="d">{{ s.date|date:"d M" }}</span>
+                <span class="t">{{ s.time|time:"H:i" }}</span>
+                <span class="d">{{ s.remaining_seats }} {% trans "places" %}</span>
+              </span>
+            </label>
+            {% endfor %}
+          </div>
+
+          <div class="panel py-3 px-4">
+            <label class="text-[0.65rem] uppercase tracking-wider text-white/45">{% trans "Personnes" %}</label>
+            <div class="flex items-center justify-between mt-1">
+              <select name="party_size" class="bg-transparent border-0 text-sm font-bold text-white focus:ring-0 focus:outline-none">
+                {% for i in "12345678" %}<option value="{{ i }}" class="bg-night-900">{{ i }} {% if i == "1" %}personne{% else %}personnes{% endif %}</option>{% endfor %}
+              </select>
+            </div>
+          </div>
+
+          {% if user.is_authenticated %}
+            <button type="submit" class="btn-primary w-full shine">{% trans "Réserver maintenant" %}</button>
+          {% else %}
+            <a href="/connexion/?next={{ request.path }}" class="btn-primary w-full text-center block shine">{% trans "Connecte-toi pour réserver" %}</a>
+          {% endif %}
+          <p class="text-center text-xs text-white/45">{% trans "Confirmation immédiate par email" %}</p>
+          <div class="detail-booking-note mt-4">
+            <p class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-white/42">{% trans "Pourquoi ça convertit mieux" %}</p>
+            <p class="mt-2 text-sm leading-6 text-white/64">{% trans "Plus de désir, plus de signal social et une hiérarchie plus nette entre mood, créneau et action principale." %}</p>
+          </div>
+          <div class="grid grid-cols-2 gap-3 text-xs text-white/55">
+            <div class="panel py-3 px-4">🍷 {% trans "Cadre premium" %}</div>
+            <div class="panel py-3 px-4">⭐ {% trans "Très bien noté" %}</div>
+          </div>
+        </form>
+        {% else %}
+        <div class="panel text-center py-8">
+          <div class="text-3xl mb-2">📅</div>
+          <p class="text-sm text-white/65">{% trans "Aucun créneau disponible pour l'instant." %}</p>
+          {% if user.is_authenticated %}
+          <a href="/sorties/creer/?city={{ venue.city_label|default:venue.city_slug|urlencode }}&location={{ venue.name|add:' - '|add:venue.address|urlencode }}&type=COMMUNAUTAIRE" class="btn-secondary btn-sm mt-4">{% trans "Organiser une sortie dans ce restaurant" %}</a>
+          {% endif %}
+          {% if venue.phone %}<a href="tel:{{ venue.phone }}" class="btn-secondary btn-sm mt-4">📞 {% trans "Appeler" %}</a>{% endif %}
+        </div>
+        {% endif %}
+
+        <div class="mt-6 pt-6 border-t border-white/10 space-y-2 text-sm">
+          <div class="flex justify-between"><span class="text-white/55">{% trans "Annulation" %}</span><span class="text-white">{% trans "Gratuite 2h avant" %}</span></div>
+          <div class="flex justify-between"><span class="text-white/55">{% trans "Frais" %}</span><span class="text-white">0€</span></div>
+        </div>
+      </div>
+    </aside>
+
+  </div>
 </div>
 {% endblock %}

@@ -2,80 +2,102 @@
 {% block title %}Partenaires | Mooviogo{% endblock %}
 {% block description %}Paintball, karting, escape game, bowling — réservez directement avec nos partenaires Mooviogo.{% endblock %}
 
-{% block extra_head %}
-<style>
-  .pp-card { border-radius:20px;overflow:hidden;border:1px solid rgba(255,255,255,0.07);background:#14181F;transition:transform 0.22s,box-shadow 0.22s;text-decoration:none;display:block; }
-  .pp-card:hover { transform:translateY(-4px);box-shadow:0 20px 56px rgba(0,0,0,0.55); }
-  .pp-thumb { width:100%;height:200px;object-fit:cover; }
-  .pp-ph { width:100%;height:200px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1a1e28,#2a1f30); }
-  .cat-pill { display:inline-flex;align-items:center;border-radius:999px;padding:3px 11px;font-size:0.72rem;font-weight:700;background:rgba(255,106,77,0.12);color:#FF8A66; }
-</style>
-{% endblock %}
-
 {% block content %}
 
-<div class="pg-hdr">
-  <div class="mx-auto max-w-7xl px-4">
-    <p class="slabel mb-3">180+ établissements</p>
-    <h1 style="font-size:2.25rem;font-weight:900;color:#fff;letter-spacing:-0.03em;line-height:1.1">Partenaires</h1>
-    <p style="margin-top:0.45rem;font-size:0.9rem;color:rgba(255,255,255,0.4)">Paintball, karting, escape game, bowling et bien plus — réservez directement</p>
+{# Hero #}
+<section class="relative overflow-hidden border-b border-white/5">
+  <div class="absolute inset-0 bg-grad-aurora opacity-25"></div>
+  <div class="absolute -top-32 -right-24 h-96 w-96 rounded-full bg-sunset-500/30 blur-3xl"></div>
+  <div class="relative mx-auto max-w-7xl px-4 py-14">
+    <p class="h-eyebrow text-sunset-300">180+ établissements vérifiés</p>
+    <h1 class="mt-3 font-display text-4xl sm:text-5xl font-extrabold text-white tracking-tight">Nos <span class="grad-text">partenaires</span></h1>
+    <p class="mt-3 text-white/65 max-w-xl">Paintball, karting, escape game, bowling, rooftops… réserve directement avec les meilleurs lieux près de toi.</p>
+  </div>
+</section>
 
-    {# Filtres catégorie #}
-    <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:1.75rem">
-      <a href="/partenaires/" style="border-radius:999px;padding:0.4rem 1rem;font-size:0.78rem;font-weight:600;text-decoration:none;border:1px solid;{% if not request.GET.categorie %}background:rgba(255,106,77,0.15);border-color:rgba(255,106,77,0.35);color:#FF8A66{% else %}background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.08);color:rgba(255,255,255,0.45){% endif %}">Tous</a>
+{# Sticky filter strip #}
+<div class="sticky top-[64px] z-30 border-b border-white/5 bg-night-950/85 backdrop-blur-xl">
+  <div class="mx-auto max-w-7xl px-4 py-3 overflow-x-auto scrollbar-hide">
+    <div class="flex items-center gap-2 whitespace-nowrap">
+      <a href="/partenaires/" class="cat-pill {% if not request.GET.categorie %}cat-pill-active{% endif %}">Tous</a>
       {% for cat in categories %}
-      <a href="?categorie={{ cat }}" style="border-radius:999px;padding:0.4rem 1rem;font-size:0.78rem;font-weight:600;text-decoration:none;border:1px solid;{% if request.GET.categorie == cat %}background:rgba(255,106,77,0.15);border-color:rgba(255,106,77,0.35);color:#FF8A66{% else %}background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.08);color:rgba(255,255,255,0.45){% endif %}">{{ cat }}</a>
+      <a href="?categorie={{ cat }}" class="cat-pill {% if request.GET.categorie == cat %}cat-pill-active{% endif %}">{{ cat }}</a>
       {% endfor %}
     </div>
   </div>
 </div>
 
-<div class="mx-auto max-w-7xl px-4" style="padding-top:3rem;padding-bottom:5rem">
+<div class="mx-auto max-w-7xl px-4 py-10">
+
   {% if partners %}
-  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:1.25rem">
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
     {% for partner in partners %}
-    <div class="pp-card">
-      {% if partner.cover_image_url %}
-        <img src="{{ partner.cover_image_url }}" alt="{{ partner.name }}" class="pp-thumb" loading="lazy" />
-      {% else %}
-        <div class="pp-ph">
-          <svg xmlns="http://www.w3.org/2000/svg" style="width:2.5rem;height:2.5rem;color:rgba(255,255,255,0.1)" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+    <article class="card card-hover group">
+      <div class="card-media aspect-[4/5] relative">
+        {% if partner.cover_image_url %}
+          <img src="{{ partner.cover_image_url }}" alt="{{ partner.name }}" class="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
+        {% else %}
+          <div class="absolute inset-0 bg-grad-aurora flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+          </div>
+        {% endif %}
+        {% if partner.is_verified %}
+        <span class="absolute top-3 left-3 chip chip-electric text-[0.65rem]">✓ Vérifié</span>
+        {% endif %}
+        <button type="button" class="save-btn absolute top-3 right-3 grid h-9 w-9 place-items-center rounded-full bg-night-950/55 backdrop-blur text-white hover:bg-night-950/85" aria-label="Sauvegarder">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+        </button>
+      </div>
+      <div class="card-body">
+        <div class="flex items-start justify-between gap-2">
+          <h3 class="card-title line-clamp-1">{{ partner.name }}</h3>
         </div>
-      {% endif %}
-      <div style="padding:1rem 1.1rem 1.25rem">
-        <div style="display:flex;align-items:start;justify-content:space-between;gap:0.5rem;margin-bottom:0.5rem">
-          <p style="font-size:0.95rem;font-weight:800;color:#fff;line-height:1.3">{{ partner.name }}</p>
-          {% if partner.is_verified %}<span style="flex-shrink:0;font-size:0.7rem;font-weight:700;color:#4ADE80">✓ Vérifié</span>{% endif %}
+        <div class="mt-1.5 flex items-center gap-2 flex-wrap">
+          {% if partner.category %}<span class="chip chip-sunset text-[0.65rem]">{{ partner.category }}</span>{% endif %}
+          {% if partner.city %}<span class="text-xs text-white/55 inline-flex items-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            {{ partner.city }}
+          </span>{% endif %}
         </div>
-        {% if partner.category %}<p style="margin-bottom:0.45rem"><span class="cat-pill">{{ partner.category }}</span></p>{% endif %}
-        <p style="font-size:0.72rem;color:rgba(255,255,255,0.35);margin-bottom:{% if partner.short_description %}0.5rem{% else %}0.75rem{% endif %};display:flex;align-items:center;gap:4px">
-          <svg xmlns="http://www.w3.org/2000/svg" style="width:0.72rem;height:0.72rem;flex-shrink:0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-          {{ partner.city }}
-        </p>
         {% if partner.short_description %}
-        <p style="font-size:0.78rem;color:rgba(255,255,255,0.45);line-height:1.55;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:0.75rem">{{ partner.short_description }}</p>
+        <p class="mt-2 text-xs text-white/55 leading-relaxed line-clamp-2">{{ partner.short_description }}</p>
         {% endif %}
         {% if partner.website %}
-        <a href="{{ partner.website }}" target="_blank" rel="noopener" style="font-size:0.75rem;font-weight:700;color:#FF8A66;text-decoration:none;display:inline-flex;align-items:center;gap:4px">Voir le site <svg xmlns="http://www.w3.org/2000/svg" style="width:0.7rem;height:0.7rem" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>
+        <a href="{{ partner.website }}" target="_blank" rel="noopener" class="mt-3 inline-flex items-center gap-1 text-xs font-bold text-flamingo-300 hover:text-flamingo-200">
+          Voir le site
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+        </a>
         {% endif %}
       </div>
-    </div>
+    </article>
     {% endfor %}
   </div>
   {% else %}
-  <div style="border:1px dashed rgba(255,255,255,0.08);border-radius:24px;padding:5rem 2rem;text-align:center">
-    <p style="font-size:1rem;font-weight:700;color:rgba(255,255,255,0.4);margin-bottom:1.25rem">Aucun partenaire pour le moment</p>
-    <a href="/devenir-partenaire/" class="btn-brand" style="font-size:0.88rem">Devenir partenaire</a>
+  <div class="panel p-16 text-center">
+    <p class="font-display text-lg font-extrabold text-white/70">Aucun partenaire pour le moment</p>
+    <a href="/devenir-partenaire/" class="btn-primary btn-sm mt-5 inline-flex">Devenir partenaire</a>
   </div>
   {% endif %}
 
-  {# CTA devenir partenaire #}
-  <div style="margin-top:4rem;border-radius:24px;border:1px solid rgba(255,106,77,0.15);background:linear-gradient(135deg,rgba(255,106,77,0.08) 0%,rgba(20,24,33,1) 60%);padding:3rem 2.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:2rem">
-    <div>
-      <p style="font-size:1.4rem;font-weight:900;color:#fff;letter-spacing:-0.02em;margin-bottom:0.5rem">Tu gères un lieu d'activité ?</p>
-      <p style="font-size:0.88rem;color:rgba(255,255,255,0.45);max-width:480px">Karting, escape game, bowling… rejoins Mooviogo et touche des milliers de sorties par mois.</p>
+  {# CTA #}
+  <div class="mt-16 relative overflow-hidden rounded-3xl border border-white/10 p-8 sm:p-12">
+    <div class="absolute inset-0 bg-grad-brand opacity-20"></div>
+    <div class="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-flamingo-500/40 blur-3xl"></div>
+    <div class="relative flex items-center justify-between gap-6 flex-wrap">
+      <div>
+        <p class="h-eyebrow text-sunset-300">Tu gères un lieu ?</p>
+        <h2 class="mt-2 font-display text-3xl font-extrabold text-white">Deviens partenaire Mooviogo</h2>
+        <p class="mt-2 text-white/70 max-w-xl text-sm">Karting, escape game, bowling, rooftop, club… rejoins la plateforme et touche des milliers de sorties chaque mois.</p>
+      </div>
+      <a href="/devenir-partenaire/" class="btn-primary whitespace-nowrap">Devenir partenaire →</a>
     </div>
-    <a href="/devenir-partenaire/" class="btn-brand" style="font-size:0.9rem;padding:0.85rem 2rem;border-radius:14px;white-space:nowrap">Devenir partenaire →</a>
   </div>
+
 </div>
+
+<style>
+  .cat-pill { display:inline-flex; align-items:center; padding:.45rem 1rem; border-radius:9999px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.04); font-size:.78rem; font-weight:600; color:rgba(255,255,255,.6); text-decoration:none; transition:.18s; }
+  .cat-pill:hover { color:#fff; border-color:rgba(255,255,255,.18); }
+  .cat-pill-active { background:linear-gradient(180deg,#f7f9fc 0%,#dfe6ef 100%); border-color:transparent; color:#081018; box-shadow:0 0 24px rgba(0,0,0,.35); }
+</style>
 {% endblock %}

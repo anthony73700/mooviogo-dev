@@ -2,6 +2,8 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 
+from apps.partners.models import Partner
+
 
 class Sortie(models.Model):
     """Community outing (sortie communautaire)."""
@@ -23,6 +25,13 @@ class Sortie(models.Model):
         null=True,
         blank=True,
         related_name="created_sorties",
+    )
+    partner = models.ForeignKey(
+        Partner,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="sorties",
     )
     title = models.CharField(max_length=200)
     slug = models.SlugField(max_length=220, unique=True)
@@ -58,6 +67,10 @@ class Sortie(models.Model):
         if self.type == self.Type.COMMUNAUTAIRE:
             self.is_free = True
             self.price = 0
+            self.partner = None
+
+        if self.type == self.Type.PARTENAIRE and not self.partner_id:
+            raise ValidationError({"partner": "Un partenaire doit être sélectionné pour une sortie partenaire."})
 
     def save(self, *args, **kwargs):
         self.full_clean()

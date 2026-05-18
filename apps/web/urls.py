@@ -6,6 +6,7 @@ urlpatterns = [
     # Home
     path("", views.home, name="home"),
     path("explore/", views.explore, name="explore"),
+    path("feed/", views.feed_page, name="feed"),
     path("events/", views.events_alias, name="events-en"),
     path("nightlife/", views.nightlife, name="nightlife"),
     path("activities/", views.activities, name="activities"),
@@ -69,6 +70,7 @@ urlpatterns = [
     path("partner/events/", views.partner_events_page, name="partner-events"),
     path("partner/events/create/", views.partner_events_create_page, name="partner-events-create"),
     path("partner/bookings/", views.partner_bookings_page, name="partner-bookings"),
+    path("partner/bookings/restaurants/<int:booking_id>/decision/", views.partner_restaurant_booking_decision, name="partner-restaurant-booking-decision"),
     path("partner/requests/", views.partner_requests_page, name="partner-requests"),
     path("partner/analytics/", views.partner_analytics_page, name="partner-analytics"),
     path("partner/payments/", views.partner_payments_page, name="partner-payments"),

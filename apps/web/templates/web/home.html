@@ -1,1073 +1,571 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}{% trans "Sorties, restaurants & soirees" %} | Mooviogo{% endblock %}
+{% block title %}{% trans "Sorties, restaurants & soirées" %} | Mooviogo{% endblock %}
 
 {% block extra_head %}
 <style>
-/* ═══════════ ANIMATIONS ═══════════ */
-@keyframes float-orb {
-  0%,100% { transform: translateY(0) scale(1); }
-  50%      { transform: translateY(-30px) scale(1.06); }
-}
-@keyframes float-orb2 {
-  0%,100% { transform: translateY(0) scale(1); }
-  50%      { transform: translateY(25px) scale(0.94); }
-}
-@keyframes shimmer {
-  0%   { background-position: -400px 0; }
-  100% { background-position: 400px 0; }
-}
-@keyframes slide-up {
-  from { opacity:0; transform:translateY(28px); }
-  to   { opacity:1; transform:translateY(0); }
-}
-@keyframes glow-pulse {
-  0%,100% { box-shadow: 0 0 30px 4px rgba(192,132,252,0.30), 0 0 80px 10px rgba(255,106,77,0.15); }
-  50%      { box-shadow: 0 0 60px 12px rgba(192,132,252,0.55), 0 0 120px 20px rgba(255,106,77,0.28); }
-}
-/* ═══════════ HERO ═══════════ */
-.hero-section {
-  position: relative;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  overflow: hidden;
-  padding: 5rem 1rem 6rem;
-  background: #070a12;
-}
-.hero-bg-img {
-  position: absolute; inset: 0;
-  background: url('https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=1800&q=85') center/cover no-repeat;
-  opacity: 0.18;
-  transform: scale(1.04);
-}
-.orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(80px);
-  pointer-events: none;
-}
-.orb-1 {
-  width: 600px; height: 600px;
-  background: radial-gradient(circle, rgba(192,132,252,0.45) 0%, transparent 70%);
-  top: -100px; left: -150px;
-  animation: float-orb 8s ease-in-out infinite;
-}
-.orb-2 {
-  width: 500px; height: 500px;
-  background: radial-gradient(circle, rgba(255,106,77,0.38) 0%, transparent 70%);
-  bottom: -80px; right: -100px;
-  animation: float-orb2 10s ease-in-out infinite;
-}
-.orb-3 {
-  width: 350px; height: 350px;
-  background: radial-gradient(circle, rgba(244,114,182,0.28) 0%, transparent 70%);
-  top: 40%; left: 55%;
-  animation: float-orb 13s ease-in-out infinite reverse;
-}
-/* gradient text shimmer */
-.grad-text {
-  background: linear-gradient(90deg, #FF6A4D 0%, #C084FC 45%, #F472B6 75%, #FF6A4D 100%);
-  background-size: 800px 100%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: shimmer 4s linear infinite;
-}
-/* slide-up anim on children */
-.hero-anim-1 { animation: slide-up 0.6s cubic-bezier(0.22,1,0.36,1) both; }
-.hero-anim-2 { animation: slide-up 0.6s 0.12s cubic-bezier(0.22,1,0.36,1) both; }
-.hero-anim-3 { animation: slide-up 0.6s 0.22s cubic-bezier(0.22,1,0.36,1) both; }
-.hero-anim-4 { animation: slide-up 0.6s 0.34s cubic-bezier(0.22,1,0.36,1) both; }
-.hero-anim-5 { animation: slide-up 0.6s 0.46s cubic-bezier(0.22,1,0.36,1) both; }
-/* CTA principal */
-.cta-main {
-  position: relative;
-  display: inline-flex; align-items: center; gap: 10px;
-  padding: 1rem 2.5rem;
-  border-radius: 999px;
-  font-size: 1.05rem;
-  font-weight: 800;
-  color: #fff;
-  background: linear-gradient(135deg, #FF6A4D 0%, #C084FC 60%, #F472B6 100%);
-  box-shadow: 0 8px 40px rgba(192,132,252,0.45), 0 2px 12px rgba(0,0,0,0.4);
-  animation: glow-pulse 3s ease-in-out infinite;
-  transition: transform 0.2s, box-shadow 0.2s;
-  text-decoration: none;
-}
-.cta-main:hover { transform: scale(1.04) translateY(-2px); }
-.cta-secondary {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 1rem 2rem;
-  border-radius: 999px;
-  font-size: 1rem;
-  font-weight: 600;
-  color: rgba(255,255,255,0.85);
-  border: 1.5px solid rgba(255,255,255,0.15);
-  backdrop-filter: blur(8px);
-  background: rgba(255,255,255,0.05);
-  transition: all 0.2s;
-  text-decoration: none;
-}
-.cta-secondary:hover { border-color:rgba(192,132,252,0.5); color:#fff; background:rgba(192,132,252,0.08); }
-/* stat pill */
-.stat-pill {
-  display: inline-flex; align-items: center; gap: 6px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.09);
-  border-radius: 999px;
-  padding: 0.45rem 1rem;
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: rgba(255,255,255,0.7);
-  backdrop-filter: blur(6px);
-}
-.stat-pill strong { color: #fff; }
-/* ═══════════ SEARCH BAR ═══════════ */
-.search-pill {
-  display: flex; align-items: center;
-  background: rgba(8,5,18,0.88);
-  border: 1px solid rgba(192,132,252,0.22);
-  border-radius: 999px;
-  box-shadow: 0 8px 40px rgba(0,0,0,0.65), 0 0 0 1px rgba(192,132,252,0.06);
-  overflow: hidden;
-}
-.search-pill .seg { flex:1; padding:0.85rem 1.5rem; cursor:pointer; transition:background 0.15s; border-right:1px solid rgba(255,255,255,0.05); }
-.search-pill .seg:last-of-type { border-right:none; }
-.search-pill .seg:hover { background:rgba(192,132,252,0.07); }
-.search-pill label { display:block; font-size:0.65rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:rgba(192,132,252,0.65); margin-bottom:2px; }
-.search-pill input, .search-pill select { background:transparent; border:none; outline:none; color:#F8FAFC; font-size:0.9rem; font-weight:500; width:100%; }
-.search-pill select option { background:#100820; }
-/* ═══ SECTION HEADER ═══ */
-.sh { display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:2rem; gap:1rem; }
-.sh h2 { font-size:clamp(1.35rem,2.5vw,1.85rem); font-weight:800; color:#111827; letter-spacing:-0.03em; line-height:1.1; }
-.sh-label { display:flex; align-items:center; gap:6px; font-size:0.68rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; margin-bottom:0.45rem; }
-.sh-sub { margin-top:0.2rem; font-size:0.82rem; color:#9CA3AF; }
-.sh-link { white-space:nowrap; display:inline-flex; align-items:center; gap:5px; font-size:0.82rem; font-weight:700; text-decoration:none; transition:gap 0.2s; }
-.sh-link:hover { gap:9px; }
-/* ═══ LIVE DOT ═══ */
-.live-dot { position:relative; width:8px; height:8px; flex-shrink:0; display:inline-block; top:1px; }
-.live-dot::before { content:''; position:absolute; inset:0; border-radius:50%; background:currentColor; opacity:0.35; animation:live-ping 1.8s ease-in-out infinite; }
-.live-dot::after { content:''; position:absolute; top:1px; left:1px; width:6px; height:6px; border-radius:50%; background:currentColor; }
-@keyframes live-ping { 0%{transform:scale(1);opacity:0.35} 70%{transform:scale(2.5);opacity:0} 100%{transform:scale(2.5);opacity:0} }
-/* ═══ CARTES ═══ */
-.kard {
-  display:block; text-decoration:none;
-  background:#fff;
-  border-radius:16px;
-  overflow:hidden;
-  border:1px solid rgba(0,0,0,0.07);
-  box-shadow:0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.05);
-  transition:box-shadow 0.35s cubic-bezier(0.22,1,0.36,1), transform 0.35s cubic-bezier(0.22,1,0.36,1);
-  flex-shrink:0;
-  will-change:transform;
-}
-.kard:hover { box-shadow:0 24px 64px rgba(0,0,0,0.13), 0 6px 20px rgba(0,0,0,0.07); }
-.kard-img-wrap { overflow:hidden; position:relative; }
-.kard-img { width:100%; height:210px; object-fit:cover; display:block; transition:transform 0.6s cubic-bezier(0.22,1,0.36,1); }
-.kard:hover .kard-img { transform:scale(1.05); }
-.kard-no-img { width:100%; height:210px; display:flex; align-items:center; justify-content:center; background:#F8F9FA; }
-.kard-body { padding:0.9rem 1rem 1rem; }
-.kard-chip { display:inline-block; border-radius:6px; padding:2px 8px; font-size:0.65rem; font-weight:700; letter-spacing:.03em; margin-bottom:0.4rem; }
-.kard-title { font-size:0.9rem; font-weight:700; color:#111827; line-height:1.35; }
-.kard-meta { margin-top:0.25rem; font-size:0.72rem; color:#9CA3AF; display:flex; align-items:center; gap:3px; }
-.kard-row { margin-top:0.65rem; display:flex; align-items:center; justify-content:space-between; }
-.kard-price { font-size:0.9rem; font-weight:800; color:#111827; }
-.kard-price.free { color:#059669; }
-.kard-badge { position:absolute; top:12px; left:12px; border-radius:6px; padding:4px 10px; font-size:0.65rem; font-weight:800; letter-spacing:.05em; color:#fff; text-transform:uppercase; }
-.kard-save { position:absolute; top:10px; right:10px; width:34px; height:34px; border-radius:50%; background:rgba(255,255,255,0.92); backdrop-filter:blur(8px); display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,0.10); transition:transform 0.2s; }
-.kard:hover .kard-save { transform:scale(1.1); }
-/* ═══ CARTE VOIR TOUT ═══ */
-.kard-all {
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  background:#FAFAFA;
-  border-radius:16px;
-  border:1.5px dashed #E5E7EB;
-  text-decoration:none;
-  flex-shrink:0;
-  transition:all 0.28s cubic-bezier(0.22,1,0.36,1);
-}
-.kard-all:hover { border-color:#FF6A4D; background:#FFF5F3; transform:translateY(-4px); box-shadow:0 14px 36px rgba(255,106,77,0.10); }
-.kard-all-icon { width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin-bottom:0.75rem; background:#F3F4F6; transition:background 0.2s, transform 0.2s; }
-.kard-all:hover .kard-all-icon { background:#FFE8E3; transform:scale(1.1); }
-/* ═══ BOUTONS CAROUSEL ═══ */
-.crsl-btn {
-  position:absolute; top:50%; z-index:10;
-  width:42px; height:42px;
-  background:#fff; border:1px solid #E5E7EB; border-radius:50%;
-  display:none; align-items:center; justify-content:center;
-  box-shadow:0 2px 12px rgba(0,0,0,0.09);
-  cursor:pointer; color:#374151;
-  transition:all 0.2s;
-}
-@media(min-width:768px){ .crsl-btn { display:flex; } }
-.crsl-btn:hover { box-shadow:0 6px 24px rgba(0,0,0,0.14); }
-.crsl-btn-l { left:0; transform:translate(-50%,-50%); }
-.crsl-btn-r { right:0; transform:translate(50%,-50%); }
-.crsl-btn-l:hover { transform:translate(-50%,-50%) scale(1.06); }
-.crsl-btn-r:hover { transform:translate(50%,-50%) scale(1.06); }
-/* ═══ MARQUEE LIVE ═══ */
-@keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
-.mqstrip { overflow:hidden; padding:0.85rem 0; background:#F8F9FA; border-top:1px solid #EFEFEF; border-bottom:1px solid #EFEFEF; }
-.mqtrack { display:flex; white-space:nowrap; width:max-content; animation:marquee 42s linear infinite; }
-.mqtrack:hover { animation-play-state:paused; }
-.mqi { display:inline-flex; align-items:center; gap:0.5rem; padding:0 2.25rem; font-size:0.77rem; color:#9CA3AF; }
-.mqi strong { color:#6B7280; font-weight:600; }
-/* ═══ SCROLL REVEALS ═══ */
-.reveal { opacity:0; transform:translateY(26px); transition:opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1); }
-.reveal.vis { opacity:1; transform:translateY(0); }
-.rd1 { transition-delay:0.08s; }
-.rd2 { transition-delay:0.16s; }
-.rd3 { transition-delay:0.24s; }
-/* ═══ TRUST STRIP ═══ */
-.trust-strip { background:#111827; padding:3.5rem 0; }
-.trust-num { font-size:2.4rem; font-weight:900; letter-spacing:-0.04em; color:#fff; line-height:1; }
-.trust-label { margin-top:0.4rem; font-size:0.68rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,0.28); }
-.trust-bar { height:2px; border-radius:2px; margin-top:0.75rem; width:32px; }
-/* ═══ COMMENT ÇA MARCHE ═══ */
-.how-grid { display:grid; gap:1px; background:rgba(255,255,255,0.055); border-radius:24px; overflow:hidden; }
-@media(min-width:640px){ .how-grid { grid-template-columns:repeat(3,1fr); } }
-.how-step { position:relative; padding:2.75rem 2.25rem 2.5rem; background:#0D1018; overflow:hidden; transition:background 0.3s cubic-bezier(0.22,1,0.36,1); }
-.how-step:hover { background:#121820; }
-.how-big-num { position:absolute; top:0.75rem; right:1.25rem; font-size:6rem; font-weight:900; letter-spacing:-0.04em; line-height:1; color:rgba(255,255,255,0.04); pointer-events:none; user-select:none; }
-.how-icon { width:50px; height:50px; border-radius:14px; display:flex; align-items:center; justify-content:center; margin-bottom:1.5rem; transition:transform 0.3s cubic-bezier(0.22,1,0.36,1); }
-.how-step:hover .how-icon { transform:scale(1.1); }
-.how-label { font-size:0.6rem; font-weight:800; letter-spacing:.13em; text-transform:uppercase; margin-bottom:0.55rem; }
-/* ═══ SECTION PRO (light) ═══ */
-.pro-feat { display:flex; align-items:flex-start; gap:1rem; padding:1.35rem 1.6rem; border-radius:16px; background:#fff; border:1px solid rgba(0,0,0,0.07); box-shadow:0 1px 4px rgba(0,0,0,0.05); transition:all 0.28s cubic-bezier(0.22,1,0.36,1); text-decoration:none; }
-.pro-feat:hover { box-shadow:0 8px 28px rgba(0,0,0,0.1); border-color:rgba(0,0,0,0.12); transform:translateX(4px); }
-.pro-feat-icon { width:42px; height:42px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:2px; }
-.pro-quote { padding:1.35rem 1.5rem; border-radius:16px; background:#fff; border:1px solid rgba(0,0,0,0.07); margin-top:1.75rem; box-shadow:0 1px 4px rgba(0,0,0,0.05); }
-/* ─── SCROLL PROGRESS ─── */
-#spbar { position:fixed; top:0; left:0; height:2px; width:0%; z-index:9999; pointer-events:none; background:linear-gradient(90deg,#FF6A4D,#C084FC,#F472B6); }
-/* ─── CARD CTA BUTTON ─── */
-.kard-cta { display:flex; align-items:center; justify-content:center; gap:5px; border-radius:12px; padding:0.65rem 1rem; font-size:0.79rem; font-weight:700; margin-top:0.9rem; transition:filter 0.18s cubic-bezier(0.22,1,0.36,1), transform 0.18s cubic-bezier(0.22,1,0.36,1); }
-.kard:hover .kard-cta { filter:brightness(1.12); transform:translateY(-1px); }
-/* ─── FEATURED CARD ─── */
-.kf { display:block; text-decoration:none; border-radius:18px; overflow:hidden; position:relative; flex-shrink:0; box-shadow:0 4px 20px rgba(0,0,0,0.09), 0 8px 32px rgba(0,0,0,0.09); transition:box-shadow 0.4s cubic-bezier(0.22,1,0.36,1), transform 0.4s cubic-bezier(0.22,1,0.36,1); will-change:transform; }
-.kf:hover { box-shadow:0 20px 60px rgba(0,0,0,0.18); }
-.kf-img { width:100%; height:295px; object-fit:cover; display:block; transition:transform 0.6s cubic-bezier(0.22,1,0.36,1); }
-.kf:hover .kf-img { transform:scale(1.04); }
-.kf-no-img { width:100%; height:295px; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,#1a0533,#2d1b69); }
-.kf-overlay { position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,0) 20%, rgba(0,0,0,0.74) 100%); }
-.kf-body { position:absolute; bottom:0; left:0; right:0; padding:1.35rem 1.25rem; }
-.kf-badge { display:inline-flex; align-items:center; gap:4px; border-radius:6px; padding:3px 9px; font-size:0.62rem; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:#fff; backdrop-filter:blur(8px); }
-.kf-title { font-size:1.05rem; font-weight:800; color:#fff; line-height:1.25; letter-spacing:-0.01em; }
-.kf-meta { margin-top:0.3rem; font-size:0.73rem; color:rgba(255,255,255,0.55); }
-.kf-row { margin-top:0.7rem; display:flex; align-items:center; justify-content:space-between; }
-.kf-price { font-size:0.95rem; font-weight:800; color:#fff; }
-.kf-price.free { color:#86EFAC; }
-.kf-seats { display:inline-flex; align-items:center; gap:4px; background:rgba(255,255,255,0.13); border:1px solid rgba(255,255,255,0.2); backdrop-filter:blur(8px); border-radius:999px; padding:3px 10px; font-size:0.7rem; font-weight:600; color:rgba(255,255,255,0.82); }
-/* ─── DOT PATTERN background ─── */
-.dotbg { background-color:#FAFAFA; background-image:radial-gradient(circle, #E5E7EB 1.5px, transparent 1.5px); background-size:22px 22px; }
-
-.hero-cats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:0.75rem; width:100%; max-width:32rem; }
-.hero-cat { height:120px; }
-
-.pro-stats-row {
-  display:flex;
-  gap:2rem;
-  margin-top:2.5rem;
-}
-
-.cta-stats-row {
-  display:flex;
-  gap:2.5rem;
-  margin-top:2rem;
-  padding-top:2rem;
-  border-top:1px solid rgba(255,255,255,0.07);
-}
-
-@media (max-width: 980px) {
-  .search-pill {
-    display:block;
-    border-radius:20px;
-    padding:0.35rem;
+  .home-orb { position:absolute; pointer-events:none; border-radius:9999px; filter:blur(90px); opacity:.55; }
+  .home-orb-1 { top:-140px; left:-180px; width:560px; height:560px; background:radial-gradient(circle,rgba(87,137,255,.52) 0%,transparent 70%); animation:float-y 9s ease-in-out infinite; }
+  .home-orb-2 { bottom:-120px; right:-140px; width:520px; height:520px; background:radial-gradient(circle,rgba(255,255,255,.12) 0%,transparent 72%); animation:float-y 12s ease-in-out infinite reverse; }
+  .home-orb-3 { top:42%; left:55%; width:380px; height:380px; background:radial-gradient(circle,rgba(131,181,255,.24) 0%,transparent 70%); opacity:.24; animation:float-y 14s ease-in-out infinite; }
+  .home-trust-grid { display:grid; gap:1rem; grid-template-columns:repeat(4,minmax(0,1fr)); }
+  .home-moods { display:grid; gap:1rem; grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .home-mood-card { position:relative; overflow:hidden; border-radius:32px; border:1px solid rgba(255,255,255,.08); min-height:320px; background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02)); box-shadow:0 28px 70px -32px rgba(0,0,0,.8); transition:transform .35s cubic-bezier(.22,1,.36,1), border-color .25s ease, box-shadow .25s ease; }
+  .home-mood-card:hover { transform:translateY(-6px); border-color:rgba(255,255,255,.16); box-shadow:0 28px 64px -28px rgba(0,0,0,.55); }
+  .home-mood-card::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg,transparent 25%,rgba(6,4,14,.2) 55%,rgba(6,4,14,.94) 100%); pointer-events:none; }
+  .home-mood-media { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center; transition:transform .7s cubic-bezier(.22,1,.36,1), filter .35s ease; filter:saturate(1.04) contrast(1.02); }
+  .home-mood-card:hover .home-mood-media { transform:scale(1.06); filter:saturate(1.12) contrast(1.04); }
+  .home-mood-media.club { object-position:center 38%; }
+  .home-mood-media.dining { object-position:center 55%; }
+  .home-mood-media.community { object-position:center 32%; }
+  .home-mood-orb { position:absolute; border-radius:9999px; filter:blur(60px); opacity:.5; }
+  .home-mood-content { position:relative; z-index:1; height:100%; display:flex; flex-direction:column; justify-content:flex-end; padding:1.5rem; }
+  .home-signal { border-radius:24px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.035); padding:1rem 1.1rem; backdrop-filter:blur(12px); box-shadow:inset 0 1px 0 rgba(255,255,255,.04); }
+  .home-signal-value { font-family:"Geist",Inter,sans-serif; font-size:1.9rem; font-weight:800; line-height:1; letter-spacing:-.03em; color:#fff; }
+  .home-signal-label { margin-top:.5rem; font-size:.7rem; letter-spacing:.18em; text-transform:uppercase; color:rgba(255,255,255,.42); font-weight:700; }
+  .home-signal-copy { margin-top:.55rem; font-size:.82rem; color:rgba(255,255,255,.6); line-height:1.55; }
+  .home-onboarding { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1rem; }
+  .home-step { position:relative; overflow:hidden; border-radius:30px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.03); padding:1.25rem; box-shadow:0 24px 60px -34px rgba(0,0,0,.85); backdrop-filter:blur(16px); }
+  .home-step-num { display:inline-grid; place-items:center; height:2.6rem; width:2.6rem; border-radius:9999px; font-family:"Geist",Inter,sans-serif; font-weight:800; color:#fff; background:linear-gradient(135deg,#5d8fff,#9bc2ff); box-shadow:0 12px 26px -10px rgba(93,143,255,.45); }
+  .home-event-grid { display:grid; grid-template-columns:1.25fr .9fr; gap:1.25rem; }
+  .home-event-stack { display:grid; gap:1rem; }
+  .home-feature-event { position:relative; min-height:420px; overflow:hidden; border-radius:34px; border:1px solid rgba(255,255,255,.08); box-shadow:0 34px 90px -36px rgba(0,0,0,.82); }
+  .home-feature-event::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(6,4,14,.05) 10%,rgba(6,4,14,.35) 55%,rgba(6,4,14,.95) 100%); }
+  .home-feature-event-content { position:absolute; inset:auto 0 0 0; z-index:1; padding:1.5rem; }
+  .home-mini-event { position:relative; overflow:hidden; border-radius:28px; border:1px solid rgba(255,255,255,.08); background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02)); padding:1.25rem; box-shadow:0 24px 60px -34px rgba(0,0,0,.84); }
+  .home-photo-card { position:relative; min-height:420px; overflow:hidden; border-radius:32px; border:1px solid rgba(255,255,255,.08); box-shadow:0 30px 80px -38px rgba(0,0,0,.88); }
+  .home-photo-card-eq { min-height:360px; }
+  .home-photo-card::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(6,4,14,.08) 12%,rgba(6,4,14,.25) 45%,rgba(6,4,14,.92) 100%); pointer-events:none; }
+  .home-photo-media { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; transition:transform .7s cubic-bezier(.22,1,.36,1), filter .35s ease; }
+  .home-photo-card:hover .home-photo-media { transform:scale(1.06); filter:saturate(1.08); }
+  .home-photo-badges { position:absolute; inset:1rem 1rem auto 1rem; z-index:1; display:flex; flex-wrap:wrap; gap:.5rem; }
+  .home-photo-content { position:absolute; inset:auto 0 0 0; z-index:1; padding:1.25rem; }
+  .home-photo-sub { margin-top:.6rem; font-size:.82rem; line-height:1.65; color:rgba(255,255,255,.68); }
+  .home-curation { display:grid; grid-template-columns:1.15fr .85fr; gap:1rem; }
+  .home-curation-main, .home-curation-side { position:relative; overflow:hidden; border-radius:30px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.03); box-shadow:0 24px 60px -34px rgba(0,0,0,.84); backdrop-filter:blur(14px); }
+  .home-curation-main { padding:1.35rem; }
+  .home-curation-side { padding:1.2rem; }
+  .home-discovery-wall { display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); gap:1rem; }
+  .home-discovery-card { position:relative; overflow:hidden; border-radius:30px; border:1px solid rgba(255,255,255,.08); box-shadow:0 30px 80px -38px rgba(0,0,0,.88); min-height:280px; }
+  .home-discovery-card::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(6,4,14,.06) 10%,rgba(6,4,14,.2) 38%,rgba(6,4,14,.94) 100%); pointer-events:none; }
+  .home-discovery-card.tall { min-height:360px; }
+  .home-discovery-card.medium { min-height:360px; }
+  .home-discovery-card.wide { min-height:360px; }
+  .home-discovery-media { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; transition:transform .7s cubic-bezier(.22,1,.36,1), filter .35s ease; }
+  .home-discovery-card:hover .home-discovery-media { transform:scale(1.06); filter:saturate(1.08); }
+  .home-discovery-content { position:absolute; inset:auto 0 0 0; z-index:1; padding:1.25rem; }
+  .home-agenda { display:grid; grid-template-columns:1.1fr .9fr; gap:1rem; }
+  .home-agenda-main, .home-agenda-list { border-radius:30px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.03); box-shadow:0 24px 60px -34px rgba(0,0,0,.84); backdrop-filter:blur(14px); }
+  .home-agenda-main { position:relative; overflow:hidden; min-height:420px; }
+  .home-agenda-main::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(6,4,14,.08) 10%,rgba(6,4,14,.24) 44%,rgba(6,4,14,.94) 100%); pointer-events:none; }
+  .home-agenda-main-content { position:absolute; inset:auto 0 0 0; z-index:1; padding:1.35rem; }
+  .home-agenda-row { display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; padding:1rem 1.1rem; border-bottom:1px solid rgba(255,255,255,.06); }
+  .home-agenda-row:last-child { border-bottom:none; }
+  .home-agenda-date { display:grid; place-items:center; min-width:3.2rem; border-radius:1rem; border:1px solid rgba(255,255,255,.1); background:rgba(255,255,255,.04); padding:.55rem .45rem; }
+  .home-agenda-date strong { font-family:"Geist",Inter,sans-serif; font-size:1.15rem; line-height:1; color:#fff; }
+  .home-agenda-date span { margin-top:.18rem; font-size:.62rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:rgba(255,255,255,.48); }
+  .home-social-grid { display:grid; grid-template-columns:1.1fr .9fr; gap:1rem; }
+  .home-social-main, .home-social-side { border-radius:30px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.03); box-shadow:0 24px 60px -34px rgba(0,0,0,.84); backdrop-filter:blur(14px); }
+  .home-social-main { padding:1.3rem; }
+  .home-social-side { padding:1rem; }
+  .home-pulse-list { display:grid; gap:.8rem; }
+  .home-pulse-row { display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; border:1px solid rgba(255,255,255,.06); border-radius:20px; background:rgba(255,255,255,.025); padding:1rem; }
+  .home-community-grid { display:grid; gap:.8rem; grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .home-community-card { border:1px solid rgba(255,255,255,.08); border-radius:22px; background:rgba(255,255,255,.03); padding:1rem; }
+  .home-highlight-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:1rem; }
+  .home-highlight-card { position:relative; overflow:hidden; border-radius:24px; border:1px solid rgba(255,255,255,.08); min-height:250px; box-shadow:0 24px 62px -34px rgba(0,0,0,.86); }
+  .home-highlight-card::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(6,4,14,.05) 8%,rgba(6,4,14,.14) 34%,rgba(6,4,14,.94) 100%); }
+  .home-highlight-content { position:absolute; inset:auto 0 0 0; z-index:1; padding:1rem; }
+  .home-hero-proofbar { display:flex; flex-wrap:wrap; gap:.6rem; margin-top:1rem; }
+  .home-hero-proofchip { display:inline-flex; align-items:center; gap:.5rem; padding:.65rem .9rem; border-radius:999px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.03); box-shadow:0 16px 36px -28px rgba(0,0,0,.86); backdrop-filter:blur(12px); font-size:.78rem; color:rgba(255,255,255,.76); }
+  .home-hero-proofchip strong { color:#fff; }
+  .home-hero-actions { display:flex; flex-wrap:wrap; gap:.75rem; margin-top:1.15rem; }
+  .home-hero-moodgrid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:.85rem; margin-top:1.25rem; }
+  .home-hero-moodtile { position:relative; overflow:hidden; min-height:164px; border-radius:28px; border:1px solid rgba(255,255,255,.08); background:linear-gradient(155deg,rgba(255,255,255,.06),rgba(255,255,255,.02)); padding:1rem; box-shadow:0 24px 56px -34px rgba(0,0,0,.9); backdrop-filter:blur(16px); transition:transform .3s cubic-bezier(.22,1,.36,1), border-color .24s ease; }
+  .home-hero-moodtile:hover { transform:translateY(-5px); border-color:rgba(255,255,255,.16); }
+  .home-hero-moodicon { display:grid; place-items:center; width:3rem; height:3rem; border-radius:18px; background:linear-gradient(135deg,rgba(87,137,255,.24),rgba(255,255,255,.08)); border:1px solid rgba(255,255,255,.08); font-size:1.2rem; }
+  .home-hero-stage { position:relative; overflow:hidden; border-radius:34px; border:1px solid rgba(255,255,255,.08); background:linear-gradient(180deg,rgba(14,18,27,.98),rgba(7,10,16,.9)); padding:1.3rem; box-shadow:0 34px 80px -36px rgba(0,0,0,.92); }
+  .home-hero-stage::before { content:""; position:absolute; inset:-20% auto auto -12%; width:260px; height:260px; border-radius:9999px; background:radial-gradient(circle,rgba(93,143,255,.18),transparent 70%); pointer-events:none; }
+  .home-hero-stage-list { position:relative; display:grid; gap:.8rem; margin-top:1rem; }
+  .home-hero-stage-row { display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; border:1px solid rgba(255,255,255,.06); border-radius:22px; background:rgba(255,255,255,.025); padding:.95rem 1rem; }
+  .home-hero-stage-row strong { color:#fff; font-size:.95rem; }
+  .home-hero-stage-row span { display:block; margin-top:.25rem; color:rgba(255,255,255,.56); font-size:.8rem; line-height:1.55; }
+  .home-hero-stage-stat { flex-shrink:0; border-radius:999px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.04); padding:.45rem .7rem; font-size:.72rem; font-weight:700; color:rgba(255,255,255,.7); }
+  .home-hero-quickgrid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.8rem; margin-top:1.1rem; }
+  .home-hero-quickcard { position:relative; overflow:hidden; border-radius:24px; border:1px solid rgba(255,255,255,.08); background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.018)); padding:1rem; box-shadow:0 24px 56px -34px rgba(0,0,0,.88); backdrop-filter:blur(14px); transition:transform .3s cubic-bezier(.22,1,.36,1), border-color .24s ease, box-shadow .24s ease; }
+  .home-hero-quickcard:hover { transform:translateY(-4px); border-color:rgba(255,255,255,.16); box-shadow:0 24px 56px -28px rgba(0,0,0,.5); }
+  .home-hero-quickicon { display:grid; place-items:center; width:2.75rem; height:2.75rem; border-radius:16px; background:linear-gradient(135deg,rgba(87,137,255,.22),rgba(255,255,255,.08)); border:1px solid rgba(255,255,255,.08); font-size:1.12rem; }
+  .home-abovefold-rail { margin-top:1.1rem; }
+  .home-abovefold-rail .story-card { min-width:182px; }
+  .store-intro { padding:4.6rem 0 1.4rem; }
+  .store-kicker { font-size:.72rem; font-weight:800; letter-spacing:.2em; text-transform:uppercase; color:rgba(255,255,255,.48); }
+  .store-title { font-family:"Geist",Inter,sans-serif; font-size:clamp(3.2rem,7.2vw,6.4rem); line-height:.95; letter-spacing:-.06em; font-weight:800; max-width:14ch; }
+  .store-brand-gradient {
+    background:linear-gradient(90deg,#8b5cf6 0%,#ec4899 100%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+    color:transparent;
   }
-  .search-pill .seg {
-    border-right:none;
-    border-bottom:1px solid rgba(255,255,255,0.08);
-    padding:0.7rem 0.9rem;
+  .store-leadline { margin-top:.5rem; font-family:"Geist",Inter,sans-serif; font-size:clamp(3.2rem,7.2vw,6.4rem); line-height:.95; letter-spacing:-.06em; font-weight:800; color:rgba(255,255,255,.9); }
+  .store-subtitle { display:block; margin-top:.85rem; font-size:clamp(1rem,1.6vw,1.26rem); line-height:1.45; letter-spacing:-.01em; font-weight:600; color:rgba(255,255,255,.72); }
+  .store-copy { max-width:44rem; margin-top:1rem; font-size:.9rem; line-height:1.65; color:rgba(255,255,255,.64); }
+  .store-intro.text-center .store-title,
+  .store-intro.text-center .store-leadline,
+  .store-intro.text-center .store-copy,
+  .store-intro.text-center .store-kicker,
+  .store-intro.text-center .store-subtitle {
+    margin-left:auto;
+    margin-right:auto;
   }
-  .search-pill .seg:last-of-type {
-    border-bottom:none;
+  .store-hero-grid { display:grid; grid-template-columns:1.35fr .85fr; gap:1.1rem; margin-top:2.4rem; }
+  .store-hero-stack { display:grid; gap:1rem; }
+  .store-card { position:relative; overflow:hidden; border-radius:2.2rem; min-height:360px; padding:1.7rem; border:1px solid rgba(255,255,255,.09); box-shadow:0 34px 80px -40px rgba(0,0,0,.82); }
+  .store-card-premium { background:linear-gradient(165deg,#1a2434 0%,#0f1722 42%,#090f17 100%); color:#fff; }
+  .store-card-premium .store-card-meta { color:rgba(255,255,255,.67); }
+  .store-card-premium .store-chip { background:rgba(255,255,255,.07); color:rgba(255,255,255,.86); border-color:rgba(255,255,255,.12); }
+  .store-card-premium .store-link { color:#fff; }
+  .store-card-light { background:linear-gradient(180deg,#fbfbfd 0%,#eef1f6 100%); color:#0a0f16; }
+  .store-card-light .store-card-meta { color:rgba(10,15,22,.55); }
+  .store-card-light .store-chip { background:rgba(10,15,22,.06); color:rgba(10,15,22,.74); border-color:rgba(10,15,22,.08); }
+  .store-card-light .store-link { color:#0a0f16; }
+  .store-card-dark { background:linear-gradient(180deg,#0e1218 0%,#090c12 100%); color:#fff; }
+  .store-card-muted { background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02)); color:#fff; }
+  .store-card-title { font-family:"Geist",Inter,sans-serif; font-size:clamp(1.75rem,3vw,3.45rem); line-height:1.02; letter-spacing:-.04em; font-weight:800; max-width:12ch; }
+  .store-card-body { position:relative; z-index:1; max-width:20rem; }
+  .store-card-meta { margin-top:.75rem; font-size:.92rem; line-height:1.7; color:rgba(255,255,255,.62); }
+  .store-card-figure { position:absolute; right:0; bottom:0; width:48%; height:88%; object-fit:cover; object-position:center; }
+  .store-hero-metric { margin-top:1rem; display:inline-flex; align-items:center; gap:.55rem; border-radius:999px; border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.05); padding:.45rem .72rem; font-size:.72rem; font-weight:700; letter-spacing:.02em; color:rgba(255,255,255,.86); }
+  .store-card-orb { position:absolute; border-radius:9999px; filter:blur(46px); pointer-events:none; }
+  .store-chip { display:inline-flex; align-items:center; gap:.45rem; border-radius:999px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.05); padding:.48rem .78rem; font-size:.72rem; font-weight:700; letter-spacing:.01em; }
+  .store-link { display:inline-flex; align-items:center; gap:.45rem; margin-top:1.25rem; font-size:.88rem; font-weight:700; color:#fff; }
+  .store-link::after { content:"→"; }
+  .store-section { padding:3.2rem 0 0; }
+  .store-section-head { display:flex; align-items:end; justify-content:space-between; gap:1rem; margin-bottom:1.2rem; }
+  .store-section-title { font-family:"Geist",Inter,sans-serif; font-size:clamp(2rem,4vw,4rem); line-height:1.04; letter-spacing:-.045em; font-weight:800; }
+  .store-section-title span { color:rgba(255,255,255,.44); }
+  .store-rail { display:flex; gap:1rem; overflow-x:auto; scrollbar-width:none; padding-bottom:.4rem; }
+  .store-rail::-webkit-scrollbar { display:none; }
+  .store-rail-card { min-width:320px; }
+  .store-rail-card.store-card { min-height:420px; }
+  .store-editorial-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1rem; }
+  .store-micro { min-height:260px; }
+  .home-mobile-rail { scroll-snap-type:x mandatory; }
+  .home-mobile-rail::-webkit-scrollbar { display:none; }
+  @media (max-width: 1024px) { .home-trust-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .home-moods { grid-template-columns:1fr; } }
+  @media (max-width: 1024px) { .home-onboarding, .home-event-grid, .home-curation, .home-agenda, .home-social-grid, .home-highlight-grid, .home-hero-quickgrid { grid-template-columns:1fr; } .home-discovery-wall { grid-template-columns:1fr; } .home-community-grid { grid-template-columns:1fr; } .home-hero-moodgrid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+  @media (max-width: 1024px) { .store-hero-grid, .store-editorial-grid { grid-template-columns:1fr; } .store-card-figure { position:relative; width:100%; height:220px; margin-top:1.2rem; border-radius:1.4rem; } }
+  @media (max-width: 640px) {
+    .home-trust-grid { grid-template-columns:1fr; }
+    .home-hero-proofbar { gap:.5rem; }
+    .home-mobile-rail {
+      display:flex;
+      gap:1rem;
+      overflow-x:auto;
+      padding:0 .2rem .35rem;
+      scrollbar-width:none;
+    }
+    .home-mobile-rail > a {
+      flex:0 0 auto;
+      width:min(84vw, 360px);
+      scroll-snap-align:start;
+    }
+    .home-mobile-rail > .col-span-full {
+      min-width:100%;
+      scroll-snap-align:start;
+    }
   }
-  .search-pill button {
-    width:100%;
-    margin:0.35rem 0 0;
-    min-height:2.7rem;
-    border-radius:14px;
-  }
-  .hero-cats { grid-template-columns:repeat(2,minmax(0,1fr)); }
-}
+  @media (max-width: 640px) { .home-hero-moodgrid { grid-template-columns:1fr; } .store-intro { padding-top:2.4rem; } .store-rail-card { min-width:280px; } .store-card { min-height:300px; padding:1.25rem; } }
 
-@media (max-width: 640px) {
-  .hero-section { min-height:auto; padding:4rem 1rem 4.25rem; }
-  .hero-cats { grid-template-columns:1fr; max-width:23rem; }
-  .hero-cat { height:106px; }
-  .cta-main { width:100%; justify-content:center; font-size:1rem !important; }
-  .pro-stats-row { gap:1rem; flex-wrap:wrap; }
-  .pro-stats-row > div { min-width:28%; }
-  .cta-stats-row { gap:1rem; flex-wrap:wrap; }
-  .cta-stats-row > div { min-width:30%; }
-}
+  /* ── Points forts V2 (Apple-like highlight rail) ── */
+  .hl-section { padding:5.8rem 0 4.8rem; border-top:1px solid rgba(255,255,255,.05); }
+  .hl-wrap { max-width:80rem; margin:0 auto; }
+  .hl-head { display:flex; align-items:flex-end; justify-content:space-between; gap:1rem; padding:0 1rem; margin-bottom:2.2rem; }
+  .hl-kicker { display:block; font-size:.7rem; font-weight:800; letter-spacing:.22em; text-transform:uppercase; color:rgba(255,255,255,.4); }
+  .hl-title { margin-top:.55rem; font-family:"Geist",Inter,sans-serif; font-size:clamp(2.5rem,5.2vw,4.9rem); line-height:1; letter-spacing:-.058em; font-weight:800; color:#fff; }
+  .hl-title span { color:rgba(255,255,255,.38); }
+  .hl-link { color:rgba(255,255,255,.62); font-size:.92rem; font-weight:600; white-space:nowrap; }
+  .hl-link:hover { color:#fff; }
+  .hl-rail { display:flex; gap:1rem; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; padding:0 max(1rem, calc((100vw - 80rem)/2)) 1.6rem; scroll-padding-left:max(1rem, calc((100vw - 80rem)/2)); }
+  .hl-rail::-webkit-scrollbar { display:none; }
+  .hl-card { position:relative; flex:0 0 auto; width:min(76vw, 980px); min-height:620px; overflow:hidden; border-radius:34px; border:1px solid rgba(255,255,255,.08); scroll-snap-align:start; isolation:isolate; box-shadow:0 38px 90px -44px rgba(0,0,0,.92); transition:transform .65s cubic-bezier(.22,1,.36,1), border-color .35s ease; }
+  .hl-card:hover { transform:translateY(-6px); border-color:rgba(255,255,255,.18); }
+  .hl-media { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center; z-index:0; transition:transform .8s cubic-bezier(.22,1,.36,1), filter .35s ease; filter:saturate(1.02) contrast(1.03); }
+  .hl-card:hover .hl-media { transform:scale(1.04); filter:saturate(1.1) contrast(1.06); }
+  .hl-card::before { content:""; position:absolute; inset:0; background:radial-gradient(120% 80% at 50% -12%, rgba(255,255,255,.16), transparent 62%); pointer-events:none; z-index:1; }
+  .hl-card::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(6,9,14,.04),rgba(6,9,14,.35) 52%,rgba(6,9,14,.9) 100%); pointer-events:none; z-index:1; }
+  .hl-card-a { background:linear-gradient(160deg,#151f30 0%,#0b121b 44%,#090f16 100%); }
+  .hl-card-b { background:linear-gradient(160deg,#1b1f2d 0%,#101523 45%,#090e16 100%); }
+  .hl-card-c { background:linear-gradient(160deg,#16251f 0%,#0d1814 45%,#09110f 100%); }
+  .hl-card-inner { position:relative; z-index:2; min-height:620px; display:flex; flex-direction:column; padding:2.35rem; }
+  .hl-eyebrow { font-size:.68rem; font-weight:800; letter-spacing:.22em; text-transform:uppercase; color:rgba(255,255,255,.43); }
+  .hl-headline { margin-top:1rem; font-family:"Geist",Inter,sans-serif; font-size:clamp(2rem,3.2vw,3rem); line-height:1.04; letter-spacing:-.042em; font-weight:800; color:#fff; max-width:18ch; }
+  .hl-headline span { color:rgba(255,255,255,.5); }
+  .hl-sub { margin-top:.9rem; max-width:36ch; font-size:.92rem; line-height:1.62; color:rgba(255,255,255,.62); }
+  .hl-grow { flex:1 1 auto; }
+  .hl-figure { align-self:flex-start; border-radius:24px; border:1px solid rgba(255,255,255,.09); background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.02)); min-width:260px; min-height:160px; padding:1rem 1.2rem; display:grid; place-items:center; text-align:center; }
+  .hl-figure strong { display:block; font-family:"Geist",Inter,sans-serif; font-size:clamp(2.3rem,4.8vw,4rem); line-height:1; letter-spacing:-.06em; color:#fff; }
+  .hl-figure small { display:block; margin-top:.4rem; font-size:.68rem; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:rgba(255,255,255,.42); }
+  .hl-meta { margin-top:1.1rem; font-size:.8rem; color:rgba(255,255,255,.56); }
+  .hl-meta b { color:#fff; }
+  .hl-cta { margin-top:1.2rem; display:inline-flex; align-items:center; gap:.4rem; color:#fff; font-size:.88rem; font-weight:600; }
+  .hl-cta::after { content:"→"; transition:transform .35s cubic-bezier(.22,1,.36,1); }
+  .hl-card:hover .hl-cta::after { transform:translateX(5px); }
+  @media (max-width: 1024px) {
+    .hl-card, .hl-card-inner { min-height:560px; }
+    .hl-card { width:86vw; }
+    .hl-headline { font-size:clamp(1.7rem,4vw,2.45rem); }
+  }
+  @media (max-width: 640px) {
+    .hl-section { padding-top:4.4rem; }
+    .hl-head { align-items:flex-start; flex-direction:column; margin-bottom:1.5rem; }
+    .hl-card, .hl-card-inner { min-height:520px; }
+    .hl-card { width:90vw; border-radius:28px; }
+    .hl-card-inner { padding:1.5rem; }
+    .hl-figure { min-width:220px; min-height:140px; }
+  }
 </style>
 {% endblock %}
 
 {% block content %}
-<div id="spbar"></div>
 
-{# ═══════════════════════════════════════════ HERO ════════════════════════════════════════════ #}
-<section class="hero-section">
-  <div class="hero-bg-img"></div>
-  <div class="orb orb-1"></div>
-  <div class="orb orb-2"></div>
-  <div class="orb orb-3"></div>
-  <div class="pointer-events-none absolute inset-x-0 bottom-0 h-64" style="background:linear-gradient(0deg,#070a12 0%,transparent 100%)"></div>
-
-  <div class="relative z-10 flex flex-col items-center w-full max-w-5xl mx-auto px-4">
-
-    {# ── Badge : L'Airbnb des sorties ── #}
-    <div class="hero-anim-1 mb-7 inline-flex items-center gap-2.5 rounded-full px-5 py-2" style="background:rgba(192,132,252,0.10);border:1px solid rgba(192,132,252,0.30);backdrop-filter:blur(12px)">
-      <span class="relative flex h-2 w-2">
-        <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style="background:#A855F7"></span>
-        <span class="relative inline-flex rounded-full h-2 w-2" style="background:#C084FC"></span>
-      </span>
-      <span class="text-xs font-bold uppercase tracking-widest" style="color:#D8B4FE">{% trans "L'Airbnb des sorties - gratuit" %}</span>
-    </div>
-
-    {# ── C'EST QUOI ── #}
-    <h1 class="hero-anim-2 text-center font-black leading-[1.0] tracking-tighter text-white" style="font-size:clamp(2.8rem,8.5vw,6rem)">
-      {% trans "Tu cherches quoi faire" %}<br>
-      <span class="grad-text">ce soir&nbsp;?</span>
-    </h1>
-
-    {# ── POURQUOI — valeur immédiate ── #}
-    <p class="hero-anim-3 mt-5 text-center text-lg font-medium max-w-xl" style="color:rgba(255,255,255,0.52);line-height:1.65">
-      {% trans "Mooviogo trouve pour toi les meilleures" %} <strong class="text-white/80">{% trans "sorties" %}</strong>,
-      <strong class="text-white/80">{% trans "restaurants" %}</strong> {% trans "et" %} <strong class="text-white/80">{% trans "soirees" %}</strong>
-      - {% trans "dans ta ville, reservables en 30 secondes." %}
+<section class="relative mx-auto max-w-7xl px-4">
+  <div class="store-intro text-center">
+    <h1 class="store-title store-brand-gradient mt-3">{% trans "Mooviogo" %}</h1>
+    <p class="store-leadline">{% trans "Tes sorties commencent ici." %}</p>
+    <p class="store-subtitle">{% trans "Choisis une vibe, réserve ta place, rejoins en un geste." %}</p>
+    <p class="store-copy">
+      {% trans "Sorties, restos et événements réunis au même endroit." %}
     </p>
+  </div>
 
-    {# ── COMMENT — 3 catégories visuelles ── #}
-    <div class="hero-anim-3 mt-10 hero-cats">
-      <a href="/sorties/" class="group relative overflow-hidden rounded-2xl hero-cat">
-        <img src="https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=500&q=80"
-             alt="{% trans "Sorties" %}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
-        <div class="absolute inset-0" style="background:linear-gradient(180deg,rgba(0,0,0,0.05) 0%,rgba(10,5,25,0.82) 100%)"></div>
-        <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style="background:rgba(168,85,247,0.18)"></div>
-        <div class="absolute inset-0 flex flex-col items-center justify-end p-3">
-          <span class="text-2xl mb-1">🎉</span>
-          <span class="text-sm font-bold text-white">{% trans "Sorties" %}</span>
-          <span class="text-xs" style="color:rgba(255,255,255,0.45)">{% trans "Ce soir et week-end" %}</span>
-        </div>
-      </a>
-      <a href="/restaurants/" class="group relative overflow-hidden rounded-2xl hero-cat">
-        <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=500&q=80"
-             alt="{% trans "Restaurants" %}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
-        <div class="absolute inset-0" style="background:linear-gradient(180deg,rgba(0,0,0,0.05) 0%,rgba(20,8,5,0.82) 100%)"></div>
-        <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style="background:rgba(255,106,77,0.18)"></div>
-        <div class="absolute inset-0 flex flex-col items-center justify-end p-3">
-          <span class="text-2xl mb-1">🍽️</span>
-          <span class="text-sm font-bold text-white">{% trans "Restaurants" %}</span>
-          <span class="text-xs" style="color:rgba(255,255,255,0.45)">{% trans "Tables disponibles" %}</span>
-        </div>
-      </a>
-      <a href="/evenements/" class="group relative overflow-hidden rounded-2xl hero-cat">
-        <img src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=500&q=80"
-             alt="{% trans "Soirees" %}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
-        <div class="absolute inset-0" style="background:linear-gradient(180deg,rgba(0,0,0,0.05) 0%,rgba(15,5,20,0.82) 100%)"></div>
-        <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style="background:rgba(244,114,182,0.18)"></div>
-        <div class="absolute inset-0 flex flex-col items-center justify-end p-3">
-          <span class="text-2xl mb-1">🎶</span>
-          <span class="text-sm font-bold text-white">{% trans "Soirees" %}</span>
-          <span class="text-xs" style="color:rgba(255,255,255,0.45)">{% trans "Clubs et evenements" %}</span>
-        </div>
-      </a>
-    </div>
-
-    {# ── JE REJOINS — CTA + preuve sociale humaine ── #}
-    <div class="hero-anim-4 mt-10 flex flex-col items-center gap-5">
-      <a href="/sorties/" class="cta-main" style="font-size:1.15rem;padding:1.1rem 2.8rem">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-        {% trans "Je veux sortir ce soir" %}
-      </a>
-
-      {# Avatars + social proof #}
-      <div class="flex items-center gap-3">
-        <div class="flex -space-x-2">
-          <img src="https://i.pravatar.cc/40?img=47" alt="" class="w-8 h-8 rounded-full" style="outline:2px solid #070a12">
-          <img src="https://i.pravatar.cc/40?img=32" alt="" class="w-8 h-8 rounded-full" style="outline:2px solid #070a12">
-          <img src="https://i.pravatar.cc/40?img=12" alt="" class="w-8 h-8 rounded-full" style="outline:2px solid #070a12">
-          <img src="https://i.pravatar.cc/40?img=65" alt="" class="w-8 h-8 rounded-full" style="outline:2px solid #070a12">
-          <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold" style="background:rgba(192,132,252,0.22);color:#C084FC;outline:2px solid #070a12">+</div>
-        </div>
-        <p class="text-sm" style="color:rgba(255,255,255,0.40)">
-          <strong class="text-white">15&nbsp;000+</strong> {% trans "membres qui ne s'ennuient plus le vendredi soir" %}
-        </p>
+  {% with featured_event=events|first featured_restaurant=restaurants|first featured_sortie=sorties|first %}
+  <div class="store-hero-grid">
+    <a href="{% if featured_event %}/evenements/{{ featured_event.slug }}/{% else %}/evenements/{% endif %}" class="store-card store-card-premium block group">
+      <span class="store-chip">{% trans "L’essentiel ce soir" %}</span>
+      <div class="store-card-body mt-5">
+          <h2 class="store-card-title">{% if featured_event %}{{ featured_event.title }}{% else %}{% trans "Les événements à ouvrir en premier" %}{% endif %}</h2>
+          <p class="store-card-meta">{% if featured_event %}{{ featured_event.description|truncatechars:120 }}{% else %}{% trans "Une sélection éditoriale des sorties qui créent vraiment l’envie." %}{% endif %}</p>
+        <span class="store-hero-metric">⚡ {% trans "lecture instantanée" %}</span>
+        <span class="store-link">{% trans "Découvrir la sélection" %}</span>
       </div>
-    </div>
+      {% if featured_event and featured_event.cover_image_url %}
+      <img src="{{ featured_event.cover_image_url }}" alt="{{ featured_event.title }}" class="store-card-figure" loading="lazy" />
+      {% else %}
+      <span class="store-card-orb" style="width:240px;height:240px;right:-20px;bottom:-30px;background:radial-gradient(circle,rgba(93,143,255,.24),transparent 70%)"></span>
+      {% endif %}
+    </a>
 
-    {# ── Barre de recherche ── #}
-    <div class="hero-anim-5 mt-10 w-full max-w-3xl">
-      <form action="/sorties/" method="get" class="search-pill" aria-label="{% trans "Recherche rapide de sorties" %}">
-        <div class="seg">
-          <label>{% trans "Ville" %}</label>
-          <input type="text" name="city" placeholder="{% trans "Paris, Lyon, Marseille..." %}" autocomplete="off" aria-label="{% trans "Ville" %}" />
+    <div class="store-hero-stack">
+      <a href="{% if featured_restaurant %}/restaurants/{{ featured_restaurant.city_slug }}/{{ featured_restaurant.slug }}/{% else %}/restaurants/{% endif %}" class="store-card store-card-dark block group" style="min-height:240px;">
+        <span class="store-chip">{% trans "Réserver" %}</span>
+        <div class="store-card-body mt-5">
+          <h2 class="store-card-title text-[2.2rem] sm:text-[2.6rem]">{% if featured_restaurant %}{{ featured_restaurant.name }}{% else %}{% trans "Les tables qui donnent envie tout de suite" %}{% endif %}</h2>
+          <p class="store-card-meta">{% if featured_restaurant %}{{ featured_restaurant.description|default:_('Une fiche plus simple, plus désirable, plus claire pour réserver vite.')|truncatechars:95 }}{% else %}{% trans "Le bon cadre, le bon prix, le bon créneau: visibles immédiatement." %}{% endif %}</p>
+          <span class="store-link">{% trans "Voir les restaurants" %}</span>
         </div>
-        <div class="seg">
-          <label>{% trans "Type" %}</label>
-          <select name="type" aria-label="{% trans "Type de sortie" %}">
-            <option value="">{% trans "Tout" %}</option>
-            <option value="COMMUNAUTAIRE">{% trans "Sortie" %}</option>
-            <option value="PARTENAIRE">{% trans "Soiree" %}</option>
-          </select>
-        </div>
-        <div class="seg" style="flex:0.7">
-          <label>{% trans "Budget" %}</label>
-          <select name="free" aria-label="{% trans "Budget" %}">
-            <option value="">{% trans "Peu importe" %}</option>
-            <option value="1">{% trans "Gratuit" %}</option>
-            <option value="0">{% trans "Payant" %}</option>
-          </select>
-        </div>
-        <button type="submit" class="m-1.5 shrink-0 rounded-full px-7 py-3 text-sm font-bold text-white"
-                style="background:linear-gradient(135deg,#FF6A4D,#C084FC);box-shadow:0 4px 20px rgba(192,132,252,0.35)">
-          {% trans "Rechercher" %}
-        </button>
-      </form>
-    </div>
+      </a>
 
+      <a href="{% if featured_sortie %}/sorties/{{ featured_sortie.id }}/{% else %}/sorties/{% endif %}" class="store-card store-card-muted block group" style="min-height:240px;">
+        <span class="store-chip">{% trans "Communauté" %}</span>
+        <div class="store-card-body mt-5">
+          <h2 class="store-card-title text-[2.2rem] sm:text-[2.6rem]">{% trans "Les sorties simples à rejoindre" %}</h2>
+          <p class="store-card-meta">{% if user.is_authenticated and user.city %}{% blocktrans with city=user.city %}Ce qui bouge à {{ city }} maintenant, sans devoir fouiller dans un catalogue compliqué.{% endblocktrans %}{% else %}{% trans "Le bon mix entre vibe, ville et signal social pour sortir plus vite." %}{% endif %}</p>
+          <span class="store-link">{% trans "Voir les sorties" %}</span>
+        </div>
+      </a>
+    </div>
+  </div>
+  {% endwith %}
+</section>
+
+
+
+{# ═════════════ MOODS ═════════════ #}
+<section class="mx-auto max-w-7xl px-4 py-10 border-t border-white/[0.05]">
+  <div class="section-head">
+    <div>
+      <span class="h-eyebrow">✨ {% trans "Choisis ton mood" %}</span>
+      <h2>{% trans "Découvre la ville par ambiance" %}</h2>
+    </div>
+    <a href="/feed/">{% trans "Ouvrir le feed" %} →</a>
+  </div>
+
+  <div class="home-moods mt-6">
+    <a href="/evenements/?cat=club" class="home-mood-card block">
+      <img src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1400&q=80" alt="Ambiance clubbing nocturne" class="home-mood-media club" loading="lazy" />
+      <span class="home-mood-orb" style="width:220px;height:220px;top:-40px;left:-30px;background:radial-gradient(circle,#A832F5 0%,transparent 70%)"></span>
+      <span class="home-mood-orb" style="width:200px;height:200px;bottom:-30px;right:-20px;background:radial-gradient(circle,#F31C7F 0%,transparent 70%)"></span>
+      <div class="home-mood-content">
+        <span class="chip chip-flamingo w-fit">{% trans "Ambiance club" %}</span>
+        <h3 class="mt-3 font-display text-3xl font-extrabold text-white tracking-tight">{% trans "Clubbing & nightlife" %}</h3>
+        <p class="mt-2 max-w-md text-sm text-white/65">{% trans "Line-ups, clubs premium, rooftops et événements nocturnes avec une identité plus sombre et plus désirable." %}</p>
+      </div>
+    </a>
+
+    <a href="/restaurants/" class="home-mood-card block">
+      <img src="https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=1400&q=80" alt="Diner dans un restaurant" class="home-mood-media dining" loading="lazy" />
+      <span class="home-mood-orb" style="width:180px;height:180px;top:-20px;right:-15px;background:radial-gradient(circle,#FF6A4D 0%,transparent 70%)"></span>
+      <div class="home-mood-content">
+        <span class="chip chip-sunset w-fit">{% trans "Réservation facile" %}</span>
+        <h3 class="mt-3 font-display text-2xl font-extrabold text-white tracking-tight">{% trans "Dîner & réservation" %}</h3>
+        <p class="mt-2 text-sm text-white/65">{% trans "Des cartes claires, une recherche directe et une réservation sans stress." %}</p>
+      </div>
+    </a>
+
+    <a href="/sorties/" class="home-mood-card block">
+      <img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1400&q=80" alt="Sortie entre membres" class="home-mood-media community" loading="lazy" />
+      <span class="home-mood-orb" style="width:180px;height:180px;bottom:-20px;left:-20px;background:radial-gradient(circle,#21DCEE 0%,transparent 70%)"></span>
+      <div class="home-mood-content">
+        <span class="chip chip-electric w-fit">{% trans "Entre membres" %}</span>
+        <h3 class="mt-3 font-display text-2xl font-extrabold text-white tracking-tight">{% trans "Sortir entre membres" %}</h3>
+        <p class="mt-2 text-sm text-white/65">{% trans "Des groupes, des vibes, et des sorties pensées pour créer du lien rapidement." %}</p>
+      </div>
+    </a>
   </div>
 </section>
 
-{# ══ TRANSITION hero → blanc ══ #}
-<div style="height:80px;background:linear-gradient(180deg,#070a12 0%,#ffffff 100%)"></div>
-
-{# ══════════════════════ SORTIES ══════════════════════ #}
-<section id="section-sorties" style="background:#fff;padding:0 0 5rem">
-  <div class="mx-auto max-w-7xl px-4">
-    <div class="sh reveal">
+{# ═════════════ POINTS FORTS (Apple-style highlights rail) ═════════════ #}
+<section class="hl-section" aria-label="{% trans 'Points forts de Mooviogo' %}">
+  <div class="hl-wrap">
+    <div class="hl-head">
       <div>
-        <span class="sh-label" style="color:#FF6A4D">
-          <span class="live-dot" style="color:#22C55E"></span>
-          {% trans "Ouvert maintenant" %}
-        </span>
-        <h2>{% trans "Ce soir et ce week-end" %}</h2>
+        <span class="hl-kicker">{% trans "Points forts" %}</span>
+        <h2 class="hl-title">{% trans "Points forts." %} <span>{% trans "Grand format." %}</span></h2>
       </div>
-      <a href="/sorties/" class="sh-link" style="color:#FF6A4D">
-        {% trans "Tout voir" %}
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
-      </a>
+      <a href="/feed/" class="hl-link">{% trans "Découvrir le feed" %} →</a>
     </div>
 
-    {% if sorties %}
-    <div class="relative">
-      <div id="sorties-carousel" class="flex gap-4 overflow-x-auto pb-2 scroll-smooth" style="scrollbar-width:none;-ms-overflow-style:none">
-        {% for sortie in sorties|slice:":8" %}
-        <a href="/sorties/{{ sortie.id }}/" class="kard" style="width:300px">
-          <div class="kard-img-wrap">
-            {% if sortie.cover_image_url %}
-              <img class="kard-img" src="{{ sortie.cover_image_url }}" alt="{{ sortie.title }}" loading="lazy" style="height:200px">
-            {% else %}
-              <div class="kard-no-img" style="height:200px">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-9 h-9" style="color:#D1D5DB" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-              </div>
-            {% endif %}
-            <span class="kard-badge" style="background:rgba(255,106,77,0.88)">{{ sortie.get_type_display }}</span>
-            {% if sortie.starts_at %}<span style="position:absolute;top:12px;right:12px;background:rgba(0,0,0,0.58);color:#fff;border-radius:6px;padding:3px 9px;font-size:0.62rem;font-weight:700;backdrop-filter:blur(8px)">{{ sortie.starts_at|date:"d M" }}</span>{% endif %}
-            <span class="kard-save">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" style="color:#9CA3AF" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
-            </span>
-          </div>
-          <div class="kard-body" style="text-align:center;padding:1rem 1rem 1.25rem">
-            <p class="kard-title" style="font-size:0.92rem;font-weight:800;line-height:1.3">{{ sortie.title }}</p>
-            <p class="kard-meta" style="justify-content:center;margin-top:0.35rem">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-              {{ sortie.city }}{% if sortie.starts_at %}&nbsp;&middot;&nbsp;{{ sortie.starts_at|date:"d M" }}{% endif %}
-            </p>
-            <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:0.65rem;flex-wrap:wrap">
-              <span style="display:inline-flex;align-items:center;gap:4px;font-size:0.7rem;color:#6B7280;background:#F3F4F6;border-radius:999px;padding:3px 10px">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                {{ sortie.participant_count|default:0 }}&nbsp;/&nbsp;{{ sortie.max_participants|default:"∞" }}
-              </span>
-              <span class="kard-price {% if sortie.is_free %}free{% endif %}" style="font-size:1rem;font-weight:900">
-                {% if sortie.is_free %}{% trans "Gratuit" %}{% else %}{% widthratio sortie.price 100 1 %}&nbsp;€{% endif %}
-              </span>
-            </div>
-            <span class="kard-cta" style="background:linear-gradient(135deg,#FF6A4D,#F97316);color:#fff">
-              {% trans "Rejoindre la sortie" %}
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
-            </span>
-          </div>
-        </a>
-        {% endfor %}
-        <a href="/sorties/" class="kard-all" style="width:300px;min-height:370px">
-          <div class="kard-all-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" style="color:#FF6A4D" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
-          </div>
-          <p style="font-size:0.88rem;font-weight:700;color:#111827">{% trans "Toutes les sorties" %}</p>
-          <p style="font-size:0.72rem;color:#9CA3AF;margin-top:4px;text-align:center;padding:0 1.5rem">{% trans "Explorer toutes les sorties disponibles" %}</p>
-        </a>
+    <div class="hl-rail">
+      <article class="hl-card hl-card-a">
+        <img src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=1800&q=80" alt="Sortie nocturne entre membres" class="hl-media" loading="lazy" />
+        <div class="hl-card-inner">
+          <p class="hl-eyebrow">{% trans "Sorties membres" %}</p>
+          <h3 class="hl-headline">{% trans "Des sorties qui donnent envie." %} <span>{% trans "Tout de suite." %}</span></h3>
+          <p class="hl-sub">{% trans "Lis l’ambiance, la ville, le prix et le niveau social en un regard pour rejoindre plus vite." %}</p>
+          <div class="hl-grow"></div>
+          <div class="hl-figure"><strong>Live</strong><small>{% trans "sorties actives" %}</small></div>
+          <div class="hl-meta"><b>{% trans "Découverte sociale" %}</b> · {% trans "des cartes lisibles pour décider vite" %}</div>
+          <a href="/sorties/" class="hl-cta">{% trans "Voir les sorties" %}</a>
+        </div>
+      </article>
+
+      <article class="hl-card hl-card-b">
+        <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1800&q=80" alt="Restaurant raffine pour reservation" class="hl-media" loading="lazy" />
+        <div class="hl-card-inner">
+          <p class="hl-eyebrow">{% trans "Restaurants" %}</p>
+          <h3 class="hl-headline">{% trans "Réserver une table." %} <span>{% trans "Sans friction." %}</span></h3>
+          <p class="hl-sub">{% trans "Disponibilités, style du lieu et infos utiles sont regroupés pour réserver en quelques secondes." %}</p>
+          <div class="hl-grow"></div>
+          <div class="hl-figure"><strong>2</strong><small>{% trans "étapes" %}</small></div>
+          <div class="hl-meta"><b>{% trans "Réservation rapide" %}</b> · {% trans "du choix à la confirmation" %}</div>
+          <a href="/restaurants/" class="hl-cta">{% trans "Réserver maintenant" %}</a>
+        </div>
+      </article>
+
+      <article class="hl-card hl-card-c">
+        <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1800&q=80" alt="Partenaires et equipe evenementielle" class="hl-media" loading="lazy" />
+        <div class="hl-card-inner">
+          <p class="hl-eyebrow">{% trans "Partenaires" %}</p>
+          <h3 class="hl-headline">{% trans "Offre pro centralisée." %} <span>{% trans "Pilotage clair." %}</span></h3>
+          <p class="hl-sub">{% trans "Établissements, publications et réservations réunis dans une expérience cohérente pour les pros." %}</p>
+          <div class="hl-grow"></div>
+          <div class="hl-figure"><strong>Pro</strong><small>{% trans "espace partenaire" %}</small></div>
+          <div class="hl-meta"><b>{% trans "Visibilité locale" %}</b> · {% trans "une présence mieux structurée" %}</div>
+          <a href="/devenir-partenaire/" class="hl-cta">{% trans "Découvrir l’offre pro" %}</a>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+{# ═════════════ ONBOARDING ═════════════ #}
+
+{# ═════════════ TOP SORTIES ═════════════ #}
+<section class="mx-auto max-w-7xl px-4 py-12">
+  <div class="flex items-end justify-between mb-6 gap-4 flex-wrap">
+    <div>
+      <span class="h-eyebrow">🏆 {% trans "Tendance" %}</span>
+      <h2 class="h-section text-white mt-1">{% trans "Top sorties de la semaine" %}</h2>
+      <p class="text-sm text-white/55 mt-1">{% trans "Les plans qui rassemblent le plus de monde." %}</p>
+    </div>
+    <a href="/sorties/" class="btn-secondary btn-sm">{% trans "Toutes les sorties" %}</a>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 home-mobile-rail">
+    {% for s in sorties|slice:":8" %}
+    <a href="/sorties/{{ s.id }}/" class="home-photo-card home-photo-card-eq block group">
+      <span class="rank-num z-[2]">#{{ forloop.counter }}</span>
+      <button type="button" class="save-fab" aria-label="{% trans 'Enregistrer' %}" onclick="event.preventDefault();this.classList.toggle('is-saved');">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21s-7-4.534-9.5-9C1.07 9.36 2.5 6 5.5 6c1.74 0 3.41 1 4.5 2.5C11.09 7 12.76 6 14.5 6c3 0 4.43 3.36 3 6-2.5 4.466-9.5 9-9.5 9z" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+      </button>
+      {% if s.cover_image_url %}
+        <img src="{{ s.cover_image_url }}" alt="{{ s.title }}" loading="lazy" class="home-photo-media" />
+      {% else %}
+        <div class="absolute inset-0 bg-grad-brand"></div>
+      {% endif %}
+      <div class="home-photo-badges">
+        <span class="chip chip-dark">🎉 {% trans "Tendance" %}</span>
+        <span class="chip chip-electric">📍 {{ s.city }}</span>
       </div>
-      <button onclick="document.getElementById('sorties-carousel').scrollBy({left:-316,behavior:'smooth'})" class="crsl-btn crsl-btn-l" type="button" aria-label="{% trans "Faire defiler les sorties vers la gauche" %}">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-      </button>
-      <button onclick="document.getElementById('sorties-carousel').scrollBy({left:316,behavior:'smooth'})" class="crsl-btn crsl-btn-r" type="button" aria-label="{% trans "Faire defiler les sorties vers la droite" %}">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-      </button>
+      <div class="home-photo-content">
+        <div class="flex items-center gap-2 mb-2 flex-wrap relative z-[1]">
+          <span class="chip chip-neon">📍 {{ s.city }}</span>
+          {% if s.is_free %}<span class="chip chip-green">{% trans "Gratuit" %}</span>{% else %}<span class="chip chip-sunset">{{ s.price|floatformat:0 }}€</span>{% endif %}
+        </div>
+        <div class="font-display text-2xl font-extrabold tracking-tight text-white">{{ s.title }}</div>
+        <p class="home-photo-sub">{{ s.description|default:_('Une sortie pensée pour créer du lien, découvrir la ville et passer à l’action rapidement.')|truncatechars:110 }}</p>
+        <div class="mt-4 flex flex-wrap items-center gap-2 text-xs text-white/70">
+          <span class="flex items-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+            {{ s.participant_count|default:0 }} {% trans "participants" %}
+          </span>
+          {% if s.starts_at %}<span>•</span><time>{{ s.starts_at|date:"d M, H:i" }}</time>{% endif %}
+        </div>
+      </div>
+    </a>
+    {% empty %}
+    <div class="col-span-full panel text-center text-white/55 py-12">
+      <div class="text-3xl mb-3">🌙</div>
+      <p>{% trans "Aucune sortie en cours. Sois le premier à en créer une !" %}</p>
+      <a href="/inscription/" class="btn-primary btn-sm mt-4">{% trans "Créer une sortie" %}</a>
     </div>
-    {% else %}
-    <div class="flex flex-col items-center justify-center rounded-2xl border border-dashed py-20 text-center" style="border-color:#E5E7EB">
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 mb-3" style="color:#D1D5DB" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-      <p style="color:#9CA3AF;font-size:0.88rem">{% trans "Aucune sortie ouverte pour le moment." %}</p>
-      <a href="/sorties/creer/" class="mt-4 btn-brand text-sm">{% trans "Creer la premiere sortie" %}</a>
+    {% endfor %}
+  </div>
+</section>
+
+{# ═════════════ RESTAURANTS ═════════════ #}
+<section class="mx-auto max-w-7xl px-4 py-12 border-t border-white/[0.05]">
+  <div class="flex items-end justify-between mb-6 gap-4 flex-wrap">
+    <div>
+      <span class="h-eyebrow">🍽️ {% trans "À table" %}</span>
+      <h2 class="h-section text-white mt-1">{% trans "Restos à réserver" %}</h2>
+      <p class="text-sm text-white/55 mt-1">{% trans "Une table pour ce soir, demain, le week-end." %}</p>
     </div>
+    <a href="/restaurants/" class="btn-secondary btn-sm">{% trans "Tous les restos" %}</a>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 home-mobile-rail">
+    {% for r in restaurants|slice:":8" %}
+    <a href="/restaurants/{{ r.city_slug }}/{{ r.slug }}/" class="home-photo-card home-photo-card-eq block group">
+      <button type="button" class="save-fab" aria-label="{% trans 'Enregistrer' %}" onclick="event.preventDefault();this.classList.toggle('is-saved');">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21s-7-4.534-9.5-9C1.07 9.36 2.5 6 5.5 6c1.74 0 3.41 1 4.5 2.5C11.09 7 12.76 6 14.5 6c3 0 4.43 3.36 3 6-2.5 4.466-9.5 9-9.5 9z" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+      </button>
+      {% if r.cover_image_url %}
+        <img src="{{ r.cover_image_url }}" alt="{{ r.name }}" loading="lazy" class="home-photo-media" />
+      {% else %}
+        <div class="absolute inset-0 bg-grad-brand"></div>
+      {% endif %}
+      <div class="home-photo-badges">
+        <span class="chip chip-dark">🍽️ {% trans "Table choisie" %}</span>
+        {% if r.price_range %}<span class="chip chip-sunset">{{ r.price_range }}</span>{% endif %}
+      </div>
+      <div class="home-photo-content">
+        <div class="flex items-center justify-between gap-2 mb-1">
+          <div class="font-display text-2xl font-extrabold tracking-tight text-white">{{ r.name }}</div>
+          <span class="inline-flex items-center gap-0.5 text-xs font-semibold text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-sunset-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+            4.{% widthratio forloop.counter 10 9 %}
+          </span>
+        </div>
+        <p class="home-photo-sub">{{ r.description|default:_('Une adresse plus désirable, mieux racontée, avec une lecture rapide des signaux utiles.')|truncatechars:105 }}</p>
+        <div class="mt-4 flex flex-wrap items-center gap-2 text-xs text-white/70">
+          <span>📍 {{ r.city }}</span>
+          {% if r.cuisine_type %}<span>•</span><span>{{ r.cuisine_type }}</span>{% endif %}
+          {% if r.price_range %}<span>•</span><span class="text-white/70 font-semibold">{{ r.price_range }}</span>{% endif %}
+        </div>
+      </div>
+    </a>
+    {% empty %}
+    <div class="col-span-full panel text-center text-white/55 py-12">
+      <div class="text-3xl mb-3">🍝</div>
+      <p>{% trans "Aucun resto pour l'instant." %}</p>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+{# ═════════════ EVENTS ═════════════ #}
+<section class="mx-auto max-w-7xl px-4 py-12 border-t border-white/[0.05]">
+  <div class="flex items-end justify-between mb-6 gap-4 flex-wrap">
+    <div>
+      <span class="h-eyebrow">🎤 {% trans "L'agenda" %}</span>
+      <h2 class="h-section text-white mt-1">{% trans "Prochains événements" %}</h2>
+      <p class="text-sm text-white/55 mt-1">{% trans "Soirées, concerts, festivals — réserve avant que ça soit complet." %}</p>
+    </div>
+    <a href="/evenements/" class="btn-secondary btn-sm">{% trans "Tous les events" %}</a>
+  </div>
+
+  <div class="home-event-grid">
+    {% with featured=events|first %}
+    {% if featured %}
+    <a href="/evenements/{{ featured.slug }}/" class="home-feature-event block group">
+      {% if featured.cover_image_url %}
+      <img src="{{ featured.cover_image_url }}" alt="{{ featured.title }}" loading="lazy" class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+      {% else %}
+      <div class="absolute inset-0 bg-grad-brand"></div>
+      {% endif %}
+      <div class="home-feature-event-content">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="chip chip-flamingo">{% trans "À la une" %}</span>
+          {% if featured.price %}<span class="chip chip-sunset">{{ featured.price|floatformat:0 }}€</span>{% else %}<span class="chip chip-green">{% trans "Gratuit" %}</span>{% endif %}
+        </div>
+        <h3 class="mt-4 font-display text-4xl font-extrabold tracking-tight text-white">{{ featured.title }}</h3>
+        <p class="mt-3 max-w-lg text-sm text-white/70">{{ featured.description|truncatechars:150 }}</p>
+        <div class="mt-5 flex items-center gap-4 text-sm text-white/75">
+          <span>📍 {{ featured.city }}</span>
+          {% if featured.starts_at %}<time>🕒 {{ featured.starts_at|date:"d M · H:i" }}</time>{% endif %}
+        </div>
+      </div>
+    </a>
     {% endif %}
-  </div>
-</section>
+    {% endwith %}
 
-{# ══ MARQUEE LIVE ACTIVITY ══ #}
-<div class="mqstrip">
-  <div class="mqtrack">
-    <span class="mqi"><span style="color:#22C55E;font-size:0.7rem">●</span> <strong>Sophie</strong> rejoint Karting vendredi · Paris</span>
-    <span class="mqi" style="color:#D1D5DB">·</span>
-    <span class="mqi"><span style="color:#22C55E;font-size:0.7rem">●</span> <strong>Thomas</strong> réserve au Bistrot du Marché · Lyon</span>
-    <span class="mqi" style="color:#D1D5DB">·</span>
-    <span class="mqi"><span style="color:#F59E0B;font-size:0.7rem">●</span> <strong>3 nouvelles soirées</strong> ouvertes ce soir</span>
-    <span class="mqi" style="color:#D1D5DB">·</span>
-    <span class="mqi"><span style="color:#22C55E;font-size:0.7rem">●</span> <strong>Léa</strong> organise un Escape Game · Marseille</span>
-    <span class="mqi" style="color:#D1D5DB">·</span>
-    <span class="mqi"><span style="color:#EF4444;font-size:0.7rem">●</span> Rooftop électro — <strong>8 places</strong> restantes</span>
-    <span class="mqi" style="color:#D1D5DB">·</span>
-    <span class="mqi"><span style="color:#22C55E;font-size:0.7rem">●</span> <strong>+47 inscriptions</strong> Mooviogo ce soir</span>
-    <span class="mqi" style="color:#D1D5DB">·</span>
-    <span class="mqi"><span style="color:#22C55E;font-size:0.7rem">●</span> <strong>Julie</strong> rejoint Soirée Salsa · Paris</span>
-    <span class="mqi" style="color:#D1D5DB">·</span>
-    <span class="mqi"><span style="color:#22C55E;font-size:0.7rem">●</span> <strong>Marc</strong> réserve au Comptoir · Bordeaux</span>
-    <span class="mqi" style="color:#D1D5DB">·</span>
-    {# ─ DUPLICATE for seamless loop ─ #}
-    <span class="mqi"><span style="color:#22C55E;font-size:0.7rem">●</span> <strong>Sophie</strong> rejoint Karting vendredi · Paris</span>
-    <span class="mqi" style="color:#D1D5DB">·</span>
-    <span class="mqi"><span style="color:#22C55E;font-size:0.7rem">●</span> <strong>Thomas</strong> réserve au Bistrot du Marché · Lyon</span>
-    <span class="mqi" style="color:#D1D5DB">·</span>
-    <span class="mqi"><span style="color:#F59E0B;font-size:0.7rem">●</span> <strong>3 nouvelles soirées</strong> ouvertes ce soir</span>
-    <span class="mqi" style="color:#D1D5DB">·</span>
-    <span class="mqi"><span style="color:#22C55E;font-size:0.7rem">●</span> <strong>Léa</strong> organise un Escape Game · Marseille</span>
-    <span class="mqi" style="color:#D1D5DB">·</span>
-    <span class="mqi"><span style="color:#EF4444;font-size:0.7rem">●</span> Rooftop électro — <strong>8 places</strong> restantes</span>
-    <span class="mqi" style="color:#D1D5DB">·</span>
-    <span class="mqi"><span style="color:#22C55E;font-size:0.7rem">●</span> <strong>+47 inscriptions</strong> Mooviogo ce soir</span>
-    <span class="mqi" style="color:#D1D5DB">·</span>
-    <span class="mqi"><span style="color:#22C55E;font-size:0.7rem">●</span> <strong>Julie</strong> rejoint Soirée Salsa · Paris</span>
-    <span class="mqi" style="color:#D1D5DB">·</span>
-    <span class="mqi"><span style="color:#22C55E;font-size:0.7rem">●</span> <strong>Marc</strong> réserve au Comptoir · Bordeaux</span>
-    <span class="mqi" style="color:#D1D5DB">·</span>
-  </div>
-</div>
-
-{# ══ TRUST STRIP ══ #}
-<div class="trust-strip">
-  <div class="mx-auto max-w-7xl px-4">
-    <div class="grid grid-cols-2 gap-8 md:grid-cols-4 reveal">
-      <div class="text-center">
-        <p class="trust-num" data-target="2400" data-suffix="+">2 400+</p>
-        <p class="trust-label">{% trans "Sorties organisees" %}</p>
-        <div class="trust-bar mx-auto" style="background:#FF6A4D"></div>
-      </div>
-      <div class="text-center">
-        <p class="trust-num" data-target="180" data-suffix="+">180+</p>
-        <p class="trust-label">{% trans "Restaurants partenaires" %}</p>
-        <div class="trust-bar mx-auto" style="background:#EA580C"></div>
-      </div>
-      <div class="text-center">
-        <p class="trust-num" data-target="15000" data-suffix="+">15 000+</p>
-        <p class="trust-label">{% trans "Membres actifs" %}</p>
-        <div class="trust-bar mx-auto" style="background:#22C55E"></div>
-      </div>
-      <div class="text-center">
-        <p class="trust-num">4.9 / 5</p>
-        <p class="trust-label">{% trans "Note moyenne" %}</p>
-        <div class="trust-bar mx-auto" style="background:#F59E0B"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-{# ══ RESTAURANTS ══ #}
-{% if restaurants %}
-<section id="section-restaurants" style="background:#fff;padding:4.5rem 0">
-  <div class="mx-auto max-w-7xl px-4">
-    <div class="sh reveal">
-      <div>
-        <span class="sh-label" style="color:#EA580C">{% trans "Reserver une table" %}</span>
-        <h2>{% trans "Restaurants a decouvrir" %}</h2>
-      </div>
-      <a href="/restaurants/" class="sh-link" style="color:#EA580C">
-        {% trans "Voir tout" %}
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
-      </a>
-    </div>
-    <div class="relative">
-      <div id="resto-carousel" class="flex gap-4 overflow-x-auto pb-2 scroll-smooth" style="scrollbar-width:none;-ms-overflow-style:none">
-        {% for venue in restaurants|slice:":8" %}
-        <a href="/restaurants/{{ venue.city_slug }}/{{ venue.slug }}/" class="kard" style="width:300px">
-          <div class="kard-img-wrap">
-            {% if venue.cover_image_url %}
-              <img class="kard-img" src="{{ venue.cover_image_url }}" alt="{{ venue.name }}" loading="lazy" style="height:200px">
-            {% else %}
-              <div class="kard-no-img" style="height:200px">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-9 h-9" style="color:#D1D5DB" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-              </div>
-            {% endif %}
-            {% if venue.price_range %}<span class="kard-badge" style="background:rgba(234,88,12,0.82)">{{ venue.price_range }}</span>{% endif %}
-            <span class="kard-save">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" style="color:#9CA3AF" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
-            </span>
-          </div>
-          <div class="kard-body" style="text-align:center;padding:1rem 1rem 1.25rem">
-            {% if venue.cuisine_type %}<span class="kard-chip" style="background:#FFF7ED;color:#EA580C">{{ venue.cuisine_type }}</span>{% endif %}
-            <p class="kard-title" style="font-size:0.92rem;font-weight:800;line-height:1.3;margin-top:0.3rem">{{ venue.name }}</p>
-            <p class="kard-meta" style="justify-content:center;margin-top:0.35rem">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-              {{ venue.city_label }}
-            </p>
-            <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:0.65rem">
-              <span style="display:inline-flex;align-items:center;gap:4px;font-size:0.7rem;color:#10B981;background:#ECFDF5;border-radius:999px;padding:3px 10px;font-weight:600">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20"><circle cx="10" cy="10" r="4"/></svg>
-                {% trans "Tables disponibles" %}
-              </span>
+    <div class="home-event-stack">
+      {% for e in events|slice:"1:4" %}
+      <a href="/evenements/{{ e.slug }}/" class="home-mini-event block group">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <div class="flex flex-wrap items-center gap-2">
+              {% if e.starts_at %}<span class="chip chip-flamingo">{{ e.starts_at|date:"d M · H:i" }}</span>{% endif %}
+              {% if e.price %}<span class="chip chip-sunset">{{ e.price|floatformat:0 }}€</span>{% else %}<span class="chip chip-green">{% trans "Gratuit" %}</span>{% endif %}
             </div>
-            <span class="kard-cta" style="background:linear-gradient(135deg,#EA580C,#F97316);color:#fff">
-              {% trans "Reserver une table" %}
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
-            </span>
+            <h3 class="mt-3 font-display text-2xl font-extrabold text-white">{{ e.title }}</h3>
+            <p class="mt-2 text-sm text-white/58 line-clamp-2">{{ e.description|truncatechars:100 }}</p>
           </div>
-        </a>
-        {% endfor %}
-        <a href="/restaurants/" class="kard-all" style="width:300px;min-height:370px">
-          <div class="kard-all-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" style="color:#EA580C" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
-          </div>
-          <p style="font-size:0.88rem;font-weight:700;color:#111827">{% trans "Tous les restaurants" %}</p>
-          <p style="font-size:0.72rem;color:#9CA3AF;margin-top:4px;text-align:center;padding:0 1.5rem">{% trans "Toutes les tables disponibles" %}</p>
-        </a>
+          <span class="text-white/25 group-hover:text-flamingo-300 transition-colors">→</span>
+        </div>
+        <div class="mt-4 flex items-center justify-between text-xs text-white/55">
+          <span>📍 {{ e.city }}</span>
+          <span>{% trans "Réservation instantanée" %}</span>
+        </div>
+      </a>
+      {% empty %}
+      <div class="panel text-center text-white/55 py-12">
+        <div class="text-3xl mb-3">🎫</div>
+        <p>{% trans "Aucun event pour l'instant." %}</p>
       </div>
-      <button onclick="document.getElementById('resto-carousel').scrollBy({left:-280,behavior:'smooth'})" class="crsl-btn crsl-btn-l" type="button" aria-label="{% trans "Faire defiler les restaurants vers la gauche" %}">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-      </button>
-      <button onclick="document.getElementById('resto-carousel').scrollBy({left:280,behavior:'smooth'})" class="crsl-btn crsl-btn-r" type="button" aria-label="{% trans "Faire defiler les restaurants vers la droite" %}">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-      </button>
+      {% endfor %}
     </div>
   </div>
 </section>
-{% endif %}
 
-{# ══ ACTIVITÉS ══ #}
-{% if partners %}
-<section id="section-activites" style="background:#F8F9FA;padding:4.5rem 0">
-  <div class="mx-auto max-w-7xl px-4">
-    <div class="sh reveal">
+{# ═════════════ PARTNERS CTA ═════════════ #}
+<section class="mx-auto max-w-7xl px-4 pb-16">
+  <div class="rounded-[2rem] border border-white/[0.08] bg-white/[0.025] p-8 md:p-10">
+    <div class="grid gap-6 md:grid-cols-[1.05fr_.95fr] md:items-end">
       <div>
-        <span class="sh-label" style="color:#059669">{% trans "Loisirs et activites" %}</span>
-        <h2>{% trans "Activites et experiences" %}</h2>
+        <span class="h-eyebrow">🤝 {% trans "Pros" %}</span>
+        <h2 class="h-section text-white mt-2">{% trans "Toute l’offre partenaire, dans un seul point d’entrée." %}</h2>
+        <p class="mt-4 text-white/62 max-w-xl leading-7">{% trans "Publier un événement, gérer les réservations, suivre les performances et piloter sa présence Mooviogo depuis une interface plus claire et plus durable." %}</p>
       </div>
-      <a href="/partenaires/" class="sh-link" style="color:#059669">
-        {% trans "Voir tout" %}
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
-      </a>
-    </div>
-    <div class="relative">
-      <div id="activities-carousel" class="flex gap-4 overflow-x-auto pb-2 scroll-smooth" style="scrollbar-width:none;-ms-overflow-style:none">
-        {% for partner in partners|slice:":8" %}
-        <a href="/partenaires/" class="kard" style="width:300px">
-          <div class="kard-img-wrap">
-            {% if partner.cover_image_url %}
-              <img class="kard-img" src="{{ partner.cover_image_url }}" alt="{{ partner.name }}" loading="lazy" style="height:200px">
-            {% else %}
-              <div class="kard-no-img" style="height:200px">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-9 h-9" style="color:#D1D5DB" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-              </div>
-            {% endif %}
-            {% if partner.is_verified %}<span class="kard-badge" style="background:rgba(5,150,105,0.85)">&#10003; {% trans "Verifie" %}</span>{% endif %}
-            <span class="kard-save">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" style="color:#9CA3AF" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
-            </span>
-          </div>
-          <div class="kard-body" style="text-align:center;padding:1rem 1rem 1.25rem">
-            {% if partner.category %}<span class="kard-chip" style="background:#ECFDF5;color:#059669">{{ partner.category }}</span>{% endif %}
-            <p class="kard-title" style="font-size:0.92rem;font-weight:800;line-height:1.3;margin-top:0.3rem">{{ partner.name }}</p>
-            {% if partner.short_description %}<p style="font-size:0.74rem;color:#9CA3AF;margin-top:0.3rem;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">{{ partner.short_description }}</p>{% endif %}
-            <p class="kard-meta" style="justify-content:center;margin-top:0.35rem">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-              {{ partner.city }}
-            </p>
-            <span class="kard-cta" style="background:linear-gradient(135deg,#059669,#10B981);color:#fff">
-              {% trans "Decouvrir l'activite" %}
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
-            </span>
-          </div>
-        </a>
-        {% endfor %}
-        <a href="/partenaires/" class="kard-all" style="width:300px;min-height:370px">
-          <div class="kard-all-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" style="color:#059669" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
-          </div>
-          <p style="font-size:0.88rem;font-weight:700;color:#111827">{% trans "Toutes les activites" %}</p>
-          <p style="font-size:0.72rem;color:#9CA3AF;margin-top:4px;text-align:center;padding:0 1.5rem">{% trans "Tous nos partenaires loisirs" %}</p>
-        </a>
-      </div>
-      <button onclick="document.getElementById('activities-carousel').scrollBy({left:-316,behavior:'smooth'})" class="crsl-btn crsl-btn-l" type="button" aria-label="{% trans "Faire defiler les activites vers la gauche" %}">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-      </button>
-      <button onclick="document.getElementById('activities-carousel').scrollBy({left:316,behavior:'smooth'})" class="crsl-btn crsl-btn-r" type="button" aria-label="{% trans "Faire defiler les activites vers la droite" %}">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-      </button>
-    </div>
-  </div>
-</section>
-{% endif %}
-
-{# ══ COMMENT ÇA MARCHE ══ #}
-<section style="background:#070A12;padding:7rem 0;position:relative;overflow:hidden">
-  <div style="pointer-events:none;position:absolute;bottom:-240px;left:50%;transform:translateX(-50%);width:900px;height:500px;background:radial-gradient(ellipse,rgba(255,106,77,0.05) 0%,transparent 65%)"></div>
-  <div style="pointer-events:none;position:absolute;top:-100px;left:-80px;width:400px;height:400px;background:radial-gradient(circle,rgba(255,106,77,0.03) 0%,transparent 65%)"></div>
-
-  <div class="mx-auto max-w-6xl px-4">
-
-    {# ── Header centré ── #}
-    <div style="text-align:center;max-width:580px;margin:0 auto 4.5rem" class="reveal">
-      <p style="font-size:0.62rem;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:#FF6A4D;margin-bottom:0.85rem">{% trans "Comment ca marche" %}</p>
-      <h2 style="font-size:clamp(2.4rem,5vw,3.6rem);font-weight:900;color:#fff;line-height:1.05;letter-spacing:-0.035em">
-        Simple. Rapide.<br>
-        <span style="background:linear-gradient(90deg,#FF6A4D 0%,#F97316 55%,#FBBF24 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Efficace.</span>
-      </h2>
-      <p style="margin-top:1.1rem;font-size:0.88rem;color:rgba(255,255,255,0.3);line-height:1.7">{% trans "De l'idee a la reservation en quelques clics. Pas de compte requis pour explorer." %}</p>
-    </div>
-
-    {# ── 3 étapes ── #}
-    <div class="how-grid reveal">
-
-      {# Step 1 #}
-      <div class="how-step">
-        <p class="how-big-num">01</p>
-        <div class="how-icon" style="background:rgba(255,106,77,0.12)">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" style="color:#FF6A4D" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-        </div>
-        <p class="how-label" style="color:#FF6A4D">{% trans "Explorer" %}</p>
-        <h3 style="font-size:1.05rem;font-weight:800;color:#fff;line-height:1.3;margin-bottom:0.65rem">{% trans "Parcours les sorties" %}</h3>
-        <p style="font-size:0.82rem;color:rgba(255,255,255,0.32);line-height:1.7">{% trans "Filtre par ville, budget ou date. Sorties, restaurants, soirees - tout est la, a portee de main." %}</p>
-      </div>
-
-      {# Step 2 #}
-      <div class="how-step">
-        <p class="how-big-num">02</p>
-        <div class="how-icon" style="background:rgba(249,115,22,0.12)">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" style="color:#F97316" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-        </div>
-        <p class="how-label" style="color:#F97316">{% trans "Rejoindre" %}</p>
-        <h3 style="font-size:1.05rem;font-weight:800;color:#fff;line-height:1.3;margin-bottom:0.65rem">{% trans "Un clic pour reserver" %}</h3>
-        <p style="font-size:0.82rem;color:rgba(255,255,255,0.32);line-height:1.7">{% trans "Rejoins une sortie ou reserve ta table directement. Zero commission, zero engagement." %}</p>
-      </div>
-
-      {# Step 3 #}
-      <div class="how-step">
-        <p class="how-big-num">03</p>
-        <div class="how-icon" style="background:rgba(251,191,36,0.10)">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" style="color:#FBBF24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
-        </div>
-        <p class="how-label" style="color:#FBBF24">{% trans "Profiter" %}</p>
-        <h3 style="font-size:1.05rem;font-weight:800;color:#fff;line-height:1.3;margin-bottom:0.65rem">{% trans "Vis des moments memorables" %}</h3>
-        <p style="font-size:0.82rem;color:rgba(255,255,255,0.32);line-height:1.7">{% trans "Rencontre de nouvelles personnes, explore ta ville autrement. C'est tout ce qu'il faut." %}</p>
-      </div>
-
-    </div>
-
-    {# ── CTA ── #}
-    <div style="display:flex;align-items:center;justify-content:center;gap:1.5rem;margin-top:3.5rem;flex-wrap:wrap" class="reveal">
-      <a href="/inscription/" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#FF6A4D,#F97316);color:#fff;border-radius:999px;padding:0.95rem 2.4rem;font-weight:700;font-size:0.92rem;text-decoration:none;box-shadow:0 6px 28px rgba(255,106,77,0.22);transition:all 0.2s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 12px 36px rgba(255,106,77,0.35)'" onmouseout="this.style.transform='';this.style.boxShadow='0 6px 28px rgba(255,106,77,0.22)'">
-        {% trans "Creer mon compte - gratuit" %}
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
-      </a>
-      <a href="/sorties/" style="font-size:0.85rem;font-weight:600;color:rgba(255,255,255,0.32);text-decoration:none;transition:color 0.2s" onmouseover="this.style.color='rgba(255,255,255,0.65)'" onmouseout="this.style.color='rgba(255,255,255,0.32)'">
-        {% trans "Explorer sans compte" %} →
-      </a>
-    </div>
-
-  </div>
-</section>
-
-{# Transition dark → light #}
-<div style="height:64px;background:linear-gradient(180deg,#070A12 0%,#F5F3EF 100%)"></div>
-
-{# ══ SECTION PRO — light premium ══ #}
-<section id="section-pro" style="background:#F5F3EF;padding:5rem 0 6.5rem;position:relative;overflow:hidden">
-
-  {# Texture légère + orbs #}
-  <div style="pointer-events:none;position:absolute;top:-80px;right:0;width:500px;height:500px;background:radial-gradient(circle,rgba(255,106,77,0.07) 0%,transparent 60%)"></div>
-  <div style="pointer-events:none;position:absolute;bottom:-60px;left:3%;width:360px;height:360px;background:radial-gradient(circle,rgba(99,102,241,0.04) 0%,transparent 60%)"></div>
-
-  <div class="relative mx-auto max-w-6xl px-4">
-    <div class="flex flex-col lg:flex-row gap-16 xl:gap-24 items-start">
-
-      {# ─── Colonne gauche : pitch ─── #}
-      <div style="flex:1;min-width:0">
-        <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,106,77,0.09);border:1px solid rgba(255,106,77,0.22);border-radius:999px;padding:5px 14px;margin-bottom:1.25rem">
-          <span style="width:6px;height:6px;border-radius:50%;background:#FF6A4D;flex-shrink:0"></span>
-          <span style="font-size:0.6rem;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:#C84E35">{% trans "Espace professionnel" %}</span>
-        </div>
-        <h2 class="mt-0 font-black tracking-tight reveal" style="font-size:clamp(2rem,4.5vw,3rem);color:#0D1117;line-height:1.05;letter-spacing:-0.03em">
-          Votre établissement<br>devant&nbsp;<span style="background:linear-gradient(90deg,#FF6A4D,#F97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">15&nbsp;000</span>&nbsp;clients.<br>
-          <span style="color:rgba(0,0,0,0.26)">Dès aujourd'hui.</span>
-        </h2>
-        <p class="mt-5 leading-relaxed reveal" style="font-size:0.95rem;color:#6B7280;max-width:420px;line-height:1.75">
-          {% trans "Mooviogo connecte les etablissements locaux aux personnes qui veulent sortir maintenant. Sans commission cachee, sans contrat long." %}
-        </p>
-
-        {# Stats #}
-        <div class="mt-10 pro-stats-row reveal">
-          <div style="padding-right:2rem;border-right:1px solid rgba(0,0,0,0.1)">
-            <p class="font-black" style="font-size:1.75rem;color:#0D1117;letter-spacing:-0.04em;line-height:1">180+</p>
-            <p style="font-size:0.7rem;color:#9CA3AF;text-transform:uppercase;letter-spacing:.08em;margin-top:3px">{% trans "Etablissements" %}</p>
-          </div>
-          <div style="padding-right:2rem;border-right:1px solid rgba(0,0,0,0.1)">
-            <p class="font-black" style="font-size:1.75rem;color:#0D1117;letter-spacing:-0.04em;line-height:1">15K+</p>
-            <p style="font-size:0.7rem;color:#9CA3AF;text-transform:uppercase;letter-spacing:.08em;margin-top:3px">{% trans "Utilisateurs actifs" %}</p>
-          </div>
-          <div>
-            <p class="font-black" style="font-size:1.75rem;color:#FF6A4D;letter-spacing:-0.04em;line-height:1">0%</p>
-            <p style="font-size:0.7rem;color:#9CA3AF;text-transform:uppercase;letter-spacing:.08em;margin-top:3px">{% trans "Commission" %}</p>
-          </div>
-        </div>
-
-        {# Séparateur #}
-        <div style="height:1px;background:linear-gradient(90deg,rgba(255,106,77,0.2),transparent);margin:2rem 0"></div>
-
-        {# Témoignage #}
-        <div class="pro-quote reveal">
-          <div style="display:flex;gap:1px;margin-bottom:0.55rem">
-            <span style="color:#FF6A4D;font-size:0.72rem;letter-spacing:2px">★★★★★</span>
-          </div>
-          <p style="font-size:0.88rem;color:#374151;font-style:italic;line-height:1.7">"Depuis Mooviogo, mes soirées du jeudi sont complètes en moins de 2h. Un canal de distribution qu'on aurait dû avoir depuis longtemps."</p>
-          <div class="flex items-center gap-2.5 mt-3">
-            <img src="https://i.pravatar.cc/32?img=15" alt="" class="w-7 h-7 rounded-full" style="outline:2px solid rgba(0,0,0,0.06)">
-            <span style="font-size:0.73rem;color:#9CA3AF;font-weight:600">Julien M. &mdash; Bar La Cave, Paris</span>
-          </div>
-        </div>
-
-        <div class="mt-8 flex items-center gap-5 flex-wrap reveal">
-          <a href="/devenir-partenaire/" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#FF6A4D,#F97316);color:#fff;border-radius:999px;padding:0.95rem 2.25rem;font-weight:700;font-size:0.95rem;text-decoration:none;box-shadow:0 6px 24px rgba(255,106,77,0.28);transition:all 0.2s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 12px 36px rgba(255,106,77,0.4)'" onmouseout="this.style.transform='';this.style.boxShadow='0 6px 24px rgba(255,106,77,0.28)'">
-            {% trans "Rejoindre le reseau" %}
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
-          </a>
-          <a href="/connexion/" style="font-size:0.85rem;font-weight:600;color:#6B7280;text-decoration:none;transition:color 0.2s" onmouseover="this.style.color='#111827'" onmouseout="this.style.color='#6B7280'">{% trans "Deja partenaire ? Se connecter" %} →</a>
-        </div>
-      </div>
-
-      {# ─── Colonne droite : 3 offres + photos ─── #}
-      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:0.75rem">
-
-        <a href="/devenir-partenaire/?type=restaurant" class="pro-feat reveal rd1">
-          <div class="pro-feat-icon" style="background:rgba(234,88,12,0.1)">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" style="color:#EA580C" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-          </div>
-          <div style="flex:1;min-width:0">
-            <p style="font-size:0.65rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#EA580C;margin-bottom:0.2rem">{% trans "Restaurant" %}</p>
-            <p style="font-size:0.9rem;font-weight:700;color:#111827;line-height:1.3">{% trans "Remplissez vos tables chaque soir" %}</p>
-            <p style="font-size:0.78rem;color:#6B7280;margin-top:0.25rem;line-height:1.5">{% trans "Publiez vos creneaux et touchez des milliers de clients locaux." %}</p>
-          </div>
-          <div style="color:rgba(0,0,0,0.18);flex-shrink:0;padding-left:0.5rem;margin-top:4px">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-          </div>
-        </a>
-
-        <a href="/devenir-partenaire/?type=nightlife" class="pro-feat reveal rd2">
-          <div class="pro-feat-icon" style="background:rgba(147,51,234,0.08)">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" style="color:#9333EA" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
-          </div>
-          <div style="flex:1;min-width:0">
-            <p style="font-size:0.65rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#9333EA;margin-bottom:0.2rem">Bar &amp; Nightlife</p>
-            <p style="font-size:0.9rem;font-weight:700;color:#111827;line-height:1.3">{% trans "Salle comble chaque week-end" %}</p>
-            <p style="font-size:0.78rem;color:#6B7280;margin-top:0.25rem;line-height:1.5">{% trans "Clubs, rooftops, soirees DJ - on amene le public." %}</p>
-          </div>
-          <div style="color:rgba(0,0,0,0.18);flex-shrink:0;padding-left:0.5rem;margin-top:4px">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-          </div>
-        </a>
-
-        <a href="/devenir-partenaire/?type=evasion" class="pro-feat reveal rd3">
-          <div class="pro-feat-icon" style="background:rgba(5,150,105,0.1)">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" style="color:#059669" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-          </div>
-          <div style="flex:1;min-width:0">
-            <p style="font-size:0.65rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#059669;margin-bottom:0.2rem">{% trans "Loisirs et Evasion" %}</p>
-            <p style="font-size:0.9rem;font-weight:700;color:#111827;line-height:1.3">{% trans "Groupes prets a l'aventure" %}</p>
-            <p style="font-size:0.78rem;color:#6B7280;margin-top:0.25rem;line-height:1.5">{% trans "Paintball, karting, escape game - remplissez vos sessions." %}</p>
-          </div>
-          <div style="color:rgba(0,0,0,0.18);flex-shrink:0;padding-left:0.5rem;margin-top:4px">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-          </div>
-        </a>
-
-        {# Mini galerie photos #}
-        <div class="grid grid-cols-3 gap-2 mt-3 reveal rd3">
-          <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&q=80" alt="" class="rounded-xl w-full h-20 object-cover" style="box-shadow:0 2px 8px rgba(0,0,0,0.12)">
-          <img src="https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=400&q=80" alt="" class="rounded-xl w-full h-20 object-cover" style="box-shadow:0 2px 8px rgba(0,0,0,0.12)">
-          <img src="https://images.unsplash.com/photo-1551632811-561732d1e306?w=400&q=80" alt="" class="rounded-xl w-full h-20 object-cover" style="box-shadow:0 2px 8px rgba(0,0,0,0.12)">
-        </div>
-
+      <div class="flex flex-wrap gap-2 md:justify-end">
+        <a href="/devenir-partenaire/" class="btn-primary">{% trans "Découvrir l’offre pro" %}</a>
+        <a href="/partenaires/" class="btn-secondary">{% trans "Voir les partenaires" %}</a>
       </div>
     </div>
   </div>
 </section>
-
-{# Transition light → dark #}
-<div style="height:64px;background:linear-gradient(180deg,#F5F3EF 0%,#070A12 100%)"></div>
-
-{# ══ CTA FINAL ══ #}
-<section style="background:#070A12;padding:7rem 0;position:relative;overflow:hidden">
-  <div style="pointer-events:none;position:absolute;top:-220px;right:-80px;width:720px;height:720px;background:radial-gradient(circle,rgba(255,106,77,0.07) 0%,transparent 58%)"></div>
-  <div style="pointer-events:none;position:absolute;bottom:-180px;left:-60px;width:520px;height:520px;background:radial-gradient(circle,rgba(192,132,252,0.05) 0%,transparent 60%)"></div>
-
-  <div class="relative mx-auto max-w-5xl px-4">
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 xl:gap-20 items-center">
-
-      {# ─── Left: headline + stats ─── #}
-      <div class="reveal">
-        <p style="font-size:0.68rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#FF6A4D;margin-bottom:0.75rem">{% trans "Gratuit - Pour toujours" %}</p>
-        <h2 style="font-size:clamp(2.4rem,5vw,3.6rem);font-weight:900;color:#fff;line-height:1.05;letter-spacing:-0.035em">
-          La ville est<br>pleine de<br>
-          <span style="background:linear-gradient(90deg,#FF6A4D 0%,#F97316 55%,#FBBF24 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">surprises.</span>
-        </h2>
-        <p style="margin-top:1.25rem;color:rgba(255,255,255,0.38);font-size:0.9rem;line-height:1.7;max-width:340px">
-          {% trans "Rejoins 15 000+ personnes qui ne s'ennuient plus le vendredi soir." %}
-        </p>
-        <div class="cta-stats-row">
-          <div>
-            <p style="font-size:1.45rem;font-weight:900;color:#fff;letter-spacing:-0.03em;line-height:1">2 400<span style="color:#FF6A4D">+</span></p>
-            <p style="font-size:0.62rem;color:rgba(255,255,255,0.28);text-transform:uppercase;letter-spacing:.09em;margin-top:3px">{% trans "Sorties creees" %}</p>
-          </div>
-          <div>
-            <p style="font-size:1.45rem;font-weight:900;color:#fff;letter-spacing:-0.03em;line-height:1">4.9<span style="color:#F59E0B"> ★</span></p>
-            <p style="font-size:0.62rem;color:rgba(255,255,255,0.28);text-transform:uppercase;letter-spacing:.09em;margin-top:3px">{% trans "Note moyenne" %}</p>
-          </div>
-          <div>
-            <p style="font-size:1.45rem;font-weight:900;color:#FF6A4D;letter-spacing:-0.03em;line-height:1">0 €</p>
-            <p style="font-size:0.62rem;color:rgba(255,255,255,0.28);text-transform:uppercase;letter-spacing:.09em;margin-top:3px">{% trans "Pour rejoindre" %}</p>
-          </div>
-        </div>
-      </div>
-
-      {# ─── Right: signup card ─── #}
-      <div class="reveal rd1" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:24px;padding:2.25rem 2rem">
-        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.5rem">
-          <div style="display:flex">
-            <img src="https://i.pravatar.cc/40?img=47" alt="" style="width:34px;height:34px;border-radius:50%;outline:2px solid rgba(255,255,255,0.10)">
-            <img src="https://i.pravatar.cc/40?img=32" alt="" style="width:34px;height:34px;border-radius:50%;outline:2px solid rgba(255,255,255,0.10);margin-left:-9px">
-            <img src="https://i.pravatar.cc/40?img=12" alt="" style="width:34px;height:34px;border-radius:50%;outline:2px solid rgba(255,255,255,0.10);margin-left:-9px">
-            <img src="https://i.pravatar.cc/40?img=65" alt="" style="width:34px;height:34px;border-radius:50%;outline:2px solid rgba(255,255,255,0.10);margin-left:-9px">
-          </div>
-          <div>
-            <p style="font-size:0.8rem;font-weight:700;color:#fff;line-height:1.2">15 000+ membres</p>
-            <p style="font-size:0.68rem;color:rgba(255,255,255,0.28)">actifs cette semaine</p>
-          </div>
-        </div>
-        <h3 style="font-size:1.18rem;font-weight:800;color:#fff;line-height:1.35;margin-bottom:1.5rem">
-          {% trans "Cree ton compte et rejoins" %}<br>{% trans "la prochaine sortie" %}
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 inline-block ml-1" style="color:#FF6A4D" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
-        </h3>
-        <div style="display:flex;flex-direction:column;gap:0.55rem;margin-bottom:1.75rem">
-          <div style="display:flex;align-items:center;gap:0.6rem;font-size:0.8rem;color:rgba(255,255,255,0.48)">
-            <span style="width:18px;height:18px;border-radius:50%;background:#FF6A4D;display:flex;align-items:center;justify-content:center;font-size:0.58rem;font-weight:800;color:#fff;flex-shrink:0">&#10003;</span>
-            {% trans "Sorties, restaurants et soirees pres de toi" %}
-          </div>
-          <div style="display:flex;align-items:center;gap:0.6rem;font-size:0.8rem;color:rgba(255,255,255,0.48)">
-            <span style="width:18px;height:18px;border-radius:50%;background:#FF6A4D;display:flex;align-items:center;justify-content:center;font-size:0.58rem;font-weight:800;color:#fff;flex-shrink:0">&#10003;</span>
-            {% trans "Reservation en 30 secondes, sans frais" %}
-          </div>
-          <div style="display:flex;align-items:center;gap:0.6rem;font-size:0.8rem;color:rgba(255,255,255,0.48)">
-            <span style="width:18px;height:18px;border-radius:50%;background:#FF6A4D;display:flex;align-items:center;justify-content:center;font-size:0.58rem;font-weight:800;color:#fff;flex-shrink:0">&#10003;</span>
-            {% trans "Rencontre des gens, vis des experiences uniques" %}
-          </div>
-        </div>
-        <a href="/inscription/" style="display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#FF6A4D,#F97316);color:#fff;border-radius:14px;padding:1rem 1.5rem;font-weight:800;font-size:0.92rem;text-decoration:none;box-shadow:0 6px 28px rgba(255,106,77,0.25);transition:all 0.2s;margin-bottom:0.75rem" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 12px 36px rgba(255,106,77,0.38)'" onmouseout="this.style.transform='';this.style.boxShadow='0 6px 28px rgba(255,106,77,0.25)'">
-          {% trans "Rejoindre Mooviogo - gratuit" %}
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
-        </a>
-        <a href="/sorties/" style="display:block;text-align:center;font-size:0.78rem;color:rgba(255,255,255,0.22);text-decoration:none;transition:color 0.2s" onmouseover="this.style.color='rgba(255,255,255,0.52)'" onmouseout="this.style.color='rgba(255,255,255,0.22)'">
-          {% trans "Explorer sans s'inscrire" %} →
-        </a>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-{# ══ JAVASCRIPT ══ #}
-<script>
-(function(){
-  // ── Scroll reveals ──────────────────────────────────────────
-  var ro = new IntersectionObserver(function(entries){
-    entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('vis'); } });
-  }, { threshold: 0.10, rootMargin: '0px 0px -32px 0px' });
-  document.querySelectorAll('.reveal').forEach(function(el){ ro.observe(el); });
-
-  // ── Count-up for trust strip ────────────────────────────────
-  function countUp(el){
-    var target = parseInt(el.dataset.target, 10);
-    var suffix = el.dataset.suffix || '';
-    var dur = 1600;
-    var start = performance.now();
-    function tick(now){
-      var t = Math.min((now - start) / dur, 1);
-      var ease = 1 - Math.pow(1 - t, 3);
-      var val = Math.floor(ease * target);
-      el.textContent = val.toLocaleString('fr-FR') + (t >= 1 ? suffix : '');
-      if(t < 1) requestAnimationFrame(tick);
-    }
-    requestAnimationFrame(tick);
-  }
-  var to = new IntersectionObserver(function(entries){
-    entries.forEach(function(e){
-      if(e.isIntersecting){
-        e.target.querySelectorAll('[data-target]').forEach(countUp);
-        to.unobserve(e.target);
-      }
-    });
-  }, { threshold: 0.5 });
-  document.querySelectorAll('.trust-strip').forEach(function(el){ to.observe(el); });
-
-  // ── Card perspective tilt (.kard + .kf) ────────────────────
-  document.querySelectorAll('.kard, .kf').forEach(function(card){
-    card.addEventListener('mousemove', function(e){
-      var r = card.getBoundingClientRect();
-      var x = (e.clientX - r.left) / r.width  - 0.5;
-      var y = (e.clientY - r.top)  / r.height - 0.5;
-      card.style.transform = 'perspective(900px) rotateX('+(-y*4)+'deg) rotateY('+(x*4)+'deg) translateY(-4px)';
-    });
-    card.addEventListener('mouseleave', function(){
-      card.style.transition = 'transform 0.45s cubic-bezier(0.22,1,0.36,1), box-shadow 0.35s cubic-bezier(0.22,1,0.36,1)';
-      card.style.transform = '';
-      setTimeout(function(){ card.style.transition = ''; }, 450);
-    });
-  });
-
-  // ── Scroll progress bar ─────────────────────────────────────
-  var spbar = document.getElementById('spbar');
-  if(spbar){
-    function updProg(){
-      var s = window.scrollY;
-      var h = document.documentElement.scrollHeight - window.innerHeight;
-      spbar.style.width = (h > 0 ? Math.min(s / h * 100, 100) : 0) + '%';
-    }
-    document.addEventListener('scroll', updProg, { passive:true });
-  }
-
-})();
-</script>
 
 {% endblock %}

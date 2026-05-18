@@ -4,63 +4,130 @@
 
 {% block content %}
 
-<div class="pg-hdr">
-  <div class="mx-auto max-w-5xl px-4">
-    <p class="slabel mb-3">{% trans "Tableau de bord" %}</p>
-    <h1 style="font-size:2rem;font-weight:900;color:#fff;letter-spacing:-0.03em">{% trans "Espace partenaire" %}</h1>
-    <p style="margin-top:0.4rem;font-size:0.88rem;color:rgba(255,255,255,0.4)">{% trans "Bienvenue," %} {{ user.display_name|default:user.username }}</p>
+<section class="relative overflow-hidden border-b border-white/[0.06]">
+  <div class="absolute inset-0 bg-grad-aurora opacity-25"></div>
+  <div class="absolute -right-24 -top-24 h-80 w-80 rounded-full bg-neon-500/25 blur-3xl"></div>
+  <div class="relative mx-auto max-w-6xl px-4 py-14">
+    <p class="h-eyebrow text-electric-300">{% trans "Dashboard partenaire" %}</p>
+    <div class="mt-3 flex flex-wrap items-end justify-between gap-5">
+      <div>
+        <h1 class="h-display text-white">{% trans "Pilote ton lieu comme un produit premium" %}</h1>
+        <p class="mt-3 max-w-2xl text-sm sm:text-base text-white/60">{% trans "Une interface plus claire, plus rapide et plus moderne pour gérer événements, réservations, analytics et revenus sans friction." %}</p>
+        <div class="mt-5 flex flex-wrap gap-2">
+          <span class="chip chip-flamingo">{% trans "Conversion first" %}</span>
+          <span class="chip chip-dark">{% trans "Brand control" %}</span>
+          <span class="chip chip-electric">{% trans "Premium ops" %}</span>
+        </div>
+      </div>
+      <div class="panel-soft px-4 py-3">
+        <p class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-white/40">{% trans "Compte" %}</p>
+        <p class="mt-1 font-display text-xl font-extrabold text-white">{{ user.display_name|default:user.username }}</p>
+      </div>
+    </div>
+
+    <div class="mt-6 grid gap-3 sm:grid-cols-2">
+      {% if partner_profile %}
+      <div class="panel-soft p-4">
+        <p class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-white/40">{% trans "Fiche partenaire" %}</p>
+        <p class="mt-2 font-display text-lg font-extrabold text-white">{{ partner_profile.name }}</p>
+        <p class="mt-1 text-sm text-white/60">{{ partner_profile.city }}{% if partner_profile.category %} • {{ partner_profile.category }}{% endif %}</p>
+      </div>
+      {% endif %}
+      <div class="panel-soft p-4">
+        <p class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-white/40">{% trans "Établissements" %}</p>
+        <p class="mt-2 font-display text-lg font-extrabold text-white">{{ owned_restaurants|length }}</p>
+        <p class="mt-1 text-sm text-white/60">{% trans "restaurants reliés à ce compte" %}</p>
+      </div>
+    </div>
+
+    {% if owned_restaurants %}
+    <div class="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+      <p class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-white/40">{% trans "Mes établissements" %}</p>
+      <div class="mt-3 grid gap-2 sm:grid-cols-2">
+        {% for venue in owned_restaurants|slice:":6" %}
+        <div class="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5">
+          <p class="text-sm font-semibold text-white">{{ venue.name }}</p>
+          <p class="text-xs text-white/55">{{ venue.city_label }}{% if venue.cuisine_type %} • {{ venue.cuisine_type }}{% endif %}</p>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
   </div>
-</div>
+</section>
 
-<div class="mx-auto max-w-5xl px-4" style="padding-top:3rem;padding-bottom:5rem">
-  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1rem">
+<div class="mx-auto max-w-6xl px-4 py-10">
+  <div class="card p-6 mb-6 flex flex-wrap items-center justify-between gap-4">
+    <div>
+      <p class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-white/40">{% trans "Cockpit" %}</p>
+      <h2 class="mt-2 font-display text-2xl font-extrabold text-white">{% trans "Tout ce qui compte en une seule vue" %}</h2>
+      <p class="mt-2 text-sm text-white/55">{% trans "Visibilité, réservations, demandes, chiffre et qualité perçue alignés sur un seul rythme produit." %}</p>
+    </div>
+    <a href="/partner/events/" class="btn-primary btn-sm">{% trans "Créer un événement" %}</a>
+  </div>
 
-    <a href="/partenaire/evenements/" class="pk" style="padding:1.5rem;text-decoration:none;display:block">
-      <div style="width:40px;height:40px;border-radius:10px;background:rgba(255,106,77,0.12);display:flex;align-items:center;justify-content:center;margin-bottom:1rem">
-        <svg xmlns="http://www.w3.org/2000/svg" style="width:1.2rem;height:1.2rem;color:#FF8A66" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+  <div class="dashboard-kpi-grid mb-6">
+    <div class="kpi-card"><p class="h-eyebrow">{% trans "Visibilité" %}</p><p class="mt-3 font-display text-3xl font-extrabold text-white">+28%</p><p class="mt-2 text-sm text-white/50">{% trans "de vues cette semaine" %}</p></div>
+    <div class="kpi-card"><p class="h-eyebrow">{% trans "Réservations" %}</p><p class="mt-3 font-display text-3xl font-extrabold text-white">24</p><p class="mt-2 text-sm text-white/50">{% trans "en attente de validation" %}</p></div>
+    <div class="kpi-card"><p class="h-eyebrow">{% trans "Conversion" %}</p><p class="mt-3 font-display text-3xl font-extrabold text-white">8.4%</p><p class="mt-2 text-sm text-white/50">{% trans "depuis la fiche partenaire" %}</p></div>
+    <div class="kpi-card"><p class="h-eyebrow">{% trans "Tickets" %}</p><p class="mt-3 font-display text-3xl font-extrabold text-white">112</p><p class="mt-2 text-sm text-white/50">{% trans "vendus ce mois" %}</p></div>
+    <div class="kpi-card"><p class="h-eyebrow">{% trans "Satisfaction" %}</p><p class="mt-3 font-display text-3xl font-extrabold text-white">4.9</p><p class="mt-2 text-sm text-white/50">{% trans "note moyenne" %}</p></div>
+  </div>
+
+  <div class="dashboard-grid">
+
+    <a href="/partner/events/" class="dashboard-link shine">
+      <div class="dashboard-link-icon text-sunset-400">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
       </div>
-      <p style="font-size:0.95rem;font-weight:800;color:#fff;margin-bottom:0.3rem">{% trans "Mes evenements" %}</p>
-      <p style="font-size:0.78rem;color:rgba(255,255,255,0.38)">{% trans "Creer et gerer tes evenements" %}</p>
+      <p class="mt-4 font-display text-xl font-extrabold text-white">{% trans "Mes événements" %}</p>
+      <p class="mt-2 text-sm text-white/55">{% trans "Créer, programmer et pousser tes événements premium." %}</p>
+      <div class="mt-4 inline-flex items-center gap-2 text-xs font-semibold text-sunset-300">{% trans "Créer et gérer" %} <span>→</span></div>
     </a>
 
-    <a href="/partenaire/disponibilites/" class="pk" style="padding:1.5rem;text-decoration:none;display:block">
-      <div style="width:40px;height:40px;border-radius:10px;background:rgba(96,165,250,0.12);display:flex;align-items:center;justify-content:center;margin-bottom:1rem">
-        <svg xmlns="http://www.w3.org/2000/svg" style="width:1.2rem;height:1.2rem;color:#60A5FA" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    <a href="/partner/bookings/" class="dashboard-link shine">
+      <div class="dashboard-link-icon text-electric-300">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
       </div>
-      <p style="font-size:0.95rem;font-weight:800;color:#fff;margin-bottom:0.3rem">{% trans "Disponibilites" %}</p>
-      <p style="font-size:0.78rem;color:rgba(255,255,255,0.38)">{% trans "Gerer tes creneaux horaires" %}</p>
+      <p class="mt-4 font-display text-xl font-extrabold text-white">{% trans "Réservations" %}</p>
+      <p class="mt-2 text-sm text-white/55">{% trans "Suis les créneaux, no-shows et confirmations sans friction." %}</p>
+      <div class="mt-4 inline-flex items-center gap-2 text-xs font-semibold text-electric-300">{% trans "Voir les créneaux" %} <span>→</span></div>
     </a>
 
-    <a href="/partenaire/demandes/" class="pk" style="padding:1.5rem;text-decoration:none;display:block">
-      <div style="width:40px;height:40px;border-radius:10px;background:rgba(74,222,128,0.12);display:flex;align-items:center;justify-content:center;margin-bottom:1rem">
-        <svg xmlns="http://www.w3.org/2000/svg" style="width:1.2rem;height:1.2rem;color:#4ADE80" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
+    <a href="/partner/requests/" class="dashboard-link shine">
+      <div class="dashboard-link-icon text-green-300">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
       </div>
-      <p style="font-size:0.95rem;font-weight:800;color:#fff;margin-bottom:0.3rem">{% trans "Demandes" %}</p>
-      <p style="font-size:0.78rem;color:rgba(255,255,255,0.38)">{% trans "Reservations recues" %}</p>
+      <p class="mt-4 font-display text-xl font-extrabold text-white">{% trans "Demandes" %}</p>
+      <p class="mt-2 text-sm text-white/55">{% trans "Centralise les demandes entrantes et réponds plus vite." %}</p>
+      <div class="mt-4 inline-flex items-center gap-2 text-xs font-semibold text-green-300">{% trans "Prioriser" %} <span>→</span></div>
     </a>
 
-    <a href="/partenaire/offres/" class="pk" style="padding:1.5rem;text-decoration:none;display:block">
-      <div style="width:40px;height:40px;border-radius:10px;background:rgba(234,179,8,0.12);display:flex;align-items:center;justify-content:center;margin-bottom:1rem">
-        <svg xmlns="http://www.w3.org/2000/svg" style="width:1.2rem;height:1.2rem;color:#FDE047" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+    <a href="/partner/analytics/" class="dashboard-link shine">
+      <div class="dashboard-link-icon text-yellow-300">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
       </div>
-      <p style="font-size:0.95rem;font-weight:800;color:#fff;margin-bottom:0.3rem">{% trans "Offres" %}</p>
-      <p style="font-size:0.78rem;color:rgba(255,255,255,0.38)">{% trans "Tes opportunites partenaires" %}</p>
+      <p class="mt-4 font-display text-xl font-extrabold text-white">{% trans "Analytics" %}</p>
+      <p class="mt-2 text-sm text-white/55">{% trans "Comprends audience, conversion et pics de demande." %}</p>
+      <div class="mt-4 inline-flex items-center gap-2 text-xs font-semibold text-yellow-300">{% trans "Analyser" %} <span>→</span></div>
     </a>
 
-    <a href="/partenaire/revenus/" class="pk" style="padding:1.5rem;text-decoration:none;display:block">
-      <div style="width:40px;height:40px;border-radius:10px;background:rgba(74,222,128,0.1);display:flex;align-items:center;justify-content:center;margin-bottom:1rem">
-        <svg xmlns="http://www.w3.org/2000/svg" style="width:1.2rem;height:1.2rem;color:#4ADE80" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    <a href="/partner/payments/" class="dashboard-link shine">
+      <div class="dashboard-link-icon text-green-300">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
       </div>
-      <p style="font-size:0.95rem;font-weight:800;color:#fff;margin-bottom:0.3rem">{% trans "Revenus" %}</p>
-      <p style="font-size:0.78rem;color:rgba(255,255,255,0.38)">{% trans "Paiements et historique" %}</p>
+      <p class="mt-4 font-display text-xl font-extrabold text-white">{% trans "Revenus" %}</p>
+      <p class="mt-2 text-sm text-white/55">{% trans "Paiements, historique et performance monétaire." %}</p>
+      <div class="mt-4 inline-flex items-center gap-2 text-xs font-semibold text-green-300">{% trans "Suivre" %} <span>→</span></div>
     </a>
 
-    <a href="/partenaire/profil/" class="pk" style="padding:1.5rem;text-decoration:none;display:block">
-      <div style="width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;margin-bottom:1rem">
-        <svg xmlns="http://www.w3.org/2000/svg" style="width:1.2rem;height:1.2rem;color:rgba(255,255,255,0.4)" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+    <a href="/partner/settings/" class="dashboard-link shine">
+      <div class="dashboard-link-icon text-white/70">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
       </div>
-      <p style="font-size:0.95rem;font-weight:800;color:#fff;margin-bottom:0.3rem">{% trans "Profil partenaire" %}</p>
-      <p style="font-size:0.78rem;color:rgba(255,255,255,0.38)">{% trans "Informations et dossier" %}</p>
+      <p class="mt-4 font-display text-xl font-extrabold text-white">{% trans "Paramètres" %}</p>
+      <p class="mt-2 text-sm text-white/55">{% trans "Infos établissement, branding et configuration." %}</p>
+      <div class="mt-4 inline-flex items-center gap-2 text-xs font-semibold text-white/70">{% trans "Configurer" %} <span>→</span></div>
     </a>
 
   </div>

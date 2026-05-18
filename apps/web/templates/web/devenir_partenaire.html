@@ -5,6 +5,17 @@
 
 {% block extra_head %}
 <style>
+  /* Page-level neutralization to keep the Apple-premium tone. */
+  .dp-hero, .dp-hero * { color: inherit; }
+  .dp-hero [style*="#FF8A66"], .dp-hero [style*="#FF6A4D"], .dp-hero [style*="#F97316"] {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    background: transparent !important;
+  }
+  .dp-stats { border-color: rgba(255,255,255,0.08) !important; background: rgba(255,255,255,0.03) !important; }
+  [style*="rgba(255,106,77"] { background-color: rgba(255,255,255,0.05) !important; border-color: rgba(255,255,255,0.10) !important; }
+  [style*="rgba(255,106,77,0.12)"] svg { color: #e6ecf5 !important; }
+
   .dp-hero {
     background: #070A12;
     padding: 5rem 1rem 4.5rem;
@@ -65,9 +76,9 @@
     </h1>
     <p style="font-size:1rem;color:rgba(255,255,255,0.5);max-width:480px;margin:0 auto 2.5rem;line-height:1.7">{% trans "Restaurateurs, organisateurs d'evenements, lieux - touche des milliers d'utilisateurs actifs et gere tout depuis un seul endroit." %}</p>
     {% if user.is_authenticated %}
-    <a href="/pro/inscription/" class="btn-brand" style="font-size:1rem;padding:1rem 2.75rem;border-radius:14px;font-weight:800">{% trans "Deposer ma candidature" %}</a>
+    <a href="/partenaire/" class="btn-brand" style="font-size:1rem;padding:1rem 2.75rem;border-radius:14px;font-weight:800">{% trans "Deposer ma candidature" %}</a>
     {% else %}
-    <a href="/inscription/?next=/pro/inscription/" class="btn-brand" style="font-size:1rem;padding:1rem 2.75rem;border-radius:14px;font-weight:800">{% trans "Commencer gratuitement" %}</a>
+    <a href="/inscription/?next=/partenaire/" class="btn-brand" style="font-size:1rem;padding:1rem 2.75rem;border-radius:14px;font-weight:800">{% trans "Commencer gratuitement" %}</a>
     <p style="margin-top:0.75rem;font-size:0.78rem;color:rgba(255,255,255,0.25)">{% trans "Pas encore de compte ? L'inscription est gratuite." %}</p>
     {% endif %}
   </div>

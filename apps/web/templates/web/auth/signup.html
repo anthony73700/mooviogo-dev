@@ -2,132 +2,138 @@
 {% load i18n %}
 {% block title %}{% trans "Inscription" %} | Mooviogo{% endblock %}
 
+{% block extra_head %}
+<style>
+  .auth-shell { min-height:calc(100vh - 120px); display:grid; grid-template-columns:1fr 1fr; }
+  @media (max-width:1023px){ .auth-shell { grid-template-columns:1fr; } .auth-art { display:none; } }
+  .auth-art { position:relative; overflow:hidden; background:linear-gradient(135deg,#1a0e3a,#0c0820); }
+  .auth-art::before,.auth-art::after { content:""; position:absolute; border-radius:9999px; filter:blur(80px); pointer-events:none; }
+  .auth-art::before { top:-100px; left:-80px; width:400px; height:400px; background:radial-gradient(circle,#21DCEE 0%,transparent 70%); opacity:.45; animation:float-y 10s ease-in-out infinite; }
+  .auth-art::after { bottom:-100px; right:-80px; width:380px; height:380px; background:radial-gradient(circle,#F31C7F 0%,transparent 70%); opacity:.55; animation:float-y 12s ease-in-out infinite reverse; }
+  .auth-form-side { display:flex; align-items:center; justify-content:center; padding:3rem 1.25rem; }
+</style>
+{% endblock %}
+
 {% block content %}
-<div style="min-height:80vh;display:flex;align-items:center;justify-content:center;padding:4rem 1rem;background:radial-gradient(ellipse at 50% -20%,rgba(255,106,77,0.07) 0%,transparent 60%)">
-  <div style="width:100%;max-width:400px">
+<div class="auth-shell">
 
-    <div style="text-align:center;margin-bottom:2.25rem">
-      <a href="/" style="display:inline-flex;align-items:center;gap:9px;text-decoration:none;margin-bottom:1.25rem">
-        <span style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#FF6A4D,#F97316);display:flex;align-items:center;justify-content:center;font-size:0.8rem;color:#fff;font-weight:900">M</span>
-        <span style="font-size:1.15rem;font-weight:900;color:#fff;letter-spacing:-0.02em">Mooviogo</span>
+  <div class="auth-art p-12 hidden lg:flex flex-col justify-between relative">
+    <div class="relative z-10">
+      <a href="/" class="inline-flex items-center gap-2.5">
+        <span class="grid h-10 w-10 place-items-center rounded-2xl bg-grad-brand text-white font-display font-extrabold text-lg shadow-neon-sm">M</span>
+        <span class="font-display text-xl font-extrabold text-white">mooviogo</span>
       </a>
-      <p style="font-size:1.5rem;font-weight:900;color:#fff;letter-spacing:-0.025em;margin-bottom:0.35rem">{% trans "Rejoins-nous" %}</p>
-      <p style="font-size:0.85rem;color:rgba(255,255,255,0.38)">{% trans "Cree ton compte en 30 secondes - c'est gratuit" %}</p>
     </div>
+    <div class="relative z-10">
+      <h2 class="font-display text-4xl font-extrabold text-white leading-tight">{% trans "Rejoins la" %} <span class="grad-text">{% trans "communauté nightlife" %}</span></h2>
+      <p class="mt-4 text-white/65 max-w-md">{% trans "Crée ton compte en 30 secondes — c'est gratuit." %}</p>
+      <ul class="mt-6 space-y-2 text-sm text-white/70">
+        <li class="flex items-center gap-2">✨ {% trans "Rejoins des sorties entre membres" %}</li>
+        <li class="flex items-center gap-2">🍽️ {% trans "Réserve restos et events en 2 clics" %}</li>
+        <li class="flex items-center gap-2">▶️ {% trans "Découvre la nightlife au format feed" %}</li>
+      </ul>
+    </div>
+  </div>
 
-    <div class="pk" style="padding:2rem">
+  <div class="auth-form-side">
+    <div class="w-full max-w-sm">
+      <a href="/" class="lg:hidden inline-flex items-center gap-2.5 mb-8">
+        <span class="grid h-9 w-9 place-items-center rounded-2xl bg-grad-brand text-white font-display font-extrabold">M</span>
+        <span class="font-display text-lg font-extrabold text-white">mooviogo</span>
+      </a>
+
+      <h1 class="font-display text-3xl font-extrabold text-white">{% trans "Crée ton compte" %}</h1>
+      <p class="text-white/55 mt-2 text-sm">{% trans "Gratuit, 30 secondes." %}</p>
+
       {% if error %}
-      <div style="margin-bottom:1.25rem;border-radius:12px;border:1px solid rgba(248,113,113,0.2);background:rgba(248,113,113,0.08);padding:0.85rem 1rem;font-size:0.82rem;color:#F87171">{{ error }}</div>
+      <div role="alert" class="mt-5 rounded-2xl border border-flamingo-500/30 bg-flamingo-500/10 px-4 py-3 text-sm text-flamingo-200">{{ error }}</div>
       {% endif %}
 
-      <form method="post">
+      <form method="post" class="mt-6 space-y-3.5">
         {% csrf_token %}
-        <div style="display:flex;flex-direction:column;gap:1rem">
-          <div>
-            <label style="display:block;font-size:0.75rem;font-weight:600;color:rgba(255,255,255,0.4);margin-bottom:0.45rem">{% trans "Nom d'utilisateur" %} *</label>
-            <input type="text" name="username" required autofocus class="fi-input" placeholder="{% trans "ton_pseudo" %}" />
-          </div>
-          <div>
-            <label style="display:block;font-size:0.75rem;font-weight:600;color:rgba(255,255,255,0.4);margin-bottom:0.45rem">{% trans "Email" %} *</label>
-            <input type="email" name="email" required class="fi-input" placeholder="{% trans "toi@example.com" %}" />
-          </div>
-          <div>
-            <label style="display:block;font-size:0.75rem;font-weight:600;color:rgba(255,255,255,0.4);margin-bottom:0.45rem">{% trans "Telephone" %} *</label>
-            <div style="display:grid;grid-template-columns:1fr auto;gap:0.5rem;align-items:center">
-              <input type="tel" id="signup-phone" name="phone" required class="fi-input" placeholder="+33612345678" />
-              <button type="button" id="signup-request-otp" class="btn-ghost" style="padding:0.75rem 0.95rem;border-radius:12px;font-size:0.78rem;white-space:nowrap">{% trans "Envoyer code" %}</button>
-            </div>
-            <p id="signup-otp-feedback" style="margin-top:0.5rem;font-size:0.75rem;color:rgba(255,255,255,0.5)"></p>
-          </div>
-          <div>
-            <label style="display:block;font-size:0.75rem;font-weight:600;color:rgba(255,255,255,0.4);margin-bottom:0.45rem">{% trans "Code OTP" %} *</label>
-            <input type="text" name="otp_code" required class="fi-input" placeholder="{% trans "Code recu par SMS" %}" maxlength="6" />
-          </div>
-          <div>
-            <label style="display:block;font-size:0.75rem;font-weight:600;color:rgba(255,255,255,0.4);margin-bottom:0.45rem">{% trans "Date de naissance" %} *</label>
-            <input type="date" name="birth_date" required class="fi-input" />
-          </div>
-          <div>
-            <label style="display:block;font-size:0.75rem;font-weight:600;color:rgba(255,255,255,0.4);margin-bottom:0.45rem">{% trans "Mot de passe" %} *</label>
-            <input type="password" name="password" required class="fi-input" placeholder="{% trans "8 caracteres minimum" %}" />
-          </div>
-          <div>
-            <label style="display:block;font-size:0.75rem;font-weight:600;color:rgba(255,255,255,0.4);margin-bottom:0.45rem">{% trans "Confirmer le mot de passe" %} *</label>
-            <input type="password" name="password2" required class="fi-input" placeholder="••••••••" />
-          </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-white/55 mb-1.5 uppercase tracking-wider">{% trans "Nom d'utilisateur" %} *</label>
+          <input type="text" name="username" required autofocus class="input" placeholder="{% trans 'ton_pseudo' %}" />
         </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-white/55 mb-1.5 uppercase tracking-wider">{% trans "Email" %} *</label>
+          <input type="email" name="email" required class="input" placeholder="{% trans 'toi@email.com' %}" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-white/55 mb-1.5 uppercase tracking-wider">{% trans "Téléphone" %} *</label>
+          <div class="flex gap-2">
+            <input id="signup-phone" type="tel" name="phone" required class="input flex-1" placeholder="+33612345678" />
+            <button type="button" id="signup-request-otp" class="btn-secondary btn-sm whitespace-nowrap">{% trans "Envoyer code" %}</button>
+          </div>
+          <p id="signup-otp-feedback" class="mt-1.5 text-xs text-white/55"></p>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-white/55 mb-1.5 uppercase tracking-wider">{% trans "Code OTP" %} *</label>
+          <input type="text" name="otp_code" required class="input tracking-widest text-center font-display" maxlength="6" placeholder="123456" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-white/55 mb-1.5 uppercase tracking-wider">{% trans "Date de naissance" %} *</label>
+          <input type="date" name="birth_date" required class="input" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-white/55 mb-1.5 uppercase tracking-wider">{% trans "Mot de passe" %} *</label>
+          <input type="password" name="password" required class="input" placeholder="{% trans '8 caractères minimum' %}" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-white/55 mb-1.5 uppercase tracking-wider">{% trans "Confirmer le mot de passe" %} *</label>
+          <input type="password" name="password2" required class="input" placeholder="••••••••" />
+        </div>
+
         {% if TURNSTILE_SITE_KEY %}
-        <div class="cf-turnstile" data-sitekey="{{ TURNSTILE_SITE_KEY }}" style="margin-top:1.25rem"></div>
+        <div class="cf-turnstile" data-sitekey="{{ TURNSTILE_SITE_KEY }}"></div>
         <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
         {% endif %}
-        <button type="submit" class="btn-brand" style="margin-top:1.5rem;width:100%;padding:0.9rem;font-size:0.92rem;border-radius:14px;justify-content:center;font-weight:800">
-          {% trans "Creer mon compte" %}
-        </button>
+
+        <button type="submit" class="btn-primary w-full mt-4">{% trans "Créer mon compte" %}</button>
+        <p class="text-[0.7rem] text-white/45 text-center mt-2">{% trans "En t'inscrivant tu acceptes nos CGU et notre politique de confidentialité." %}</p>
       </form>
 
-      <div class="hdiv"></div>
+      <div class="my-6 flex items-center gap-3 text-xs text-white/40">
+        <span class="flex-1 h-px bg-white/10"></span><span>{% trans "ou" %}</span><span class="flex-1 h-px bg-white/10"></span>
+      </div>
 
-      <p style="text-align:center;font-size:0.82rem;color:rgba(255,255,255,0.35)">
-        {% trans "Deja un compte ?" %}
-        <a href="/connexion/" style="color:#FF8A66;text-decoration:none;font-weight:600">{% trans "Se connecter" %}</a>
+      <p class="text-center text-sm text-white/65">
+        {% trans "Déjà un compte ?" %}
+        <a href="/connexion/" class="text-flamingo-300 hover:text-flamingo-200 font-semibold">{% trans "Se connecter" %}</a>
       </p>
     </div>
-
   </div>
+
 </div>
+
 <script>
-  (function () {
-    const btn = document.getElementById('signup-request-otp');
-    const phoneInput = document.getElementById('signup-phone');
-    const feedback = document.getElementById('signup-otp-feedback');
-    if (!btn || !phoneInput || !feedback) {
-      return;
-    }
-
-    btn.addEventListener('click', async function () {
-      const phone = (phoneInput.value || '').trim();
-      if (!phone) {
-        feedback.style.color = '#F87171';
-        feedback.textContent = '{% trans "Renseigne ton numero avant d'envoyer le code." %}';
-        return;
-      }
-
-      const csrf = document.querySelector('input[name="csrfmiddlewaretoken"]')?.value || '';
-      btn.disabled = true;
-      feedback.style.color = 'rgba(255,255,255,0.6)';
-      feedback.textContent = '{% trans "Envoi du code en cours..." %}';
-
-      try {
-        const body = new URLSearchParams();
-        body.set('phone', phone);
-
-        const response = await fetch('/inscription/request-otp/', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'X-CSRFToken': csrf,
-          },
-          body: body.toString(),
-        });
-        const payload = await response.json();
-
-        if (!response.ok) {
-          feedback.style.color = '#F87171';
-          feedback.textContent = payload.detail || '{% trans "Impossible d'envoyer le code." %}';
-          return;
-        }
-
-        feedback.style.color = '#4ADE80';
-        feedback.textContent = payload.debug_code
-          ? `{% trans "Code envoye." %} (DEBUG: ${payload.debug_code})`
-          : '{% trans "Code envoye par SMS. Verifie ton telephone." %}';
-      } catch (_err) {
-        feedback.style.color = '#F87171';
-        feedback.textContent = '{% trans "Erreur reseau pendant l'envoi du code." %}';
-      } finally {
-        btn.disabled = false;
-      }
-    });
-  })();
+(function () {
+  var btn = document.getElementById('signup-request-otp');
+  var phoneInput = document.getElementById('signup-phone');
+  var feedback = document.getElementById('signup-otp-feedback');
+  if (!btn || !phoneInput || !feedback) return;
+  btn.addEventListener('click', async function () {
+    var phone = (phoneInput.value || '').trim();
+    if (!phone) { feedback.className = 'mt-1.5 text-xs text-flamingo-300'; feedback.textContent = '{% trans "Renseigne ton numéro avant d\u2019envoyer le code." %}'; return; }
+    var csrf = document.querySelector('input[name="csrfmiddlewaretoken"]').value || '';
+    btn.disabled = true; feedback.className = 'mt-1.5 text-xs text-white/65'; feedback.textContent = '{% trans "Envoi du code…" %}';
+    try {
+      var body = new URLSearchParams(); body.set('phone', phone);
+      var response = await fetch('/inscription/request-otp/', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded','X-CSRFToken':csrf}, body:body.toString() });
+      var payload = await response.json();
+      if (!response.ok) { feedback.className = 'mt-1.5 text-xs text-flamingo-300'; feedback.textContent = payload.detail || '{% trans "Impossible d\u2019envoyer le code." %}'; return; }
+      feedback.className = 'mt-1.5 text-xs text-electric-300';
+      feedback.textContent = payload.debug_code ? '{% trans "Code envoyé." %} (DEBUG: ' + payload.debug_code + ')' : '{% trans "Code envoyé par SMS. Vérifie ton téléphone." %}';
+    } catch (_e) { feedback.className = 'mt-1.5 text-xs text-flamingo-300'; feedback.textContent = '{% trans "Erreur réseau pendant l\u2019envoi du code." %}'; }
+    finally { btn.disabled = false; }
+  });
+})();
 </script>
 {% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Modifier mon profil | Mooviogo{% endblock %}
+
+{% block content %}
+
+<div class="pg-hdr">
+  <div class="mx-auto max-w-xl px-4">
+    <a href="/profil/" class="back-link">← Mon profil</a>
+    <h1 style="font-size:1.8rem;font-weight:900;color:#fff;letter-spacing:-0.025em">Modifier mon profil</h1>
+  </div>
+</div>
+
+<div class="mx-auto max-w-xl px-4" style="padding-top:3rem;padding-bottom:5rem">
+  <div class="pk" style="padding:2rem">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div style="display:flex;flex-direction:column;gap:1.1rem">
+        <div>
+          <label style="display:block;font-size:0.75rem;font-weight:600;color:rgba(255,255,255,0.4);margin-bottom:0.4rem">Nom affiché</label>
+          <input type="text" name="display_name" value="{{ user.display_name|default:'' }}" class="fi-input" placeholder="Ton prénom ou pseudo" />
+        </div>
+        <div>
+          <label style="display:block;font-size:0.75rem;font-weight:600;color:rgba(255,255,255,0.4);margin-bottom:0.4rem">Bio</label>
+          <textarea name="bio" rows="4" class="fi-input" style="min-height:auto;height:auto;padding-top:0.75rem;padding-bottom:0.75rem;resize:none" placeholder="Quelques mots sur toi...">{{ user.bio|default:'' }}</textarea>
+        </div>
+        <div>
+          <label style="display:block;font-size:0.75rem;font-weight:600;color:rgba(255,255,255,0.4);margin-bottom:0.4rem">Ville</label>
+          <input type="text" name="city" value="{{ user.city|default:'' }}" class="fi-input" placeholder="Paris" />
+        </div>
+        <div>
+          <label style="display:block;font-size:0.75rem;font-weight:600;color:rgba(255,255,255,0.4);margin-bottom:0.4rem">URL de l'avatar</label>
+          <input type="url" name="avatar_url" value="{{ user.avatar_url|default:'' }}" class="fi-input" placeholder="https://..." />
+        </div>
+      </div>
+      <button type="submit" class="btn-brand" style="margin-top:1.75rem;width:100%;padding:0.9rem;border-radius:14px;justify-content:center;font-size:0.92rem;font-weight:800">Enregistrer les modifications</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

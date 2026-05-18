@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ title }} | Mooviogo{% endblock %}
+
+{% block extra_head %}
+<style>
+  .rb-grid { display: grid; gap: 0.75rem; }
+  .rb-card { border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; background: rgba(255,255,255,0.03); padding: 0.9rem; }
+  .rb-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+  .rb-title { font-size: 0.9rem; font-weight: 800; color: #fff; }
+  .rb-meta { font-size: 0.75rem; color: rgba(255,255,255,0.55); margin-top: 0.2rem; }
+  .rb-badge { padding: 0.25rem 0.55rem; border-radius: 999px; font-size: 0.7rem; font-weight: 700; border: 1px solid rgba(255,255,255,0.18); }
+  .rb-badge.pending { color: #FACC15; }
+  .rb-badge.confirmed { color: #34D399; }
+  .rb-badge.cancelled { color: #F87171; }
+  .rb-actions { display: flex; gap: 0.5rem; margin-top: 0.8rem; }
+  .rb-btn { border-radius: 10px; padding: 0.48rem 0.7rem; font-size: 0.75rem; font-weight: 700; }
+  .rb-btn-ok { background: #0B6A45; color: #fff; }
+  .rb-btn-no { background: #7F1D1D; color: #fff; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pg-hdr">
+  <div class="mx-auto max-w-5xl px-4">
+    <p class="slabel mb-3">{% trans "Dashboard" %}</p>
+    <h1 style="font-size:2rem;font-weight:900;color:#fff;letter-spacing:-0.03em">{{ title }}</h1>
+    {% if subtitle %}<p style="margin-top:0.55rem;font-size:0.9rem;color:rgba(255,255,255,0.45)">{{ subtitle }}</p>{% endif %}
+  </div>
+</div>
+
+<div class="mx-auto max-w-5xl px-4" style="padding-top:2rem;padding-bottom:4rem">
+  {% if not owned_venues %}
+  <div class="pk" style="padding:1rem">
+    <p style="font-size:0.8rem;color:rgba(255,255,255,0.6)">{% trans "Aucun restaurant ne t'est attribué pour le moment." %}</p>
+  </div>
+  {% else %}
+  <div class="pk" style="padding:1rem">
+    <div class="rb-grid">
+      {% for row in booking_rows %}
+      <div class="rb-card">
+        <div class="rb-head">
+          <div>
+            <div class="rb-title">{% trans "Réservation" %} #{{ row.booking.id }}</div>
+            <div class="rb-meta">
+              {% if row.slot %}
+              {{ row.slot.venue.name }} · {{ row.slot.date|date:"d/m/Y" }} {{ row.slot.time|time:"H:i" }} · {{ row.slot.confirmed_count }}/{{ row.slot.capacity }}
+              {% else %}
+              {% trans "Créneau introuvable" %}
+              {% endif %}
+            </div>
+            <div class="rb-meta">{% trans "Client" %}: {{ row.booking.user.display_name|default:row.booking.user.username }} · {{ row.booking.created_at|date:"d/m/Y H:i" }}</div>
+          </div>
+          <span class="rb-badge {% if row.booking.status == 'PENDING' %}pending{% elif row.booking.status == 'CONFIRMED' %}confirmed{% else %}cancelled{% endif %}">
+            {{ row.booking.get_status_display }}
+          </span>
+        </div>
+
+        {% if row.booking.status == 'PENDING' and row.slot and row.slot.venue.reservation_mode == 'MANUAL' %}
+        <div class="rb-actions">
+          <form method="post" action="/partner/bookings/restaurants/{{ row.booking.id }}/decision/">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="confirm" />
+            <button type="submit" class="rb-btn rb-btn-ok">{% trans "Valider" %}</button>
+          </form>
+          <form method="post" action="/partner/bookings/restaurants/{{ row.booking.id }}/decision/">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="reject" />
+            <button type="submit" class="rb-btn rb-btn-no">{% trans "Refuser" %}</button>
+          </form>
+        </div>
+        {% endif %}
+      </div>
+      {% empty %}
+      <p style="font-size:0.8rem;color:rgba(255,255,255,0.4)">{% trans "Aucune réservation reçue pour tes restaurants." %}</p>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

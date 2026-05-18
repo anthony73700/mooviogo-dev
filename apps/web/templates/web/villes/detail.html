@@ -4,34 +4,57 @@
 
 {% block content %}
 
-<div class="pg-hdr">
-  <div class="mx-auto max-w-7xl px-4">
-    <a href="/villes/" class="back-link">← Toutes les villes</a>
-    <h1 style="font-size:2.25rem;font-weight:900;color:#fff;letter-spacing:-0.03em;line-height:1.1">{{ city_name }}</h1>
-    <p style="margin-top:0.45rem;font-size:0.9rem;color:rgba(255,255,255,0.4)">Sorties, restaurants et événements</p>
+<section class="relative overflow-hidden border-b border-white/5">
+  <div class="absolute inset-0 bg-grad-aurora opacity-25"></div>
+  <div class="absolute -top-32 -right-24 h-96 w-96 rounded-full bg-flamingo-500/30 blur-3xl"></div>
+  <div class="relative mx-auto max-w-7xl px-4 py-12">
+    <nav class="text-xs text-white/45 mb-4">
+      <a href="/" class="hover:text-white">Accueil</a>
+      <span class="mx-1.5">›</span>
+      <a href="/villes/" class="hover:text-white">Villes</a>
+      <span class="mx-1.5">›</span>
+      <span class="text-white/75">{{ city_name }}</span>
+    </nav>
+    <p class="h-eyebrow text-flamingo-300">📍 Tout savoir</p>
+    <h1 class="mt-3 font-display text-4xl sm:text-5xl font-extrabold text-white tracking-tight">Que faire à <span class="grad-text">{{ city_name }}</span> ?</h1>
+    <p class="mt-3 text-white/65">Sorties entre membres, meilleurs restos, events à ne pas rater.</p>
+  </div>
+</section>
 
-    {# Onglets #}
-    <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:1.75rem">
-      <a href="/ville/{{ city_slug }}/" style="border-radius:999px;padding:0.45rem 1.1rem;font-size:0.78rem;font-weight:600;text-decoration:none;border:1px solid;transition:all 0.15s;{% if active_tab == 'all' %}background:rgba(255,106,77,0.15);border-color:rgba(255,106,77,0.35);color:#FF8A66{% else %}background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.08);color:rgba(255,255,255,0.5){% endif %}">Tout</a>
-      <a href="/ville/{{ city_slug }}/sorties/" style="border-radius:999px;padding:0.45rem 1.1rem;font-size:0.78rem;font-weight:600;text-decoration:none;border:1px solid;transition:all 0.15s;{% if active_tab == 'sorties' %}background:rgba(255,106,77,0.15);border-color:rgba(255,106,77,0.35);color:#FF8A66{% else %}background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.08);color:rgba(255,255,255,0.5){% endif %}">Sorties</a>
-      <a href="/ville/{{ city_slug }}/restaurants/" style="border-radius:999px;padding:0.45rem 1.1rem;font-size:0.78rem;font-weight:600;text-decoration:none;border:1px solid;transition:all 0.15s;{% if active_tab == 'restaurants' %}background:rgba(255,106,77,0.15);border-color:rgba(255,106,77,0.35);color:#FF8A66{% else %}background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.08);color:rgba(255,255,255,0.5){% endif %}">Restaurants</a>
-      <a href="/ville/{{ city_slug }}/evenements/" style="border-radius:999px;padding:0.45rem 1.1rem;font-size:0.78rem;font-weight:600;text-decoration:none;border:1px solid;transition:all 0.15s;{% if active_tab == 'evenements' %}background:rgba(255,106,77,0.15);border-color:rgba(255,106,77,0.35);color:#FF8A66{% else %}background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.08);color:rgba(255,255,255,0.5){% endif %}">Événements</a>
+{# Tabs sticky #}
+<div class="sticky top-[64px] z-30 border-b border-white/5 bg-night-950/85 backdrop-blur-xl">
+  <div class="mx-auto max-w-7xl px-4 py-3 overflow-x-auto scrollbar-hide">
+    <div class="flex items-center gap-2 whitespace-nowrap">
+      <a href="/ville/{{ city_slug }}/" class="vil-tab {% if active_tab == 'all' %}vil-tab-active{% endif %}">Tout</a>
+      <a href="/ville/{{ city_slug }}/sorties/" class="vil-tab {% if active_tab == 'sorties' %}vil-tab-active{% endif %}">Sorties</a>
+      <a href="/ville/{{ city_slug }}/restaurants/" class="vil-tab {% if active_tab == 'restaurants' %}vil-tab-active{% endif %}">Restaurants</a>
+      <a href="/ville/{{ city_slug }}/evenements/" class="vil-tab {% if active_tab == 'evenements' %}vil-tab-active{% endif %}">Événements</a>
     </div>
   </div>
 </div>
 
-<div class="mx-auto max-w-7xl px-4" style="padding-top:3rem;padding-bottom:5rem">
+<div class="mx-auto max-w-7xl px-4 py-10 space-y-14">
 
   {% if sorties %}
-  <section style="margin-bottom:3.5rem">
-    <p style="font-size:0.65rem;font-weight:900;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,0.22);margin-bottom:1.25rem">Sorties</p>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:0.9rem">
+  <section>
+    <div class="flex items-baseline justify-between mb-5">
+      <h2 class="font-display text-2xl font-extrabold text-white">Sorties à {{ city_name }}</h2>
+      <a href="/sorties/?ville={{ city_slug }}" class="text-sm text-flamingo-300 hover:text-flamingo-200 font-semibold">Voir tout →</a>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
       {% for sortie in sorties %}
-      <a href="/sorties/{{ sortie.id }}/" class="pk" style="display:block;text-decoration:none;padding:1.1rem 1.25rem">
-        <p style="font-size:0.92rem;font-weight:800;color:#fff;margin-bottom:0.35rem;line-height:1.3">{{ sortie.title }}</p>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:0.5rem">
-          <span class="tag tag-orange" style="font-size:0.65rem">{{ sortie.get_type_display }}</span>
-          <span style="font-size:0.85rem;font-weight:900;color:{% if sortie.is_free %}#4ADE80{% else %}#fff{% endif %}">{% if sortie.is_free %}Gratuit{% else %}{{ sortie.price|floatformat:2 }} €{% endif %}</span>
+      <a href="/sorties/{{ sortie.id }}/" class="card card-hover">
+        <div class="card-media aspect-[4/3] bg-grad-aurora relative">
+          <div class="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-night-950 to-transparent">
+            <span class="chip chip-neon text-[0.65rem]">{{ sortie.get_type_display }}</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title line-clamp-2">{{ sortie.title }}</h3>
+          <div class="mt-2 flex items-center justify-between">
+            <span class="card-meta">{{ sortie.starts_at|date:"d M · H:i" }}</span>
+            <span class="font-display font-extrabold {% if sortie.is_free %}text-electric-300{% else %}text-white{% endif %}">{% if sortie.is_free %}Gratuit{% else %}{{ sortie.price|floatformat:0 }} €{% endif %}</span>
+          </div>
         </div>
       </a>
       {% endfor %}
@@ -40,13 +63,19 @@
   {% endif %}
 
   {% if restaurants %}
-  <section style="margin-bottom:3.5rem">
-    <p style="font-size:0.65rem;font-weight:900;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,0.22);margin-bottom:1.25rem">Restaurants</p>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:0.9rem">
+  <section>
+    <div class="flex items-baseline justify-between mb-5">
+      <h2 class="font-display text-2xl font-extrabold text-white">Restos à {{ city_name }}</h2>
+      <a href="/restaurants/?ville={{ city_slug }}" class="text-sm text-flamingo-300 hover:text-flamingo-200 font-semibold">Voir tout →</a>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
       {% for venue in restaurants %}
-      <a href="/restaurants/{{ venue.city_slug }}/{{ venue.slug }}/" class="pk" style="display:block;text-decoration:none;padding:1.1rem 1.25rem">
-        <p style="font-size:0.92rem;font-weight:800;color:#fff;margin-bottom:0.35rem">{{ venue.name }}</p>
-        {% if venue.cuisine_type %}<span class="tag tag-orange" style="font-size:0.65rem">{{ venue.cuisine_type }}</span>{% endif %}
+      <a href="/restaurants/{{ venue.city_slug }}/{{ venue.slug }}/" class="card card-hover">
+        <div class="card-media aspect-[4/3] bg-grad-brand"></div>
+        <div class="card-body">
+          <h3 class="card-title line-clamp-1">{{ venue.name }}</h3>
+          {% if venue.cuisine_type %}<span class="mt-2 inline-block chip chip-sunset text-[0.65rem]">{{ venue.cuisine_type }}</span>{% endif %}
+        </div>
       </a>
       {% endfor %}
     </div>
@@ -55,12 +84,25 @@
 
   {% if events %}
   <section>
-    <p style="font-size:0.65rem;font-weight:900;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,0.22);margin-bottom:1.25rem">Événements</p>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:0.9rem">
+    <div class="flex items-baseline justify-between mb-5">
+      <h2 class="font-display text-2xl font-extrabold text-white">Events à {{ city_name }}</h2>
+      <a href="/evenements/?ville={{ city_slug }}" class="text-sm text-flamingo-300 hover:text-flamingo-200 font-semibold">Voir tout →</a>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
       {% for event in events %}
-      <a href="/evenements/{{ event.slug }}/" class="pk" style="display:block;text-decoration:none;padding:1.1rem 1.25rem">
-        <p style="font-size:0.92rem;font-weight:800;color:#fff;margin-bottom:0.35rem">{{ event.title }}</p>
-        {% if event.starts_at %}<p style="font-size:0.72rem;color:rgba(255,255,255,0.35)">{{ event.starts_at|date:"d M Y" }}</p>{% endif %}
+      <a href="/evenements/{{ event.slug }}/" class="card card-hover">
+        <div class="card-media aspect-[4/3] bg-gradient-to-br from-flamingo-500 to-neon-500 relative">
+          {% if event.starts_at %}
+          <div class="absolute top-3 left-3 rounded-2xl bg-night-950/85 backdrop-blur px-3 py-2 text-center">
+            <p class="font-display text-xl font-extrabold text-white leading-none">{{ event.starts_at|date:"d" }}</p>
+            <p class="text-[0.6rem] uppercase tracking-wider text-white/75 mt-0.5">{{ event.starts_at|date:"M" }}</p>
+          </div>
+          {% endif %}
+        </div>
+        <div class="card-body">
+          <h3 class="card-title line-clamp-2">{{ event.title }}</h3>
+          {% if event.starts_at %}<p class="card-meta mt-1">{{ event.starts_at|date:"l d F · H:i" }}</p>{% endif %}
+        </div>
       </a>
       {% endfor %}
     </div>
@@ -68,11 +110,18 @@
   {% endif %}
 
   {% if not sorties and not restaurants and not events %}
-  <div style="border:1px dashed rgba(255,255,255,0.08);border-radius:24px;padding:5rem 2rem;text-align:center">
-    <p style="font-size:1rem;font-weight:700;color:rgba(255,255,255,0.4);margin-bottom:0.5rem">Rien à {{ city_name }} pour le moment</p>
-    <a href="/sorties/creer/" style="font-size:0.82rem;color:#FF8A66;text-decoration:none">Créer la première sortie →</a>
+  <div class="panel p-16 text-center">
+    <p class="font-display text-lg font-extrabold text-white/70">Rien à {{ city_name }} pour le moment</p>
+    <p class="mt-2 text-sm text-white/55">Sois le premier à animer la ville.</p>
+    <a href="/sorties/creer/" class="btn-primary btn-sm mt-5 inline-flex">+ Créer la première sortie</a>
   </div>
   {% endif %}
 
 </div>
+
+<style>
+  .vil-tab { display:inline-flex; align-items:center; padding:.5rem 1.1rem; border-radius:9999px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.04); font-size:.78rem; font-weight:600; color:rgba(255,255,255,.6); text-decoration:none; transition:.18s; }
+  .vil-tab:hover { color:#fff; border-color:rgba(255,255,255,.18); }
+  .vil-tab-active { background:linear-gradient(135deg,#F31C7F,#A832F5); border-color:transparent; color:#fff; box-shadow:0 0 24px rgba(243,28,127,.4); }
+</style>
 {% endblock %}

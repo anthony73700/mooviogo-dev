@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}{{ city_name }} | Mooviogo{% endblock %}
+{% block description %}Sorties, restaurants et événements à {{ city_name }} — Mooviogo.{% endblock %}
+
+{% block content %}
+
+<div class="pg-hdr">
+  <div class="mx-auto max-w-7xl px-4">
+    <a href="/villes/" class="back-link">← Toutes les villes</a>
+    <h1 style="font-size:2.25rem;font-weight:900;color:#fff;letter-spacing:-0.03em;line-height:1.1">{{ city_name }}</h1>
+    <p style="margin-top:0.45rem;font-size:0.9rem;color:rgba(255,255,255,0.4)">Sorties, restaurants et événements</p>
+
+    {# Onglets #}
+    <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:1.75rem">
+      <a href="/ville/{{ city_slug }}/" style="border-radius:999px;padding:0.45rem 1.1rem;font-size:0.78rem;font-weight:600;text-decoration:none;border:1px solid;transition:all 0.15s;{% if active_tab == 'all' %}background:rgba(255,106,77,0.15);border-color:rgba(255,106,77,0.35);color:#FF8A66{% else %}background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.08);color:rgba(255,255,255,0.5){% endif %}">Tout</a>
+      <a href="/ville/{{ city_slug }}/sorties/" style="border-radius:999px;padding:0.45rem 1.1rem;font-size:0.78rem;font-weight:600;text-decoration:none;border:1px solid;transition:all 0.15s;{% if active_tab == 'sorties' %}background:rgba(255,106,77,0.15);border-color:rgba(255,106,77,0.35);color:#FF8A66{% else %}background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.08);color:rgba(255,255,255,0.5){% endif %}">Sorties</a>
+      <a href="/ville/{{ city_slug }}/restaurants/" style="border-radius:999px;padding:0.45rem 1.1rem;font-size:0.78rem;font-weight:600;text-decoration:none;border:1px solid;transition:all 0.15s;{% if active_tab == 'restaurants' %}background:rgba(255,106,77,0.15);border-color:rgba(255,106,77,0.35);color:#FF8A66{% else %}background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.08);color:rgba(255,255,255,0.5){% endif %}">Restaurants</a>
+      <a href="/ville/{{ city_slug }}/evenements/" style="border-radius:999px;padding:0.45rem 1.1rem;font-size:0.78rem;font-weight:600;text-decoration:none;border:1px solid;transition:all 0.15s;{% if active_tab == 'evenements' %}background:rgba(255,106,77,0.15);border-color:rgba(255,106,77,0.35);color:#FF8A66{% else %}background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.08);color:rgba(255,255,255,0.5){% endif %}">Événements</a>
+    </div>
+  </div>
+</div>
+
+<div class="mx-auto max-w-7xl px-4" style="padding-top:3rem;padding-bottom:5rem">
+
+  {% if sorties %}
+  <section style="margin-bottom:3.5rem">
+    <p style="font-size:0.65rem;font-weight:900;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,0.22);margin-bottom:1.25rem">Sorties</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:0.9rem">
+      {% for sortie in sorties %}
+      <a href="/sorties/{{ sortie.id }}/" class="pk" style="display:block;text-decoration:none;padding:1.1rem 1.25rem">
+        <p style="font-size:0.92rem;font-weight:800;color:#fff;margin-bottom:0.35rem;line-height:1.3">{{ sortie.title }}</p>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:0.5rem">
+          <span class="tag tag-orange" style="font-size:0.65rem">{{ sortie.get_type_display }}</span>
+          <span style="font-size:0.85rem;font-weight:900;color:{% if sortie.is_free %}#4ADE80{% else %}#fff{% endif %}">{% if sortie.is_free %}Gratuit{% else %}{{ sortie.price|floatformat:2 }} €{% endif %}</span>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  {% if restaurants %}
+  <section style="margin-bottom:3.5rem">
+    <p style="font-size:0.65rem;font-weight:900;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,0.22);margin-bottom:1.25rem">Restaurants</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:0.9rem">
+      {% for venue in restaurants %}
+      <a href="/restaurants/{{ venue.city_slug }}/{{ venue.slug }}/" class="pk" style="display:block;text-decoration:none;padding:1.1rem 1.25rem">
+        <p style="font-size:0.92rem;font-weight:800;color:#fff;margin-bottom:0.35rem">{{ venue.name }}</p>
+        {% if venue.cuisine_type %}<span class="tag tag-orange" style="font-size:0.65rem">{{ venue.cuisine_type }}</span>{% endif %}
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  {% if events %}
+  <section>
+    <p style="font-size:0.65rem;font-weight:900;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,0.22);margin-bottom:1.25rem">Événements</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:0.9rem">
+      {% for event in events %}
+      <a href="/evenements/{{ event.slug }}/" class="pk" style="display:block;text-decoration:none;padding:1.1rem 1.25rem">
+        <p style="font-size:0.92rem;font-weight:800;color:#fff;margin-bottom:0.35rem">{{ event.title }}</p>
+        {% if event.starts_at %}<p style="font-size:0.72rem;color:rgba(255,255,255,0.35)">{{ event.starts_at|date:"d M Y" }}</p>{% endif %}
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  {% if not sorties and not restaurants and not events %}
+  <div style="border:1px dashed rgba(255,255,255,0.08);border-radius:24px;padding:5rem 2rem;text-align:center">
+    <p style="font-size:1rem;font-weight:700;color:rgba(255,255,255,0.4);margin-bottom:0.5rem">Rien à {{ city_name }} pour le moment</p>
+    <a href="/sorties/creer/" style="font-size:0.82rem;color:#FF8A66;text-decoration:none">Créer la première sortie →</a>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

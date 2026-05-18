@@ -1,259 +1,391 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}{% trans "Evenements" %} | Mooviogo{% endblock %}
-{% block description %}{% trans "Concerts, soirees, festivals - les evenements officiels Mooviogo." %}{% endblock %}
+{% block title %}{% trans "Événements" %} | Mooviogo{% endblock %}
+{% block description %}{% trans "Soirées, concerts, festivals — l'agenda nightlife de votre ville." %}{% endblock %}
 
 {% block extra_head %}
 <style>
-  .ev-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 1.15rem;
+  .store-list-grid { display:grid; grid-template-columns:1fr; gap:1rem; }
+  .store-list-card { position:relative; overflow:hidden; border:1px solid rgba(255,255,255,.08); border-radius:2rem; box-shadow:0 30px 80px -40px rgba(0,0,0,.82); }
+  .store-list-card.light { background:linear-gradient(180deg,#fbfbfd 0%,#eef1f6 100%); color:#0a0f16; }
+  .store-list-card.dark { background:linear-gradient(180deg,#0e1218 0%,#090c12 100%); color:#fff; }
+  .store-list-body { padding:1.5rem; }
+  .store-list-title { font-family:"Geist",Inter,sans-serif; font-size:clamp(2.5rem,5vw,5rem); line-height:.98; letter-spacing:-.05em; font-weight:800; }
+  .store-list-copy { margin-top:1rem; max-width:40rem; font-size:1rem; line-height:1.75; color:rgba(255,255,255,.64); }
+  .store-list-card.light .store-list-copy { color:rgba(10,15,22,.62); }
+  .store-list-meta { display:grid; gap:.75rem; grid-template-columns:repeat(3,minmax(0,1fr)); margin-top:1.3rem; }
+  .store-list-meta > div { border:1px solid rgba(10,15,22,.08); border-radius:1.1rem; background:rgba(10,15,22,.04); padding:.95rem 1rem; }
+  .store-list-pill { display:inline-flex; align-items:center; gap:.45rem; border-radius:999px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.05); padding:.48rem .78rem; font-size:.72rem; font-weight:700; }
+  .events-hero-wide {
+    position:relative;
+    min-height:460px;
+    border-color:rgba(255,255,255,.14);
+    background:#0a0e14;
   }
-
-  @media (max-width: 640px) {
-    .ev-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .ev-meta-chip,
-    .ev-price-chip {
-      min-height: 2.2rem;
-      padding: .26rem .65rem;
-      font-size: .68rem;
-    }
-
-    .ev-cta {
-      min-height: 2.75rem;
-      font-size: .78rem;
-    }
+  .events-hero-media {
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
   }
-
-  .ev-card {
-    position: relative;
-    border-radius: 22px;
-    overflow: hidden;
-    background: #ffffff;
-    border: 1px solid rgba(15, 23, 42, 0.12);
-    box-shadow: 0 14px 34px rgba(15, 23, 42, 0.09);
-    transition: transform .22s ease, box-shadow .22s ease;
-    text-decoration: none;
-    display: block;
+  .events-hero-wide::after {
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(180deg,rgba(6,8,12,.12) 15%,rgba(6,8,12,.38) 46%,rgba(6,8,12,.9) 100%);
+    pointer-events:none;
   }
-
-  .ev-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 20px 42px rgba(15, 23, 42, 0.14);
+  .events-hero-content {
+    position:relative;
+    z-index:1;
+    padding:1.6rem;
+    color:#fff;
+    text-align:center;
   }
-
-  .ev-thumb-wrap {
-    position: relative;
-    overflow: hidden;
+  .events-hero-content .store-list-copy { color:rgba(255,255,255,.8); max-width:52rem; margin-inline:auto; }
+  .events-hero-content .store-list-meta > div {
+    border:1px solid rgba(255,255,255,.18);
+    background:rgba(8,12,18,.42);
+    backdrop-filter:blur(10px);
   }
-
-  .ev-thumb {
-    width: 100%;
-    height: 185px;
-    object-fit: cover;
-    display: block;
-    transition: transform .45s ease;
+  .events-hero-content .store-list-meta .text-black\/38 { color:rgba(255,255,255,.52) !important; }
+  .events-hero-content .store-list-meta .text-black\/88 { color:rgba(255,255,255,.96) !important; }
+  .list-hero-grid { display:grid; grid-template-columns:minmax(0,1.15fr) minmax(280px,.85fr); gap:1.25rem; }
+  .list-side-panel { border:1px solid rgba(255,255,255,.08); border-radius:30px; background:rgba(255,255,255,.035); padding:1.25rem; box-shadow:0 24px 60px -34px rgba(0,0,0,.82); backdrop-filter:blur(14px); }
+  .agenda-shell { display:grid; grid-template-columns:minmax(0,1.15fr) minmax(280px,.85fr); gap:1.25rem; }
+  .agenda-main, .agenda-side { border:1px solid rgba(255,255,255,.08); border-radius:32px; background:rgba(255,255,255,.03); box-shadow:0 28px 72px -36px rgba(0,0,0,.84); backdrop-filter:blur(16px); }
+  .agenda-main { padding:1.35rem; }
+  .agenda-side { padding:1rem; }
+  .agenda-feature { position:relative; overflow:hidden; min-height:400px; border-radius:28px; border:1px solid rgba(255,255,255,.08); }
+  .agenda-feature::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(6,4,14,.05) 12%,rgba(6,4,14,.18) 42%,rgba(6,4,14,.94) 100%); }
+  .agenda-feature-media { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  .agenda-feature-content { position:absolute; inset:auto 0 0 0; z-index:2; padding:1.2rem; }
+  .agenda-feature-meta { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.75rem; }
+  .agenda-meta-card { border:1px solid rgba(255,255,255,.08); border-radius:1.1rem; background:rgba(8,7,18,.5); padding:.9rem 1rem; backdrop-filter:blur(14px); }
+  .agenda-list { display:grid; gap:.75rem; }
+  .agenda-row { display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; border:1px solid rgba(255,255,255,.06); border-radius:22px; background:rgba(255,255,255,.025); padding:1rem; transition:transform .24s cubic-bezier(.22,1,.36,1), border-color .2s ease, background-color .2s ease; }
+  .agenda-row:hover { transform:translateY(-2px); border-color:rgba(255,255,255,.14); background:rgba(255,255,255,.04); }
+  .agenda-date { display:grid; place-items:center; min-width:3.35rem; border-radius:1rem; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); padding:.5rem .45rem; }
+  .agenda-date strong { font-family:"Bricolage Grotesque",Inter,sans-serif; font-size:1.15rem; line-height:1; color:#fff; }
+  .agenda-date span { margin-top:.18rem; font-size:.62rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.5); }
+  .agenda-city-filter { display:flex; flex-wrap:wrap; gap:.55rem; }
+  .list-photo-card { position:relative; min-height:430px; overflow:hidden; border-radius:30px; border:1px solid rgba(255,255,255,.08); box-shadow:0 28px 70px -34px rgba(0,0,0,.88); }
+  .list-photo-card::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(6,4,14,.04) 14%,rgba(6,4,14,.18) 42%,rgba(6,4,14,.94) 100%); pointer-events:none; }
+  .list-photo-media { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; transition:transform .7s cubic-bezier(.22,1,.36,1), filter .35s ease; }
+  .group:hover .list-photo-media { transform:scale(1.06); filter:saturate(1.08); }
+  .list-photo-top { position:absolute; inset:1rem 1rem auto 1rem; z-index:2; display:flex; align-items:flex-start; justify-content:space-between; gap:.75rem; }
+  .list-photo-bottom { position:absolute; inset:auto 0 0 0; z-index:2; padding:1.1rem; }
+  .save-btn { position:absolute; top:.55rem; right:.55rem; z-index:2; display:grid; place-items:center; height:2rem; width:2rem; border-radius:9999px; background:rgba(0,0,0,0.45); backdrop-filter:blur(8px); color:#fff; border:1px solid rgba(255,255,255,0.15); transition:all .2s; }
+  .save-btn:hover { background:rgba(255,255,255,0.14); border-color:rgba(255,255,255,0.22); }
+  .date-badge { position:absolute; top:.7rem; left:.7rem; z-index:2; display:grid; place-items:center; padding:.4rem .7rem; border-radius:.75rem; background:rgba(0,0,0,0.65); backdrop-filter:blur(8px); color:#fff; border:1px solid rgba(255,255,255,0.12); text-align:center; line-height:1.1; }
+  .date-badge .d { font-size:1.15rem; font-weight:800; }
+  .date-badge .m { font-size:.6rem; text-transform:uppercase; letter-spacing:.08em; color:rgba(255,255,255,0.7); }
+  .envies-wrap {
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:1.35rem;
+    background:rgba(255,255,255,.02);
+    padding:.95rem;
+    box-shadow:0 20px 44px -34px rgba(0,0,0,.9);
   }
-
-  .ev-card:hover .ev-thumb {
-    transform: scale(1.06);
+  .envies-head {
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    gap:.75rem;
+    margin-bottom:.65rem;
   }
-
-  .ev-ph {
-    width: 100%;
-    height: 185px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(145deg, #1a1e28, #2a1520);
+  .envies-head > div { text-align:center; }
+  .envies-title {
+    font-family:"Geist",Inter,sans-serif;
+    font-size:1.15rem;
+    font-weight:800;
+    letter-spacing:-.02em;
+    color:#fff;
   }
-
-  .ev-badge {
-    position: absolute;
-    top: 12px;
-    left: 12px;
-    z-index: 3;
-    background: linear-gradient(135deg,#FF6A4D 0%,#C084FC 60%,#F472B6 100%);
-    border-radius: 999px;
-    padding: 5px 11px;
-    font-size: .58rem;
-    font-weight: 900;
-    color: #fff;
-    letter-spacing: .06em;
-    text-transform: uppercase;
-    box-shadow: 0 8px 20px rgba(192,132,252,.3);
+  .envies-sub {
+    margin-top:.2rem;
+    font-size:.76rem;
+    color:rgba(255,255,255,.56);
   }
-
-  .ev-body {
-    padding: .95rem .95rem 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: .5rem;
+  .envie-rail {
+    display:flex;
+    gap:.72rem;
+    overflow-x:auto;
+    padding:.2rem .15rem .38rem;
+    scrollbar-width:none;
+    scroll-snap-type:x mandatory;
   }
-
-  .ev-topline {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: .45rem;
+  .envie-rail::-webkit-scrollbar { display:none; }
+  .envie-card {
+    position:relative;
+    flex:0 0 auto;
+    width:188px;
+    min-height:214px;
+    border-radius:1.1rem;
+    border:1px solid rgba(255,255,255,.12);
+    overflow:hidden;
+    box-shadow:0 22px 34px -24px rgba(0,0,0,.92);
+    scroll-snap-align:start;
+    transition:transform .24s cubic-bezier(.22,1,.36,1), border-color .2s ease, box-shadow .2s ease;
   }
-
-  .ev-meta-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: .3rem;
-    border-radius: 999px;
-    padding: .18rem .52rem;
-    font-size: .61rem;
-    font-weight: 800;
-    color: #334155;
-    background: rgba(148,163,184,.16);
-    border: 1px solid rgba(148,163,184,.28);
+  .envie-card::after {
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(180deg,rgba(6,8,12,.08) 25%,rgba(6,8,12,.42) 58%,rgba(6,8,12,.88) 100%);
+    pointer-events:none;
   }
-
-  .ev-price-chip {
-    border-radius: 999px;
-    padding: .18rem .52rem;
-    font-size: .7rem;
-    font-weight: 900;
-    color: #0f172a;
-    background: rgba(15,23,42,.08);
-    border: 1px solid rgba(15,23,42,.14);
-    white-space: nowrap;
+  .envie-card:hover {
+    transform:translateY(-2px);
+    border-color:rgba(255,255,255,.28);
+    box-shadow:0 26px 38px -24px rgba(0,0,0,.95);
   }
-
-  .ev-title {
-    margin: 0;
-    font-size: .95rem;
-    line-height: 1.3;
-    font-weight: 900;
-    color: #0f172a;
-    letter-spacing: -.01em;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+  .envie-card[data-active="true"] {
+    border-color:rgba(255,255,255,.55);
+    box-shadow:0 26px 44px -26px rgba(0,0,0,.98);
   }
-
-  .ev-loc {
-    margin: 0;
-    font-size: .67rem;
-    color: #475569;
-    display: flex;
-    align-items: center;
-    gap: .3rem;
+  .envie-media {
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    transition:transform .6s cubic-bezier(.22,1,.36,1), filter .25s ease;
+    filter:saturate(1.02) contrast(1.03);
   }
-
-  .ev-desc {
-    margin: 0;
-    font-size: .68rem;
-    line-height: 1.5;
-    color: #64748b;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+  .envie-card:hover .envie-media {
+    transform:scale(1.045);
+    filter:saturate(1.08) contrast(1.05);
   }
-
-  .ev-footer {
-    margin-top: auto;
-    display: flex;
-    flex-direction: column;
-    gap: .4rem;
+  .envie-content {
+    position:absolute;
+    inset:auto 0 0 0;
+    z-index:1;
+    padding:.78rem;
   }
-
-  .ev-cap {
-    font-size: .6rem;
-    color: #64748b;
-    text-align: center;
+  .envie-kicker {
+    display:inline-flex;
+    align-items:center;
+    gap:.3rem;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.25);
+    background:rgba(0,0,0,.34);
+    padding:.2rem .5rem;
+    font-size:.58rem;
+    font-weight:700;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:rgba(255,255,255,.88);
   }
-
-  .ev-cta {
-    width: 100%;
-    min-height: 2.3rem;
-    border-radius: 12px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: .35rem;
-    font-size: .69rem;
-    font-weight: 900;
-    color: #fff;
-    text-decoration: none;
-    background: linear-gradient(135deg,#FF6A4D 0%,#C084FC 60%,#F472B6 100%);
-    box-shadow: 0 8px 20px rgba(192,132,252,.35);
+  .envie-name {
+    margin-top:.45rem;
+    font-family:"Geist",Inter,sans-serif;
+    font-size:1rem;
+    font-weight:800;
+    line-height:1.12;
+    color:#fff;
+    letter-spacing:-.018em;
   }
+  .envie-note {
+    margin-top:.18rem;
+    font-size:.69rem;
+    letter-spacing:.015em;
+    color:rgba(255,255,255,.58);
+  }
+  @media (max-width: 1024px) { .list-hero-grid, .agenda-shell, .agenda-feature-meta, .store-list-grid, .store-list-meta { grid-template-columns:1fr; } }
+  @media (max-width: 640px) { .envie-card { width:174px; min-height:198px; } }
 </style>
 {% endblock %}
 
 {% block content %}
 
-<div class="pg-hdr">
-  <div class="mx-auto max-w-7xl px-4">
-    <p class="slabel mb-3">{% trans "Officiel Mooviogo" %}</p>
-    <h1 style="font-size:2.25rem;font-weight:900;color:#fff;letter-spacing:-0.03em;line-height:1.1">{% trans "Evenements" %}</h1>
-    <p style="margin-top:0.45rem;font-size:0.9rem;color:rgba(255,255,255,0.4)">{% trans "Concerts, soirees, festivals - organises directement par Mooviogo" %}</p>
+<section class="mx-auto max-w-7xl px-4 pt-10 pb-8 sm:pt-14 sm:pb-10">
+  <nav class="text-xs text-white/50 mb-3 flex items-center gap-2">
+    <a href="/" class="hover:text-white">{% trans "Accueil" %}</a><span>›</span><span class="text-white/80">{% trans "Événements" %}</span>
+  </nav>
+  <div class="store-list-grid">
+    <div class="store-list-card events-hero-wide">
+      <img src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1800&q=80" alt="Ambiance evenement nightlife premium" class="events-hero-media" loading="lazy" />
+      <div class="events-hero-content">
+        <div class="flex flex-wrap justify-center gap-2">
+          <span class="store-list-pill">{% trans "Agenda" %}</span>
+          <span class="store-list-pill">{% trans "Réservation" %}</span>
+        </div>
+        <span class="mt-4 inline-flex text-[0.8rem] font-semibold tracking-tight text-white/78">{% trans "Événements" %}</span>
+        <h1 class="store-list-title mt-3 text-white">{% trans "Les affiches qui vendent déjà la soirée" %}</h1>
+        <p class="store-list-copy">{% trans "Le bon équilibre entre image, heure, ville et tension de réservation pour décider plus vite." %}</p>
+        <div class="store-list-meta">
+          <div><div class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-black/38">{% trans "Lecture" %}</div><div class="mt-2 text-sm font-semibold text-black/88">{% trans "Affiche d’abord" %}</div></div>
+          <div><div class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-black/38">{% trans "Action" %}</div><div class="mt-2 text-sm font-semibold text-black/88">{% trans "Billet rapide" %}</div></div>
+          <div><div class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-black/38">{% trans "Tonalité" %}</div><div class="mt-2 text-sm font-semibold text-black/88">{% trans "Nightlife premium" %}</div></div>
+        </div>
+        <form method="get" class="mt-6 flex items-stretch rounded-full border border-white/20 bg-white/[0.08] p-1.5 max-w-3xl mx-auto">
+          <input name="q" value="{{ request.GET.q }}" type="search" placeholder="{% trans 'DJ, artiste, club…' %}" class="flex-1 bg-transparent border-0 px-5 text-sm sm:text-base text-white placeholder:text-white/45 focus:ring-0 focus:outline-none" />
+          <input name="city" value="{{ request.GET.city }}" type="text" placeholder="{% trans 'Ville' %}" class="hidden sm:block w-36 bg-transparent border-0 border-l border-white/20 px-5 text-sm text-white placeholder:text-white/45 focus:ring-0 focus:outline-none" />
+          <button type="submit" class="btn-dice btn-sm rounded-full">{% trans "Rechercher" %}</button>
+        </form>
+      </div>
+    </div>
   </div>
-</div>
+</section>
 
-<div class="mx-auto max-w-7xl px-4" style="padding-top:3rem;padding-bottom:5rem">
-  {% if events %}
-  <div class="ev-grid">
-    {% for event in events %}
-    <a href="/evenements/{{ event.slug }}/" class="ev-card">
-      <div class="ev-thumb-wrap">
-        <span class="ev-badge">{% trans "Officiel" %}</span>
-        {% if event.cover_image_url %}
-          <img src="{{ event.cover_image_url }}" alt="{{ event.title }}" class="ev-thumb" loading="lazy" />
-        {% else %}
-          <div class="ev-ph">
-            <svg xmlns="http://www.w3.org/2000/svg" style="width:3rem;height:3rem;color:rgba(255,255,255,0.1)" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
-          </div>
-        {% endif %}
+{# Date filter strip #}
+<section class="glass-strong border-y border-white/[0.06]">
+  <div class="mx-auto max-w-7xl px-4">
+    <div class="envies-wrap my-3">
+      <div class="envies-head">
+        <div>
+          <h3 class="envies-title">{% trans "Vos envies du moment" %}</h3>
+          <p class="envies-sub">{% trans "Choisis un tempo, on te montre les bons événements." %}</p>
+        </div>
+      </div>
+      <div class="envie-rail mask-fade-r">
+        <a href="/evenements/" {% if not request.GET.when and not request.GET.cat %}data-active="true"{% endif %} class="envie-card"><img src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=900&q=80" alt="Tous les événements" class="envie-media" loading="lazy" /><div class="envie-content"><span class="envie-kicker">📅 {% trans "Mood" %}</span><p class="envie-name">{% trans "Tous" %}</p><p class="envie-note">{% trans "Tous les formats" %}</p></div></a>
+        <a href="/evenements/?when=tonight" {% if request.GET.when == "tonight" %}data-active="true"{% endif %} class="envie-card"><img src="https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=900&q=80" alt="Ce soir" class="envie-media" loading="lazy" /><div class="envie-content"><span class="envie-kicker">🌙 {% trans "Quand" %}</span><p class="envie-name">{% trans "Ce soir" %}</p><p class="envie-note">{% trans "Now" %}</p></div></a>
+        <a href="/evenements/?when=tomorrow" {% if request.GET.when == "tomorrow" %}data-active="true"{% endif %} class="envie-card"><img src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=900&q=80" alt="Demain" class="envie-media" loading="lazy" /><div class="envie-content"><span class="envie-kicker">☀️ {% trans "Quand" %}</span><p class="envie-name">{% trans "Demain" %}</p><p class="envie-note">{% trans "À prévoir" %}</p></div></a>
+        <a href="/evenements/?when=weekend" {% if request.GET.when == "weekend" %}data-active="true"{% endif %} class="envie-card"><img src="https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=900&q=80" alt="Ce week-end" class="envie-media" loading="lazy" /><div class="envie-content"><span class="envie-kicker">🎉 {% trans "Quand" %}</span><p class="envie-name">{% trans "Ce week-end" %}</p><p class="envie-note">{% trans "Hot picks" %}</p></div></a>
+        <a href="/evenements/?cat=concert" {% if request.GET.cat == "concert" %}data-active="true"{% endif %} class="envie-card"><img src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=900&q=80" alt="Concerts" class="envie-media" loading="lazy" /><div class="envie-content"><span class="envie-kicker">🎤 {% trans "Genre" %}</span><p class="envie-name">{% trans "Concerts" %}</p><p class="envie-note">{% trans "Live" %}</p></div></a>
+        <a href="/evenements/?cat=club" {% if request.GET.cat == "club" %}data-active="true"{% endif %} class="envie-card"><img src="https://images.unsplash.com/photo-1571266028243-d220c9b3b8ec?auto=format&fit=crop&w=900&q=80" alt="Clubbing" class="envie-media" loading="lazy" /><div class="envie-content"><span class="envie-kicker">🪩 {% trans "Genre" %}</span><p class="envie-name">{% trans "Clubbing" %}</p><p class="envie-note">{% trans "DJ sets" %}</p></div></a>
+        <a href="/evenements/?cat=festival" {% if request.GET.cat == "festival" %}data-active="true"{% endif %} class="envie-card"><img src="https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=900&q=80" alt="Festivals" class="envie-media" loading="lazy" /><div class="envie-content"><span class="envie-kicker">🎪 {% trans "Genre" %}</span><p class="envie-name">{% trans "Festivals" %}</p><p class="envie-note">{% trans "Open air" %}</p></div></a>
+        <a href="/evenements/?cat=rooftop" {% if request.GET.cat == "rooftop" %}data-active="true"{% endif %} class="envie-card"><img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=900&q=80" alt="Rooftops" class="envie-media" loading="lazy" /><div class="envie-content"><span class="envie-kicker">🌃 {% trans "Spot" %}</span><p class="envie-name">{% trans "Rooftops" %}</p><p class="envie-note">{% trans "Vue" %}</p></div></a>
+        <a href="/evenements/?cat=karaoke" {% if request.GET.cat == "karaoke" %}data-active="true"{% endif %} class="envie-card"><img src="https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?auto=format&fit=crop&w=900&q=80" alt="Karaoké" class="envie-media" loading="lazy" /><div class="envie-content"><span class="envie-kicker">🎙️ {% trans "Genre" %}</span><p class="envie-name">{% trans "Karaoké" %}</p><p class="envie-note">{% trans "Friends night" %}</p></div></a>
+        <a href="/evenements/?cat=culture" {% if request.GET.cat == "culture" %}data-active="true"{% endif %} class="envie-card"><img src="https://images.unsplash.com/photo-1518998053901-5348d3961a04?auto=format&fit=crop&w=900&q=80" alt="Culture" class="envie-media" loading="lazy" /><div class="envie-content"><span class="envie-kicker">🎨 {% trans "Genre" %}</span><p class="envie-name">{% trans "Culture" %}</p><p class="envie-note">{% trans "Expos & shows" %}</p></div></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="mx-auto max-w-7xl px-4 py-10">
+  {% with featured_event=events|first %}
+  {% if featured_event %}
+  <div class="agenda-shell mb-10 fade-up">
+    <section class="agenda-main">
+      <div class="section-head mb-5">
+        <div>
+          <span class="h-eyebrow">🗓️ {% trans "Agenda éditorial" %}</span>
+          <h2>{% trans "Une lecture plus Resident Advisor / Shotgun" %}</h2>
+        </div>
+        <a href="/feed/">{% trans "Voir aussi le feed" %} →</a>
       </div>
 
-      <div class="ev-body">
-        <div class="ev-topline">
-          <p class="ev-meta-chip">
-            <svg xmlns="http://www.w3.org/2000/svg" style="width:.7rem;height:.7rem;flex-shrink:0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-            {% if event.starts_at %}{{ event.starts_at|date:"d M · H:i" }}{% else %}{% trans "Date a confirmer" %}{% endif %}
-          </p>
-          <p class="ev-price-chip">{% if event.price %}{{ event.price|floatformat:2 }} €{% else %}{% trans "Gratuit" %}{% endif %}</p>
-        </div>
-
-        <p class="ev-title">{{ event.title }}</p>
-
-        <p class="ev-loc">
-          <svg xmlns="http://www.w3.org/2000/svg" style="width:.7rem;height:.7rem;flex-shrink:0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-          {{ event.city }}
-        </p>
-
-        {% if event.description %}
-        <p class="ev-desc">{{ event.description }}</p>
+      <a href="/evenements/{{ featured_event.slug }}/" class="agenda-feature block group ambient-ring">
+        {% if featured_event.cover_image_url %}
+          <img src="{{ featured_event.cover_image_url }}" alt="{{ featured_event.title }}" class="agenda-feature-media ken-burns" loading="lazy" />
+        {% else %}
+          <div class="absolute inset-0 bg-grad-brand"></div>
         {% endif %}
+        <div class="agenda-feature-content">
+          <div class="flex flex-wrap gap-2">
+            <span class="chip chip-flamingo">{% trans "Tonight radar" %}</span>
+            <span class="chip chip-dark">{% trans "Poster first" %}</span>
+            {% if featured_event.price %}<span class="chip chip-sunset">{{ featured_event.price|floatformat:0 }}€</span>{% endif %}
+          </div>
+          <h3 class="mt-3 font-display text-4xl font-extrabold tracking-tight text-white">{{ featured_event.title }}</h3>
+          <p class="mt-3 max-w-2xl text-sm leading-7 text-white/68">{{ featured_event.description|truncatechars:150 }}</p>
+          <div class="agenda-feature-meta mt-5">
+            <div class="agenda-meta-card">
+              <div class="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-white/42">{% trans "Quand" %}</div>
+              <div class="mt-2 text-sm font-semibold text-white">{% if featured_event.starts_at %}{{ featured_event.starts_at|date:"d M · H:i" }}{% else %}{% trans "À venir" %}{% endif %}</div>
+            </div>
+            <div class="agenda-meta-card">
+              <div class="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-white/42">{% trans "Ville" %}</div>
+              <div class="mt-2 text-sm font-semibold text-white">{{ featured_event.city }}</div>
+            </div>
+            <div class="agenda-meta-card">
+              <div class="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-white/42">{% trans "Signal" %}</div>
+              <div class="mt-2 text-sm font-semibold text-white">{% trans "Sortie à forte traction" %}</div>
+            </div>
+          </div>
+        </div>
+      </a>
+    </section>
 
-        <div class="ev-footer">
-          {% if event.max_participants %}
-          <p class="ev-cap">{{ event.max_participants }} {% trans "places disponibles" %}</p>
+    <aside class="agenda-side fade-up stagger-1">
+      <span class="chip chip-electric">{% trans "City filters" %}</span>
+      <h3 class="mt-4 font-display text-2xl font-extrabold tracking-tight text-white">{% trans "Parcourir l’agenda vite" %}</h3>
+      <p class="mt-2 text-sm leading-7 text-white/58">{% trans "Une colonne pensée comme un radar: villes, créneaux et tickets visibles immédiatement." %}</p>
+      <div class="agenda-city-filter mt-4">
+        <a href="/evenements/?city=Paris" class="chip chip-dark">Paris</a>
+        <a href="/evenements/?city=Lyon" class="chip chip-dark">Lyon</a>
+        <a href="/evenements/?city=Bordeaux" class="chip chip-dark">Bordeaux</a>
+        <a href="/evenements/?city=Marseille" class="chip chip-dark">Marseille</a>
+      </div>
+
+      <div class="agenda-list mt-5">
+        {% for e in events|slice:":5" %}
+        <a href="/evenements/{{ e.slug }}/" class="agenda-row ambient-ring">
+          <div class="flex items-start gap-3">
+            {% if e.starts_at %}
+            <div class="agenda-date">
+              <strong>{{ e.starts_at|date:"d" }}</strong>
+              <span>{{ e.starts_at|date:"M" }}</span>
+            </div>
+            {% endif %}
+            <div>
+              <h4 class="text-sm font-bold text-white">{{ e.title }}</h4>
+              <p class="mt-1 text-xs text-white/52">📍 {{ e.city }}{% if e.starts_at %} · {{ e.starts_at|date:"H:i" }}{% endif %}</p>
+            </div>
+          </div>
+          <div class="shrink-0 text-right">
+            {% if e.price %}<span class="chip chip-sunset">{{ e.price|floatformat:0 }}€</span>{% else %}<span class="chip chip-green">{% trans "Gratuit" %}</span>{% endif %}
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+    </aside>
+  </div>
+  {% endif %}
+  {% endwith %}
+
+  <div class="flex items-center justify-between mb-5">
+    <h2 class="h-section text-white">{{ events|length }} {% trans "événements" %}</h2>
+    <span class="chip chip-dark fade-up stagger-2">{% trans "Grille + agenda" %}</span>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 fade-up stagger-2">
+    {% for e in events %}
+    <a href="/evenements/{{ e.slug }}/" class="list-photo-card block group">
+      <div class="list-photo-top">
+        <div class="flex flex-wrap gap-2">
+          {% if e.starts_at %}
+          <div class="date-badge">
+            <span class="d">{{ e.starts_at|date:"d" }}</span>
+            <span class="m">{{ e.starts_at|date:"M" }}</span>
+          </div>
           {% endif %}
-          <span class="ev-cta">{% trans "Voir l'evenement" %}</span>
+          <span class="chip chip-flamingo">{% trans "Live pick" %}</span>
+        </div>
+        <button type="button" class="save-btn" aria-label="{% trans 'Enregistrer' %}" onclick="event.preventDefault();this.classList.toggle('text-flamingo-400');">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21s-7-4.534-9.5-9C1.07 9.36 2.5 6 5.5 6c1.74 0 3.41 1 4.5 2.5C11.09 7 12.76 6 14.5 6c3 0 4.43 3.36 3 6-2.5 4.466-9.5 9-9.5 9z" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+      </div>
+      {% if e.cover_image_url %}
+        <img src="{{ e.cover_image_url }}" alt="{{ e.title }}" loading="lazy" class="list-photo-media" />
+      {% else %}
+        <div class="absolute inset-0 bg-grad-brand"></div>
+      {% endif %}
+      <div class="list-photo-bottom">
+        <div class="flex items-center gap-2 mb-2 flex-wrap">
+          {% if e.starts_at %}<span class="chip chip-flamingo">🕒 {{ e.starts_at|date:"H:i" }}</span>{% endif %}
+          {% if e.price %}<span class="chip chip-sunset">{{ e.price|floatformat:0 }}€</span>{% else %}<span class="chip chip-green">{% trans "Gratuit" %}</span>{% endif %}
+        </div>
+        <div class="font-display text-2xl font-extrabold tracking-tight text-white">{{ e.title }}</div>
+        <p class="mt-2 text-sm leading-6 text-white/65 line-clamp-2">{{ e.description|truncatechars:110 }}</p>
+        <div class="mt-3 pt-3 border-t border-white/10 flex items-center justify-between text-xs">
+          <span class="text-white/60">📍 {{ e.city }}</span>
+          <span class="text-flamingo-400 font-semibold group-hover:translate-x-1 transition-transform">{% trans "Réserver →" %}</span>
         </div>
       </div>
     </a>
+    {% empty %}
+    <div class="col-span-full panel text-center py-16">
+      <div class="text-5xl mb-4">🎫</div>
+      <h3 class="font-display text-xl font-bold text-white">{% trans "Aucun événement publié" %}</h3>
+      <p class="text-white/55 mt-2">{% trans "Reviens bientôt — la programmation se met à jour chaque jour." %}</p>
+      <a href="/sorties/" class="btn-secondary btn-sm mt-6">{% trans "Voir les sorties" %}</a>
+    </div>
     {% endfor %}
   </div>
-  {% else %}
-  <div style="border:1px dashed rgba(255,255,255,0.08);border-radius:24px;padding:5rem 2rem;text-align:center">
-    <div style="width:56px;height:56px;border-radius:16px;background:rgba(255,106,77,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem">
-      <svg xmlns="http://www.w3.org/2000/svg" style="width:1.5rem;height:1.5rem;color:#FF8A66" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-    </div>
-    <p style="font-size:1.05rem;font-weight:700;color:#fff;margin-bottom:0.5rem">{% trans "Aucun evenement pour le moment" %}</p>
-    <p style="font-size:0.85rem;color:rgba(255,255,255,0.3)">{% trans "Les prochains evenements Mooviogo seront annonces ici" %}</p>
-  </div>
-  {% endif %}
-</div>
+</section>
+
 {% endblock %}

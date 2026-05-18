@@ -1,103 +1,420 @@
 {% extends "base.html" %}
 {% load i18n %}
 {% block title %}{% trans "Restaurants" %} | Mooviogo{% endblock %}
-{% block description %}{% trans "Reserve une table dans les meilleurs restaurants en quelques secondes. Disponibilites en temps reel." %}{% endblock %}
+{% block description %}{% trans "Réservez votre table — bistrots, rooftops, japonais, gastronomiques." %}{% endblock %}
 
 {% block extra_head %}
 <style>
-  .rl-form {
-    margin-top: 1.75rem;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.6rem;
-    align-items: center;
+  .store-list-grid { display:grid; grid-template-columns:1fr; gap:1rem; }
+  .store-list-card { position:relative; overflow:hidden; border:1px solid rgba(255,255,255,.08); border-radius:2rem; box-shadow:0 30px 80px -40px rgba(0,0,0,.82); }
+  .store-list-card.light { background:linear-gradient(180deg,#fbfbfd 0%,#eef1f6 100%); color:#0a0f16; }
+  .store-list-card.dark { background:linear-gradient(180deg,#0e1218 0%,#090c12 100%); color:#fff; }
+  .store-list-body { padding:1.5rem; }
+  .store-list-title { font-family:"Geist",Inter,sans-serif; font-size:clamp(2.5rem,5vw,5rem); line-height:.98; letter-spacing:-.05em; font-weight:800; }
+  .store-list-copy { margin-top:1rem; max-width:40rem; font-size:1rem; line-height:1.75; color:rgba(255,255,255,.64); }
+  .store-list-card.light .store-list-copy { color:rgba(10,15,22,.62); }
+  .store-list-meta { display:grid; gap:.75rem; grid-template-columns:repeat(3,minmax(0,1fr)); margin-top:1.3rem; }
+  .store-list-meta > div { border:1px solid rgba(10,15,22,.08); border-radius:1.1rem; background:rgba(10,15,22,.04); padding:.95rem 1rem; }
+  .store-list-pill { display:inline-flex; align-items:center; gap:.45rem; border-radius:999px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.05); padding:.48rem .78rem; font-size:.72rem; font-weight:700; }
+  .restaurants-hero-wide {
+    position:relative;
+    min-height:440px;
+    border-color:rgba(255,255,255,.14);
+    background:#0a0e14;
   }
-
-  .rl-input-q {
-    max-width: 220px;
+  .restaurants-hero-media {
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
   }
-
-  .rl-input-city {
-    max-width: 160px;
+  .restaurants-hero-wide::after {
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(180deg,rgba(6,8,12,.12) 15%,rgba(6,8,12,.38) 46%,rgba(6,8,12,.9) 100%);
+    pointer-events:none;
   }
-
-  .rl-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 1.25rem;
+  .restaurants-hero-content {
+    position:relative;
+    z-index:1;
+    padding:1.6rem;
+    color:#fff;
+    text-align:center;
   }
-
-  @media (max-width: 640px) {
-    .rl-input-q,
-    .rl-input-city,
-    .rl-form .btn-brand,
-    .rl-form .btn-ghost {
-      width: 100%;
-      max-width: 100%;
-      justify-content: center;
-      text-align: center;
-    }
-
-    .rl-grid {
-      grid-template-columns: 1fr;
-    }
+  .restaurants-hero-content .store-list-copy { color:rgba(255,255,255,.8); max-width:52rem; margin-inline:auto; }
+  .restaurants-hero-content .store-list-meta > div {
+    border:1px solid rgba(255,255,255,.18);
+    background:rgba(8,12,18,.42);
+    backdrop-filter:blur(10px);
   }
+  .restaurants-hero-content .store-list-meta .text-black\/38 { color:rgba(255,255,255,.52) !important; }
+  .restaurants-hero-content .store-list-meta .text-black\/88 { color:rgba(255,255,255,.96) !important; }
+  .list-hero-grid { display:grid; grid-template-columns:minmax(0,1.15fr) minmax(280px,.85fr); gap:1.25rem; }
+  .list-side-panel { border:1px solid rgba(255,255,255,.08); border-radius:30px; background:rgba(255,255,255,.035); padding:1.25rem; box-shadow:0 24px 60px -34px rgba(0,0,0,.82); backdrop-filter:blur(14px); }
+  .restaurant-editorial { display:grid; grid-template-columns:minmax(0,1.15fr) minmax(280px,.85fr); gap:1.25rem; }
+  .restaurant-editorial-main, .restaurant-editorial-side { border:1px solid rgba(255,255,255,.08); border-radius:32px; background:rgba(255,255,255,.03); box-shadow:0 26px 64px -34px rgba(0,0,0,.82); backdrop-filter:blur(16px); }
+  .restaurant-editorial-main { padding:1.35rem; }
+  .restaurant-editorial-side { padding:1rem; }
+  .restaurant-feature { position:relative; overflow:hidden; min-height:420px; border-radius:28px; border:1px solid rgba(255,255,255,.08); }
+  .restaurant-feature::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(6,4,14,.03) 12%,rgba(6,4,14,.18) 44%,rgba(6,4,14,.95) 100%); }
+  .restaurant-feature-media { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  .restaurant-feature-content { position:absolute; inset:auto 0 0 0; z-index:2; padding:1.2rem; }
+  .restaurant-feature-metrics { display:grid; gap:.75rem; grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .restaurant-metric { border:1px solid rgba(255,255,255,.08); border-radius:1rem; background:rgba(8,7,18,.52); padding:.85rem .95rem; backdrop-filter:blur(14px); }
+  .restaurant-side-list { display:grid; gap:.75rem; }
+  .restaurant-side-row { display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; border:1px solid rgba(255,255,255,.06); border-radius:20px; background:rgba(255,255,255,.025); padding:1rem; transition:transform .24s cubic-bezier(.22,1,.36,1), border-color .2s ease, background-color .2s ease; }
+  .restaurant-side-row:hover { transform:translateY(-2px); border-color:rgba(255,255,255,.14); background:rgba(255,255,255,.04); }
+  .restaurant-badge-col { display:flex; flex-wrap:wrap; gap:.55rem; }
+  .list-photo-card { position:relative; min-height:420px; overflow:hidden; border-radius:30px; border:1px solid rgba(255,255,255,.08); box-shadow:0 28px 70px -34px rgba(0,0,0,.88); }
+  .list-photo-card::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(6,4,14,.04) 14%,rgba(6,4,14,.2) 42%,rgba(6,4,14,.94) 100%); pointer-events:none; }
+  .list-photo-media { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; transition:transform .7s cubic-bezier(.22,1,.36,1), filter .35s ease; }
+  .group:hover .list-photo-media { transform:scale(1.06); filter:saturate(1.08); }
+  .list-photo-top { position:absolute; inset:1rem 1rem auto 1rem; z-index:2; display:flex; align-items:flex-start; justify-content:space-between; gap:.75rem; }
+  .list-photo-bottom { position:absolute; inset:auto 0 0 0; z-index:2; padding:1.1rem; }
+  .save-btn { position:absolute; top:.55rem; right:.55rem; z-index:2; display:grid; place-items:center; height:2rem; width:2rem; border-radius:9999px; background:rgba(0,0,0,0.45); backdrop-filter:blur(8px); color:#fff; border:1px solid rgba(255,255,255,0.15); transition:all .2s; }
+  .save-btn:hover { background:rgba(243,28,127,0.8); border-color:#F31C7F; }
+  .cuisine-rail {
+    display:flex;
+    gap:.55rem;
+    overflow-x:auto;
+    padding:.48rem;
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:999px;
+    background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.06), 0 10px 30px -24px rgba(0,0,0,.95);
+    backdrop-filter:blur(12px);
+    scrollbar-width:none;
+  }
+  .cuisine-rail::-webkit-scrollbar { display:none; }
+  .cat-pill {
+    flex:0 0 auto;
+    display:inline-flex;
+    align-items:center;
+    gap:.42rem;
+    min-height:2.2rem;
+    padding:.38rem .84rem;
+    border-radius:999px;
+    border:1px solid transparent;
+    background:transparent;
+    color:rgba(255,255,255,.74);
+    font-size:.79rem;
+    font-weight:650;
+    letter-spacing:.01em;
+    white-space:nowrap;
+    transition:transform .18s cubic-bezier(.22,1,.36,1), color .16s ease, border-color .16s ease, background-color .16s ease, box-shadow .18s ease;
+  }
+  .cat-pill:hover {
+    color:#fff;
+    border-color:rgba(255,255,255,.14);
+    background:rgba(255,255,255,.06);
+  }
+  .cat-pill:focus-visible {
+    outline:none;
+    box-shadow:0 0 0 2px rgba(125,211,252,.55);
+  }
+  .cat-ico {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:1.12rem;
+    height:1.12rem;
+    font-size:.88rem;
+    opacity:.84;
+    filter:saturate(.9);
+  }
+  .cat-pill[data-active="true"] {
+    background:linear-gradient(180deg,#f8fbff,#e9f0f8);
+    color:#09101a;
+    border-color:rgba(255,255,255,.82);
+    box-shadow:0 12px 26px -18px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.85);
+  }
+  .cat-pill[data-active="true"] .cat-ico {
+    opacity:1;
+    filter:saturate(1.05);
+  }
+  .envies-wrap {
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:1.35rem;
+    background:rgba(255,255,255,.02);
+    padding:.95rem;
+    box-shadow:0 20px 44px -34px rgba(0,0,0,.9);
+  }
+  .envies-head {
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    gap:.75rem;
+    margin-bottom:.65rem;
+  }
+  .envies-head > div { text-align:center; }
+  .envies-title {
+    font-family:"Geist",Inter,sans-serif;
+    font-size:1.15rem;
+    font-weight:800;
+    letter-spacing:-.02em;
+    color:#fff;
+  }
+  .envies-sub {
+    margin-top:.2rem;
+    font-size:.76rem;
+    color:rgba(255,255,255,.56);
+  }
+  .envie-rail {
+    display:flex;
+    gap:.72rem;
+    overflow-x:auto;
+    padding:.2rem .15rem .38rem;
+    scrollbar-width:none;
+    scroll-snap-type:x mandatory;
+  }
+  .envie-rail::-webkit-scrollbar { display:none; }
+  .envie-card {
+    position:relative;
+    flex:0 0 auto;
+    width:188px;
+    min-height:214px;
+    border-radius:1.1rem;
+    border:1px solid rgba(255,255,255,.12);
+    overflow:hidden;
+    box-shadow:0 22px 34px -24px rgba(0,0,0,.92);
+    scroll-snap-align:start;
+    transition:transform .24s cubic-bezier(.22,1,.36,1), border-color .2s ease, box-shadow .2s ease;
+  }
+  .envie-card::after {
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(180deg,rgba(6,8,12,.08) 25%,rgba(6,8,12,.42) 58%,rgba(6,8,12,.88) 100%);
+    pointer-events:none;
+  }
+  .envie-card:hover {
+    transform:translateY(-2px);
+    border-color:rgba(255,255,255,.28);
+    box-shadow:0 26px 38px -24px rgba(0,0,0,.95);
+  }
+  .envie-card[data-active="true"] {
+    border-color:rgba(255,255,255,.55);
+    box-shadow:0 26px 44px -26px rgba(0,0,0,.98);
+  }
+  .envie-media {
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    transition:transform .6s cubic-bezier(.22,1,.36,1), filter .25s ease;
+    filter:saturate(1.02) contrast(1.03);
+  }
+  .envie-card:hover .envie-media {
+    transform:scale(1.045);
+    filter:saturate(1.08) contrast(1.05);
+  }
+  .envie-content {
+    position:absolute;
+    inset:auto 0 0 0;
+    z-index:1;
+    padding:.78rem;
+  }
+  .envie-kicker {
+    display:inline-flex;
+    align-items:center;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.22);
+    background:rgba(255,255,255,.08);
+    padding:.25rem .52rem;
+    font-size:.62rem;
+    font-weight:700;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:rgba(255,255,255,.88);
+  }
+  .envie-name {
+    margin-top:.46rem;
+    font-size:.98rem;
+    font-weight:800;
+    color:#fff;
+    letter-spacing:-.018em;
+  }
+  .envie-note {
+    margin-top:.18rem;
+    font-size:.69rem;
+    letter-spacing:.015em;
+    color:rgba(255,255,255,.58);
+  }
+  @media (max-width: 1024px) { .list-hero-grid, .restaurant-editorial, .restaurant-feature-metrics, .store-list-grid, .store-list-meta { grid-template-columns:1fr; } }
+  @media (max-width: 640px) { .envie-card { width:174px; min-height:198px; } }
 </style>
 {% endblock %}
 
 {% block content %}
 
-<div class="pg-hdr">
-  <div class="mx-auto max-w-7xl px-4">
-    <p class="slabel mb-3">{% trans "Tables disponibles maintenant" %}</p>
-    <h1 style="font-size:2.25rem;font-weight:900;color:#fff;letter-spacing:-0.03em;line-height:1.1">{% trans "Restaurants" %}</h1>
-    <p style="margin-top:0.45rem;font-size:0.9rem;color:rgba(255,255,255,0.4)">{% trans "Reserve une table en quelques secondes" %}</p>
-    <form method="get" class="rl-form" aria-label="{% trans "Recherche de restaurants" %}">
-      <input type="text" name="q" value="{{ request.GET.q }}" placeholder="{% trans "Restaurant, cuisine..." %}" class="fi-input rl-input-q" aria-label="{% trans "Nom du restaurant ou cuisine" %}" />
-      <input type="text" name="city" value="{{ request.GET.city }}" placeholder="{% trans "Ville..." %}" class="fi-input rl-input-city" aria-label="{% trans "Ville" %}" />
-      <button type="submit" class="btn-brand" style="font-size:0.82rem;padding:0.55rem 1.2rem">{% trans "Rechercher" %}</button>
-      {% if request.GET.q or request.GET.city %}
-      <a href="/restaurants/" class="btn-ghost" style="font-size:0.82rem;padding:0.55rem 1rem">{% trans "Tout afficher" %}</a>
-      {% endif %}
-    </form>
+{# ───────── Hero ───────── #}
+<section class="mx-auto max-w-7xl px-4 pt-10 pb-8 sm:pt-14 sm:pb-10">
+  <nav class="text-xs text-white/50 mb-3 flex items-center gap-2">
+    <a href="/" class="hover:text-white">{% trans "Accueil" %}</a><span>›</span><span class="text-white/80">{% trans "Restaurants" %}</span>
+  </nav>
+  <div class="store-list-grid">
+    <div class="store-list-card restaurants-hero-wide">
+      <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1800&q=80" alt="Selection gourmande de plats a partager" class="restaurants-hero-media" loading="lazy" />
+      <div class="restaurants-hero-content">
+        <span class="text-[0.8rem] font-semibold tracking-tight text-white/78">{% trans "Restaurants" %}</span>
+        <h1 class="store-list-title mt-3 text-white">{% trans "Les tables à réserver ce soir." %}</h1>
+        <p class="store-list-copy">{% trans "Ce soir, offrez-vous une table qui fait voyager les sens: une ambiance soignée, des assiettes désirables, et l’envie d’y rester longtemps." %}</p>
+        <div class="store-list-meta">
+          <div><div class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-black/38">{% trans "Lecture" %}</div><div class="mt-2 text-sm font-semibold text-black/88">{% trans "Cadre avant détail" %}</div></div>
+          <div><div class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-black/38">{% trans "Action" %}</div><div class="mt-2 text-sm font-semibold text-black/88">{% trans "Réserver vite" %}</div></div>
+          <div><div class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-black/38">{% trans "Style" %}</div><div class="mt-2 text-sm font-semibold text-black/88">{% trans "Hospitality premium" %}</div></div>
+        </div>
+        <form method="get" class="mt-6 flex w-full max-w-3xl items-stretch rounded-full border border-white/20 bg-white/[0.08] p-1.5 mx-auto">
+          <input name="q" value="{{ request.GET.q }}" type="search" placeholder="{% trans 'Nom du resto, cuisine…' %}" class="flex-1 bg-transparent border-0 px-5 text-sm sm:text-base text-white placeholder:text-white/45 focus:ring-0 focus:outline-none" />
+          <input name="city" value="{{ request.GET.city }}" type="text" placeholder="{% trans 'Ville' %}" class="hidden sm:block w-36 bg-transparent border-0 border-l border-white/20 px-5 text-sm text-white placeholder:text-white/45 focus:ring-0 focus:outline-none" />
+          <button type="submit" class="btn-dice btn-sm rounded-full">{% trans "Rechercher" %}</button>
+        </form>
+      </div>
+    </div>
   </div>
-</div>
+</section>
 
-<div class="mx-auto max-w-7xl px-4" style="padding-top:3rem;padding-bottom:5rem">
-  {% if venues %}
-  <div class="rl-grid">
-    {% for venue in venues %}
-    <a href="/restaurants/{{ venue.city_slug }}/{{ venue.slug }}/" class="pk" style="display:block;text-decoration:none;overflow:hidden">
-      {% if venue.cover_image_url %}
-      <div style="overflow:hidden;height:195px">
-        <img src="{{ venue.cover_image_url }}" alt="{{ venue.name }}" style="width:100%;height:195px;object-fit:cover;transition:transform 0.4s" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform=''" loading="lazy" />
+{# ───────── Grid ───────── #}
+<section class="mx-auto max-w-7xl px-4 py-10">
+  {% if featured_restaurant %}
+  <div class="mb-10 fade-up">
+    <section class="restaurant-editorial-main">
+      <div class="section-head mb-5">
+        <div class="mx-auto max-w-3xl text-center">
+          <h3 class="envies-title">{% trans "La table dont tout le monde parle… avant qu’il n’y ait plus de place." %}</h3>
+        </div>
+        <a href="/feed/">{% trans "Voir le feed" %} →</a>
       </div>
-      {% else %}
-      <div style="height:195px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#12151e,#1e1520)">
-        <svg xmlns="http://www.w3.org/2000/svg" style="width:2.5rem;height:2.5rem;color:rgba(255,255,255,0.1)" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-      </div>
-      {% endif %}
-      <div style="padding:1rem 1.1rem 1.25rem">
-        {% if venue.cuisine_type %}
-        <span class="tag tag-orange" style="margin-bottom:0.6rem;display:inline-flex">{{ venue.cuisine_type }}</span>
+      <article class="restaurant-feature block interactive-card card-tilt ambient-ring group">
+        {% if featured_restaurant.cover_image_url %}
+          <img src="{{ featured_restaurant.cover_image_url }}" alt="{{ featured_restaurant.name }}" class="restaurant-feature-media ken-burns" loading="lazy" />
+        {% else %}
+          <div class="absolute inset-0 bg-grad-brand"></div>
         {% endif %}
-        <p style="font-size:0.97rem;font-weight:800;color:#fff;line-height:1.3;margin-bottom:0.35rem">{{ venue.name }}</p>
-        <p style="font-size:0.75rem;color:rgba(255,255,255,0.35);display:flex;align-items:center;gap:4px;margin-bottom:0.6rem">
-          <svg xmlns="http://www.w3.org/2000/svg" style="width:0.75rem;height:0.75rem;flex-shrink:0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-          {{ venue.city_label }}
-        </p>
-        {% if venue.price_range %}
-        <span style="font-size:0.78rem;color:rgba(255,255,255,0.4)">{{ venue.price_range }}</span>
-        {% endif %}
-      </div>
-    </a>
-    {% endfor %}
-  </div>
-  {% else %}
-  <div style="border:1px dashed rgba(255,255,255,0.08);border-radius:24px;padding:5rem 2rem;text-align:center">
-    <p style="font-size:1rem;font-weight:700;color:rgba(255,255,255,0.5)">{% trans "Aucun restaurant trouve" %}</p>
-    <a href="/restaurants/" style="display:inline-block;margin-top:1rem;font-size:0.82rem;color:#FF8A66;text-decoration:none">{% trans "Voir tous les restaurants" %} →</a>
+        <div class="restaurant-feature-content">
+          <div class="restaurant-badge-col">
+            <span class="chip chip-sunset">{% trans "Dinner radar" %}</span>
+            <span class="chip chip-dark">{% trans "Photo-led" %}</span>
+            {% if featured_restaurant.price_range %}<span class="chip chip-electric">{{ featured_restaurant.price_range }}</span>{% endif %}
+            {% if featured_is_promoted %}<span class="chip chip-neon">{% trans "Mise en avant sponsorisée" %}</span>{% endif %}
+          </div>
+          <h3 class="mt-3 font-display text-4xl font-extrabold tracking-tight text-white">{{ featured_restaurant.name }}</h3>
+          <p class="mt-3 max-w-2xl text-sm leading-7 text-white/68">{{ featured_restaurant.description|default:_('Une adresse pensée comme un choix de soirée, pas seulement comme une fiche de réservation.')|truncatechars:150 }}</p>
+          <div class="mt-4 flex flex-wrap gap-2">
+            <a href="/restaurants/{{ featured_restaurant.city_slug }}/{{ featured_restaurant.slug }}/#booking-panel" class="btn-dice btn-sm">{% trans "Réserver" %}</a>
+            <a href="/restaurants/{{ featured_restaurant.city_slug }}/{{ featured_restaurant.slug }}/" class="btn-secondary btn-sm">{% trans "Voir la fiche" %}</a>
+          </div>
+          <div class="restaurant-feature-metrics mt-5">
+            <div class="restaurant-metric">
+              <div class="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-white/42">{% trans "Ville" %}</div>
+              <div class="mt-2 text-sm font-semibold text-white">{{ featured_restaurant.city_label|default:featured_restaurant.city_slug }}</div>
+            </div>
+            <div class="restaurant-metric">
+              <div class="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-white/42">{% trans "Cuisine" %}</div>
+              <div class="mt-2 text-sm font-semibold text-white">{{ featured_restaurant.cuisine_type|default:_('Signature maison') }}</div>
+            </div>
+            <div class="restaurant-metric">
+              <div class="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-white/42">{% trans "Signal" %}</div>
+              <div class="mt-2 text-sm font-semibold text-white">{% trans "Table à forte envie" %}</div>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
   </div>
   {% endif %}
-</div>
+
+  {# ───────── Cuisine pills ───────── #}
+  <section class="glass-strong border-y border-white/[0.06] mb-8">
+    <div class="mx-auto max-w-7xl px-4">
+      <div class="envies-wrap my-3">
+        <div class="envies-head">
+          <div>
+            <h3 class="envies-title">{% trans "Vos envies du moment" %}</h3>
+            <p class="envies-sub">{% trans "Choisis une ambiance, on te montre les bonnes tables." %}</p>
+          </div>
+        </div>
+        <div class="envie-rail mask-fade-r">
+          <a href="/restaurants/" {% if not request.GET.q %}data-active="true"{% endif %} class="envie-card"><img src="https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=900&q=80" alt="Toutes cuisines" class="envie-media" loading="lazy" /><div class="envie-content"><span class="envie-kicker">{% trans "Mood" %}</span><p class="envie-name">{% trans "Tous" %}</p><p class="envie-note">{% trans "Toutes cuisines" %}</p></div></a>
+          <a href="/restaurants/?q=japonais" {% if request.GET.q == "japonais" %}data-active="true"{% endif %} class="envie-card"><img src="https://images.unsplash.com/photo-1611143669185-af224c5e3252?auto=format&fit=crop&w=900&q=80" alt="Cuisine japonaise" class="envie-media" loading="lazy" /><div class="envie-content"><span class="envie-kicker">{% trans "Cuisine" %}</span><p class="envie-name">{% trans "Japonais" %}</p><p class="envie-note">{% trans "Sushi • Ramen" %}</p></div></a>
+          <a href="/restaurants/?q=italien" {% if request.GET.q == "italien" %}data-active="true"{% endif %} class="envie-card"><img src="https://images.unsplash.com/photo-1516100882582-96c3a05fe590?auto=format&fit=crop&w=900&q=80" alt="Cuisine italienne" class="envie-media" loading="lazy" /><div class="envie-content"><span class="envie-kicker">{% trans "Cuisine" %}</span><p class="envie-name">{% trans "Italien" %}</p><p class="envie-note">{% trans "Pasta • Pizza" %}</p></div></a>
+          <a href="/restaurants/?q=français" {% if request.GET.q == "français" %}data-active="true"{% endif %} class="envie-card"><img src="https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?auto=format&fit=crop&w=900&q=80" alt="Cuisine française" class="envie-media" loading="lazy" /><div class="envie-content"><span class="envie-kicker">{% trans "Cuisine" %}</span><p class="envie-name">{% trans "Français" %}</p><p class="envie-note">{% trans "Bistrot" %}</p></div></a>
+          <a href="/restaurants/?q=burger" {% if request.GET.q == "burger" %}data-active="true"{% endif %} class="envie-card"><img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=900&q=80" alt="Burgers" class="envie-media" loading="lazy" /><div class="envie-content"><span class="envie-kicker">{% trans "Cuisine" %}</span><p class="envie-name">{% trans "Burger" %}</p><p class="envie-note">{% trans "Comfort" %}</p></div></a>
+          <a href="/restaurants/?q=mexicain" {% if request.GET.q == "mexicain" %}data-active="true"{% endif %} class="envie-card"><img src="https://images.unsplash.com/photo-1613514785940-daed07799d9b?auto=format&fit=crop&w=900&q=80" alt="Cuisine mexicaine" class="envie-media" loading="lazy" /><div class="envie-content"><span class="envie-kicker">{% trans "Cuisine" %}</span><p class="envie-name">{% trans "Mexicain" %}</p><p class="envie-note">{% trans "Tacos" %}</p></div></a>
+          <a href="/restaurants/?q=libanais" {% if request.GET.q == "libanais" %}data-active="true"{% endif %} class="envie-card"><img src="https://images.unsplash.com/photo-1541544741938-0af808871cc0?auto=format&fit=crop&w=900&q=80" alt="Cuisine libanaise" class="envie-media" loading="lazy" /><div class="envie-content"><span class="envie-kicker">{% trans "Cuisine" %}</span><p class="envie-name">{% trans "Libanais" %}</p><p class="envie-note">{% trans "Mezze" %}</p></div></a>
+          <a href="/restaurants/?q=rooftop" {% if request.GET.q == "rooftop" %}data-active="true"{% endif %} class="envie-card"><img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=900&q=80" alt="Rooftop" class="envie-media" loading="lazy" /><div class="envie-content"><span class="envie-kicker">{% trans "Spot" %}</span><p class="envie-name">{% trans "Rooftop" %}</p><p class="envie-note">{% trans "Vue" %}</p></div></a>
+          <a href="/restaurants/?q=brunch" {% if request.GET.q == "brunch" %}data-active="true"{% endif %} class="envie-card"><img src="https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=900&q=80" alt="Brunch" class="envie-media" loading="lazy" /><div class="envie-content"><span class="envie-kicker">{% trans "Moment" %}</span><p class="envie-name">{% trans "Brunch" %}</p><p class="envie-note">{% trans "Week-end" %}</p></div></a>
+          <a href="/restaurants/?q=vegan" {% if request.GET.q == "vegan" %}data-active="true"{% endif %} class="envie-card"><img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=900&q=80" alt="Vegan" class="envie-media" loading="lazy" /><div class="envie-content"><span class="envie-kicker">{% trans "Cuisine" %}</span><p class="envie-name">{% trans "Vegan" %}</p><p class="envie-note">{% trans "Plant-based" %}</p></div></a>
+          <a href="/restaurants/?q=gastronomique" {% if request.GET.q == "gastronomique" %}data-active="true"{% endif %} class="envie-card"><img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=900&q=80" alt="Gastronomique" class="envie-media" loading="lazy" /><div class="envie-content"><span class="envie-kicker">{% trans "Signature" %}</span><p class="envie-name">{% trans "Gastro" %}</p><p class="envie-note">{% trans "Chef" %}</p></div></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="flex items-center justify-between mb-5">
+    <h2 class="h-section text-white">{{ page_obj.paginator.count }} {% trans "restos" %}</h2>
+    <div class="hidden sm:flex items-center gap-2 text-xs text-white/55">
+      <span>{% trans "Trier par" %}:</span>
+      <button class="chip chip-neutral">{% trans "Pertinence" %}</button>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 fade-up stagger-2">
+    {% for r in venues %}
+    <a href="/restaurants/{{ r.city_slug }}/{{ r.slug }}/" class="list-photo-card interactive-card card-tilt ambient-ring tap-bounce block group">
+      <div class="list-photo-top">
+        <div class="flex flex-wrap gap-2">
+          <span class="chip chip-dark">🍽️ {% trans "Table" %}</span>
+          {% if r.price_range %}<span class="chip chip-sunset">{{ r.price_range }}</span>{% endif %}
+        </div>
+        <button type="button" class="save-btn" aria-label="{% trans 'Enregistrer' %}" onclick="event.preventDefault();this.classList.toggle('text-flamingo-400');">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21s-7-4.534-9.5-9C1.07 9.36 2.5 6 5.5 6c1.74 0 3.41 1 4.5 2.5C11.09 7 12.76 6 14.5 6c3 0 4.43 3.36 3 6-2.5 4.466-9.5 9-9.5 9z" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+      </div>
+      {% if r.cover_image_url %}
+        <img src="{{ r.cover_image_url }}" alt="{{ r.name }}" loading="lazy" class="list-photo-media" />
+      {% else %}
+        <div class="absolute inset-0 bg-grad-brand"></div>
+      {% endif %}
+      <div class="list-photo-bottom">
+        <div class="flex items-center justify-between gap-2 mb-1">
+          <div class="font-display text-2xl font-extrabold tracking-tight text-white">{{ r.name }}</div>
+          <span class="inline-flex items-center gap-0.5 text-xs font-semibold text-white shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-sunset-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+            4.{% widthratio forloop.counter 18 9 %}
+          </span>
+        </div>
+        <p class="mt-2 text-sm leading-6 text-white/65 line-clamp-2">{{ r.description|default:_('Une adresse premium, mieux racontée, plus claire sur la réservation.')|truncatechars:100 }}</p>
+        <div class="mt-3 flex flex-wrap items-center gap-2 text-xs text-white/72">
+          <span>📍 {{ r.city_label|default:r.city_slug }}</span>
+          {% if r.cuisine_type %}<span>•</span><span>{{ r.cuisine_type }}</span>{% endif %}
+          {% if r.price_range %}<span>•</span><span class="text-white/75 font-semibold">{{ r.price_range }}</span>{% endif %}
+        </div>
+        <div class="mt-3 pt-3 border-t border-white/10 flex items-center justify-between text-xs">
+          <span class="chip chip-electric">✓ {% trans "Dispo ce soir" %}</span>
+          <span class="text-flamingo-400 font-semibold group-hover:translate-x-1 transition-transform">{% trans "Réserver →" %}</span>
+        </div>
+      </div>
+    </a>
+    {% empty %}
+    <div class="col-span-full panel text-center py-16">
+      <div class="text-5xl mb-4">🍝</div>
+      <h3 class="font-display text-xl font-bold text-white">{% trans "Aucun resto trouvé" %}</h3>
+      <p class="text-white/55 mt-2">{% trans "Essaie d'autres mots-clés ou une autre ville." %}</p>
+      <a href="/restaurants/" class="btn-secondary btn-sm mt-6">{% trans "Réinitialiser" %}</a>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% if is_paginated %}
+  <nav class="mt-12 flex items-center justify-center gap-2" aria-label="Pagination">
+    {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}" class="btn-secondary btn-sm">←</a>{% endif %}
+    <span class="chip chip-neutral">{% blocktrans with cur=page_obj.number total=page_obj.paginator.num_pages %}Page {{ cur }} sur {{ total }}{% endblocktrans %}</span>
+    {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}" class="btn-secondary btn-sm">→</a>{% endif %}
+  </nav>
+  {% endif %}
+</section>
+
 {% endblock %}

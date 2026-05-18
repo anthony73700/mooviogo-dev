@@ -1,203 +1,270 @@
 {% extends "base.html" %}
 {% load i18n %}
 {% block title %}{{ sortie.title }} | Mooviogo{% endblock %}
-{% block description %}{{ sortie.description|default:sortie.title|striptags|truncatechars:160 }}{% endblock %}
-{% block og_title %}{{ sortie.title }}{% endblock %}
-{% block og_description %}{{ sortie.description|default:sortie.title|striptags|truncatechars:200 }}{% endblock %}
-
-{% block schema_jsonld %}
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "Event",
-  "name": "{{ sortie.title|escapejs }}",
-  "description": "{{ sortie.description|default:sortie.title|striptags|truncatechars:300|escapejs }}",
-  {% if sortie.starts_at %}"startDate": "{{ sortie.starts_at|date:'c' }}",{% endif %}
-  "eventStatus": "https://schema.org/EventScheduled",
-  "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
-  "location": {
-    "@type": "Place",
-    "name": "{{ sortie.location|default:sortie.city|escapejs }}",
-    "address": "{{ sortie.city|escapejs }}"
-    {% if sortie.latitude and sortie.longitude %},"geo": {"@type": "GeoCoordinates", "latitude": {{ sortie.latitude }}, "longitude": {{ sortie.longitude }}}{% endif %}
-  },
-  "organizer": {"@type": "Organization", "name": "Mooviogo", "url": "{{ APP_BASE_URL }}"},
-  "offers": {
-    "@type": "Offer",
-    "price": "{% if sortie.is_free %}0{% else %}{{ sortie.price|floatformat:2 }}{% endif %}",
-    "priceCurrency": "EUR",
-    "availability": "{% if sortie.status == 'OPEN' %}https://schema.org/InStock{% elif sortie.status == 'FULL' %}https://schema.org/SoldOut{% else %}https://schema.org/Discontinued{% endif %}",
-    "url": "{{ APP_BASE_URL }}{{ request.path }}"
-  }
-}
-</script>
-{% endblock %}
+{% block description %}{{ sortie.description|truncatechars:160 }}{% endblock %}
 
 {% block extra_head %}
 <style>
-  .sd-hero {
-    position: relative;
-    height: 320px;
-    overflow: hidden;
-  }
-
-  .sd-hero-inner {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 1.5rem max(1rem, (100vw - 56rem) / 2);
-  }
-
-  .sd-card {
-    padding: 2rem;
-  }
-
-  .sd-stats {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.75rem;
-    margin-bottom: 1.75rem;
-  }
-
-  @media (max-width: 760px) {
-    .sd-hero {
-      height: 260px;
-    }
-
-    .sd-hero-inner {
-      padding: 1rem;
-    }
-
-    .sd-card {
-      padding: 1.1rem;
-    }
-
-    .sd-stats {
-      grid-template-columns: 1fr;
-    }
-  }
+  .detail-store-grid { display:grid; grid-template-columns:minmax(0,1.08fr) minmax(320px,.92fr); gap:1rem; }
+  .detail-store-card { position:relative; overflow:hidden; border:1px solid rgba(255,255,255,.08); border-radius:2rem; box-shadow:0 30px 80px -40px rgba(0,0,0,.82); }
+  .detail-store-card.light { background:linear-gradient(180deg,#fbfbfd 0%,#eef1f6 100%); color:#0a0f16; }
+  .detail-store-card.dark { background:linear-gradient(180deg,#0e1218 0%,#090c12 100%); color:#fff; }
+  .detail-store-body { padding:1.5rem; }
+  .detail-store-title { font-family:"Geist",Inter,sans-serif; font-size:clamp(2.3rem,5vw,4.9rem); line-height:.98; letter-spacing:-.05em; font-weight:800; }
+  .detail-store-copy { margin-top:1rem; max-width:38rem; font-size:1rem; line-height:1.75; color:rgba(255,255,255,.64); }
+  .detail-store-card.light .detail-store-copy { color:rgba(10,15,22,.62); }
+  .detail-store-meta { display:grid; gap:.75rem; grid-template-columns:repeat(3,minmax(0,1fr)); margin-top:1.4rem; }
+  .detail-store-meta > div { border:1px solid rgba(255,255,255,.08); border-radius:1.1rem; background:rgba(255,255,255,.04); padding:.95rem 1rem; }
+  .detail-store-card.light .detail-store-meta > div { background:rgba(10,15,22,.04); border-color:rgba(10,15,22,.08); }
+  .detail-store-figure { position:relative; min-height:520px; }
+  .detail-store-figure img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  .detail-store-figure::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(6,8,12,.04) 12%,rgba(6,8,12,.18) 46%,rgba(6,8,12,.88) 100%); }
+  .detail-store-overlay { position:absolute; inset:auto 0 0 0; z-index:1; padding:1.25rem; }
+  .detail-store-pill { display:inline-flex; align-items:center; gap:.45rem; border-radius:999px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.05); padding:.48rem .78rem; font-size:.72rem; font-weight:700; }
+  .detail-store-link { display:inline-flex; align-items:center; gap:.45rem; margin-top:1.15rem; font-size:.88rem; font-weight:700; }
+  .detail-store-link::after { content:"→"; }
+  .detail-hero { position:relative; overflow:hidden; min-height:560px; border-radius:2rem; border:1px solid rgba(255,255,255,.08); box-shadow:0 36px 100px -42px rgba(0,0,0,.88); }
+  .detail-hero-media { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  .detail-hero::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(6,4,14,.15) 8%,rgba(6,4,14,.2) 32%,rgba(6,4,14,.78) 72%,rgba(6,4,14,.96) 100%); }
+  .detail-hero-content { position:relative; z-index:1; display:flex; min-height:560px; flex-direction:column; justify-content:space-between; padding:1.25rem; }
+  .detail-hero-panel { border:1px solid rgba(255,255,255,.1); border-radius:1.5rem; background:rgba(8,7,18,.46); padding:1rem; backdrop-filter:blur(18px); }
+  .detail-meta-grid { display:grid; gap:.75rem; grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .booking-sticky { position:sticky; top:140px; }
+  .ring-avatar { display:inline-grid; place-items:center; height:2.5rem; width:2.5rem; border-radius:9999px; background:linear-gradient(135deg,#A832F5,#F31C7F); color:#fff; font-weight:700; box-shadow:0 0 0 2px rgba(255,255,255,0.06); }
+  .star-row svg { color:#FF6A4D; }
+  @media (max-width:1024px){ .detail-store-grid, .detail-store-meta { grid-template-columns:1fr; } .detail-store-figure { min-height:360px; } }
+  @media (max-width:768px){ .detail-hero, .detail-hero-content { min-height:460px; } .detail-meta-grid { grid-template-columns:1fr; } }
 </style>
 {% endblock %}
 
 {% block content %}
+<div class="mx-auto max-w-7xl px-4 py-8">
 
-{# ── Header cover ── #}
-{% if sortie.cover_image_url %}
-<div class="sd-hero">
-  <img src="{{ sortie.cover_image_url }}" alt="{{ sortie.title }}" style="width:100%;height:100%;object-fit:cover" />
-  <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,10,18,0.2) 0%,rgba(7,10,18,0.85) 100%)"></div>
-  <div class="sd-hero-inner">
-    <a href="/sorties/" class="back-link" style="margin-bottom:0.75rem;color:rgba(255,255,255,0.5)">← {% trans "Retour aux sorties" %}</a>
-    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:0.5rem;margin-bottom:0.6rem">
-      <span class="tag tag-orange">{{ sortie.get_type_display }}</span>
-      <span class="tag {% if sortie.status == 'OPEN' %}tag-green{% elif sortie.status == 'FULL' %}tag-yellow{% else %}tag-gray{% endif %}">{{ sortie.get_status_display }}</span>
+  {# ───── Breadcrumb + actions ───── #}
+  <nav class="flex items-center justify-between gap-4 mb-5">
+    <div class="text-xs text-white/50 flex items-center gap-2">
+      <a href="/" class="hover:text-white">{% trans "Accueil" %}</a><span>›</span>
+      <a href="/sorties/" class="hover:text-white">{% trans "Sorties" %}</a><span>›</span>
+      <span class="text-white/80 truncate max-w-[200px]">{{ sortie.title }}</span>
     </div>
-    <h1 style="font-size:2rem;font-weight:900;color:#fff;letter-spacing:-0.02em;line-height:1.15">{{ sortie.title }}</h1>
-  </div>
-</div>
-{% else %}
-<div class="pg-hdr">
-  <div class="mx-auto max-w-3xl px-4">
-    <a href="/sorties/" class="back-link">← {% trans "Retour aux sorties" %}</a>
-    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:0.5rem;margin-bottom:0.75rem">
-      <span class="tag tag-orange">{{ sortie.get_type_display }}</span>
-      <span class="tag {% if sortie.status == 'OPEN' %}tag-green{% elif sortie.status == 'FULL' %}tag-yellow{% else %}tag-gray{% endif %}">{{ sortie.get_status_display }}</span>
+    <div class="flex items-center gap-2">
+      <button type="button" class="btn-secondary btn-sm" onclick="navigator.share?navigator.share({title:document.title,url:location.href}):navigator.clipboard.writeText(location.href);this.innerText='✓ {% trans "Copié" %}';">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8m-4-6l-4-4-4 4m4-4v12"/></svg>
+        <span class="hidden sm:inline">{% trans "Partager" %}</span>
+      </button>
+      <button type="button" class="btn-secondary btn-sm" onclick="this.classList.toggle('text-flamingo-400')">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21s-7-4.534-9.5-9C1.07 9.36 2.5 6 5.5 6c1.74 0 3.41 1 4.5 2.5C11.09 7 12.76 6 14.5 6c3 0 4.43 3.36 3 6-2.5 4.466-9.5 9-9.5 9z" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+        <span class="hidden sm:inline">{% trans "Enregistrer" %}</span>
+      </button>
     </div>
-    <h1 style="font-size:2rem;font-weight:900;color:#fff;letter-spacing:-0.02em">{{ sortie.title }}</h1>
-  </div>
-</div>
-{% endif %}
+  </nav>
 
-{# ── Corps ── #}
-<div class="mx-auto max-w-3xl px-4" style="padding-top:2rem;padding-bottom:5rem">
-  {% if sortie.cover_image_url %}
-  <a href="/sorties/" class="back-link" style="display:none"></a>
-  {% endif %}
+  <section class="mb-10 detail-store-grid">
+    <div class="detail-store-card light">
+      <div class="detail-store-body">
+        <span class="text-[0.8rem] font-semibold tracking-tight text-black/70">{% trans "Sortie" %}</span>
+        <h1 class="detail-store-title mt-3">{{ sortie.title }}</h1>
+        <p class="detail-store-copy">{{ sortie.description|default:_('Une page plus éditoriale pour comprendre l’ambiance, le lieu et la prochaine action sans bruit inutile.')|truncatechars:190 }}</p>
+        <div class="detail-store-meta">
+          <div>
+            <div class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-black/38">{% trans "Lieu" %}</div>
+            <div class="mt-2 text-sm font-semibold text-black/88">{{ sortie.location|default:sortie.city }}</div>
+          </div>
+          <div>
+            <div class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-black/38">{% trans "Quand" %}</div>
+            <div class="mt-2 text-sm font-semibold text-black/88">{% if sortie.starts_at %}{{ sortie.starts_at|date:"d M Y · H:i" }}{% else %}{% trans "À confirmer" %}{% endif %}</div>
+          </div>
+          <div>
+            <div class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-black/38">{% trans "Prix" %}</div>
+            <div class="mt-2 text-sm font-semibold text-black/88">{% if sortie.is_free %}{% trans "Gratuit" %}{% else %}{{ sortie.price|floatformat:0 }}€{% endif %}</div>
+          </div>
+        </div>
+        <a href="#booking-panel" class="detail-store-link text-black/85">{% if sortie.is_free %}{% trans "Rejoindre la sortie" %}{% else %}{% trans "Réserver maintenant" %}{% endif %}</a>
+      </div>
+    </div>
 
-  <div style="display:grid;gap:1.25rem;grid-template-columns:1fr;align-items:start">
+    <div class="detail-store-card dark detail-store-figure">
+      {% if sortie.cover_image_url %}<img src="{{ sortie.cover_image_url }}" alt="{{ sortie.title }}" />{% else %}<div class="absolute inset-0 bg-grad-brand"></div>{% endif %}
+      <div class="detail-store-overlay">
+        <div class="flex flex-wrap gap-2">
+          {% if sortie.type == "COMMUNAUTAIRE" %}<span class="detail-store-pill">👥 {% trans "Entre membres" %}</span>{% else %}<span class="detail-store-pill">🤝 {% trans "Partenaire" %}</span>{% endif %}
+          <span class="detail-store-pill">📍 {{ sortie.city }}</span>
+          <span class="detail-store-pill">{{ participant_count|default:0 }} {% trans "participants" %}</span>
+        </div>
+        <h2 class="mt-4 font-display text-3xl font-extrabold tracking-tight text-white">{% trans "La bonne lecture avant de rejoindre" %}</h2>
+        <p class="mt-2 max-w-lg text-sm leading-7 text-white/66">{% trans "Tu vois immédiatement le niveau d’énergie, le type de groupe et le bon moment pour cliquer." %}</p>
+      </div>
+    </div>
+  </section>
 
-    {# Infos principales #}
-    <div class="pk sd-card">
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:1.25rem;color:rgba(255,255,255,0.4);font-size:0.82rem">
-        <svg xmlns="http://www.w3.org/2000/svg" style="width:0.85rem;height:0.85rem;flex-shrink:0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-        {{ sortie.city }}
+  {# ───── Two-col layout ───── #}
+  <div class="mt-10 grid grid-cols-1 lg:grid-cols-12 gap-10">
+
+    {# ───── Main column ───── #}
+    <div class="lg:col-span-7 xl:col-span-8 space-y-10">
+
+      {# Host card #}
+      <section class="card p-6 flex items-center justify-between gap-4">
+        <div>
+          <h2 class="font-display text-xl font-bold text-white">{% trans "Organisé par" %} {{ sortie.creator.display_name|default:sortie.creator.username }}</h2>
+          <p class="text-sm text-white/55 mt-1">{{ participant_count }} {% trans "participants" %}{% if sortie.max_participants %} / {{ sortie.max_participants }} {% trans "max" %}{% endif %} • {% trans "Créée le" %} {{ sortie.created_at|date:"d M Y" }}</p>
+        </div>
+        <span class="ring-avatar h-12 w-12 text-lg">{{ sortie.creator.display_name|default:sortie.creator.username|slice:":1"|upper }}</span>
+      </section>
+
+      {# Highlights #}
+      <section class="card p-6 space-y-5">
+        <div class="flex items-start gap-4">
+          <span class="grid h-10 w-10 place-items-center rounded-xl bg-neon-500/15 text-xl shrink-0">📍</span>
+          <div>
+            <h3 class="font-bold text-white">{% trans "Lieu de rendez-vous" %}</h3>
+            <p class="text-sm text-white/65 mt-1">{{ sortie.location|default:sortie.city }}</p>
+          </div>
+        </div>
         {% if sortie.starts_at %}
-        &nbsp;&middot;&nbsp;
-        <svg xmlns="http://www.w3.org/2000/svg" style="width:0.85rem;height:0.85rem;flex-shrink:0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-        {{ sortie.starts_at|date:"d M Y à H:i" }}
+        <div class="flex items-start gap-4">
+          <span class="grid h-10 w-10 place-items-center rounded-xl bg-flamingo-500/15 text-xl shrink-0">🗓️</span>
+          <div>
+            <h3 class="font-bold text-white">{% trans "Date et heure" %}</h3>
+            <p class="text-sm text-white/65 mt-1">{{ sortie.starts_at|date:"l d F Y, H:i" }}</p>
+          </div>
+        </div>
         {% endif %}
-      </div>
+        <div class="flex items-start gap-4">
+          <span class="grid h-10 w-10 place-items-center rounded-xl bg-electric-400/15 text-xl shrink-0">{% if sortie.is_free %}✨{% else %}🎟️{% endif %}</span>
+          <div>
+            <h3 class="font-bold text-white">{% if sortie.is_free %}{% trans "Gratuit" %}{% else %}{{ sortie.price|floatformat:0 }}€{% endif %}</h3>
+            <p class="text-sm text-white/65 mt-1">{% if sortie.is_free %}{% trans "Sortie entre membres — pas de frais." %}{% else %}{% trans "Paiement sécurisé en ligne." %}{% endif %}</p>
+          </div>
+        </div>
+      </section>
 
+      {# Description #}
       {% if sortie.description %}
-      <p style="color:rgba(255,255,255,0.65);line-height:1.75;font-size:0.92rem;margin-bottom:1.75rem">{{ sortie.description }}</p>
+      <section class="card p-6">
+        <h2 class="font-display text-xl font-bold text-white mb-3">{% trans "À propos" %}</h2>
+        <p class="text-white/75 whitespace-pre-line leading-relaxed">{{ sortie.description }}</p>
+      </section>
       {% endif %}
 
-      {# Stats #}
-      <div class="sd-stats">
-        <div style="background:rgba(255,255,255,0.04);border-radius:14px;padding:1rem;text-align:center">
-          <p style="font-size:0.65rem;color:rgba(255,255,255,0.35);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:0.4rem">{% trans "Prix" %}</p>
-          <p style="font-size:1.1rem;font-weight:900;color:{% if sortie.is_free %}#4ADE80{% else %}#fff{% endif %}">{% if sortie.is_free %}{% trans "Gratuit" %}{% else %}{{ sortie.price|floatformat:2 }} €{% endif %}</p>
+      {# Participants #}
+      <section class="card p-6">
+        <h2 class="font-display text-xl font-bold text-white mb-4">{% trans "Participants" %} ({{ participant_count }})</h2>
+        <div class="flex flex-wrap gap-3">
+          {% for p in participants|slice:":12" %}
+          <div class="flex items-center gap-2 panel py-2 pl-2 pr-4">
+            <span class="ring-avatar">{{ p.user.display_name|default:p.user.username|slice:":1"|upper }}</span>
+            <span class="text-sm text-white/85">{{ p.user.display_name|default:p.user.username }}</span>
+          </div>
+          {% empty %}
+          <p class="text-sm text-white/55">{% trans "Sois le premier à rejoindre !" %}</p>
+          {% endfor %}
         </div>
-        <div style="background:rgba(255,255,255,0.04);border-radius:14px;padding:1rem;text-align:center">
-          <p style="font-size:0.65rem;color:rgba(255,255,255,0.35);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:0.4rem">{% trans "Participants" %}</p>
-          <p style="font-size:1.1rem;font-weight:900;color:#fff">{{ participant_count }}<span style="color:rgba(255,255,255,0.25);font-size:0.8rem">/{{ sortie.max_participants|default:"∞" }}</span></p>
-        </div>
-        <div style="background:rgba(255,255,255,0.04);border-radius:14px;padding:1rem;text-align:center">
-          <p style="font-size:0.65rem;color:rgba(255,255,255,0.35);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:0.4rem">{% trans "Statut" %}</p>
-          <p style="font-size:0.85rem;font-weight:700;color:{% if sortie.status == 'OPEN' %}#4ADE80{% elif sortie.status == 'FULL' %}#FDE047{% else %}rgba(255,255,255,0.4){% endif %}">{{ sortie.get_status_display }}</p>
-        </div>
-      </div>
+      </section>
 
-      {# CTA ── #}
-      {% if user.is_authenticated %}
-        {% if is_participant %}
-        <form method="post" action="/sorties/{{ sortie.id }}/quitter/">
-          {% csrf_token %}
-          <button type="submit" class="btn-ghost" style="width:100%;padding:0.85rem;font-size:0.9rem;border-radius:14px;justify-content:center">{% trans "Quitter la sortie" %}</button>
-        </form>
-        {% elif sortie.status == 'OPEN' %}
-        <form method="post" action="/sorties/{{ sortie.id }}/rejoindre/">
-          {% csrf_token %}
-          <button type="submit" class="btn-brand" style="width:100%;padding:0.85rem;font-size:0.95rem;border-radius:14px;justify-content:center;font-weight:800">
-            <svg xmlns="http://www.w3.org/2000/svg" style="width:1rem;height:1rem" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-            {% trans "Rejoindre la sortie" %}
-          </button>
-        </form>
-        {% else %}
-        <button disabled style="width:100%;padding:0.85rem;border-radius:14px;background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.3);font-size:0.9rem;cursor:not-allowed;border:1px solid rgba(255,255,255,0.07)">{% trans "Sortie complete ou fermee" %}</button>
+      {# Reviews (mock) #}
+      <section class="card p-6">
+        <div class="flex items-end justify-between mb-5">
+          <h2 class="font-display text-xl font-bold text-white inline-flex items-center gap-2">
+            <span class="star-row inline-flex"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></span>
+            4.9 · 127 {% trans "avis" %}
+          </h2>
+          <a href="#" class="text-sm nav-link">{% trans "Tout voir" %}</a>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          {% for r in "ABC" %}
+          <div class="panel">
+            <div class="flex items-center gap-3 mb-3">
+              <span class="ring-avatar">{{ r }}</span>
+              <div>
+                <div class="text-sm font-bold text-white">{% if forloop.counter == 1 %}Léa M.{% elif forloop.counter == 2 %}Kévin R.{% else %}Sophie D.{% endif %}</div>
+                <div class="text-xs text-white/45">{% trans "Il y a" %} {{ forloop.counter }} {% trans "semaines" %}</div>
+              </div>
+            </div>
+            <div class="star-row flex gap-0.5 mb-2">{% for _ in "12345" %}<svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>{% endfor %}</div>
+            <p class="text-sm text-white/70 line-clamp-3">{% if forloop.counter == 1 %}{% trans "Super soirée, ambiance top et organisateur au top. Je recommande !" %}{% elif forloop.counter == 2 %}{% trans "Très bonne expérience, beaucoup de monde, on a passé une soirée géniale." %}{% else %}{% trans "Rendez-vous parfaitement organisé, j'y retournerai sans hésiter." %}{% endif %}</p>
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+
+    </div>
+
+    {# ───── Booking sidebar ───── #}
+    <aside class="lg:col-span-5 xl:col-span-4">
+      <div id="booking-panel" class="booking-sticky card p-6">
+        <div class="mb-4 flex flex-wrap gap-2">
+          <span class="chip chip-green">{% trans "Confirmation rapide" %}</span>
+          <span class="chip chip-dark">{% trans "Paiement sécurisé" %}</span>
+        </div>
+        <div class="flex items-baseline justify-between mb-1">
+          <div>
+            {% if sortie.is_free %}
+              <span class="font-display text-2xl font-extrabold text-white">{% trans "Gratuit" %}</span>
+            {% else %}
+              <span class="font-display text-2xl font-extrabold text-white">{{ sortie.price|floatformat:0 }}€</span>
+              <span class="text-sm text-white/55"> / {% trans "personne" %}</span>
+            {% endif %}
+          </div>
+          <span class="inline-flex items-center gap-1 text-xs text-white font-semibold">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-sunset-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+            4.9
+          </span>
+        </div>
+
+        {% if sortie.starts_at %}
+        <div class="mt-4 panel py-3 px-4">
+          <div class="text-[0.65rem] uppercase tracking-wider text-white/45">{% trans "Quand" %}</div>
+          <div class="text-sm font-bold text-white mt-0.5">{{ sortie.starts_at|date:"l d F" }} · {{ sortie.starts_at|date:"H:i" }}</div>
+        </div>
         {% endif %}
-      {% else %}
-      <a href="/connexion/?next=/sorties/{{ sortie.id }}/" class="btn-brand" style="width:100%;padding:0.85rem;font-size:0.95rem;border-radius:14px;justify-content:center;font-weight:800;text-align:center">{% trans "Se connecter pour rejoindre" %}</a>
-      {% endif %}
-    </div>
 
-    {# Participants #}
-    {% if participants %}
-    <div class="pk sd-card" style="padding:1.5rem">
-      <p style="font-size:0.72rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,0.22);margin-bottom:1rem">{% trans "Participants" %} ({{ participant_count }})</p>
-      <div style="display:flex;flex-wrap:wrap;gap:0.5rem">
-        {% for p in participants %}
-        <div style="display:flex;align-items:center;gap:6px;border-radius:999px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.04);padding:5px 12px 5px 6px">
-          {% if p.user.avatar_url %}
-          <img src="{{ p.user.avatar_url }}" style="width:22px;height:22px;border-radius:50%;object-fit:cover;flex-shrink:0" />
-          {% else %}
-          <span style="width:22px;height:22px;border-radius:50%;background:rgba(255,106,77,0.2);display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:800;color:#FF8A66;flex-shrink:0">{{ p.user.display_name|default:p.user.username|first|upper }}</span>
+        <div class="mt-3 panel py-3 px-4">
+          <div class="text-[0.65rem] uppercase tracking-wider text-white/45">{% trans "Participants" %}</div>
+          <div class="text-sm font-bold text-white mt-0.5">{{ participant_count }}{% if sortie.max_participants %} / {{ sortie.max_participants }}{% endif %} {% trans "inscrits" %}</div>
+          {% if sortie.max_participants %}
+            {% widthratio participant_count sortie.max_participants 100 as pct %}
+            <div class="mt-2 h-1.5 rounded-full bg-white/10 overflow-hidden"><div class="h-full bg-grad-brand" style="width:{{ pct }}%"></div></div>
+            <p class="mt-2 text-xs text-white/50">{% if pct > 74 %}{% trans "Le groupe se remplit vite." %}{% else %}{% trans "Encore quelques places disponibles." %}{% endif %}</p>
           {% endif %}
-          <span style="font-size:0.78rem;color:rgba(255,255,255,0.6)">{{ p.user.display_name|default:p.user.username }}</span>
         </div>
-        {% endfor %}
-      </div>
-    </div>
-    {% endif %}
 
-    {# Carte (si geoloc disponible) #}
-    {% if sortie.latitude and sortie.longitude %}
-    <div class="pk sd-card" style="padding:1.5rem">
-      <p style="font-size:0.72rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,0.22);margin-bottom:1rem">{% trans "Lieu sur la carte" %}</p>
-      {% include "web/partials/map.html" with map_lat=sortie.latitude map_lng=sortie.longitude map_label=sortie.location|default:sortie.city %}
-    </div>
-    {% endif %}
+        <div class="mt-3 grid grid-cols-2 gap-3">
+          <div class="panel py-3 px-4">
+            <div class="text-[0.65rem] uppercase tracking-wider text-white/45">{% trans "Social proof" %}</div>
+            <div class="mt-1 text-sm font-bold text-white">{{ participant_count|default:0 }} {% trans "personnes déjà partantes" %}</div>
+          </div>
+          <div class="panel py-3 px-4">
+            <div class="text-[0.65rem] uppercase tracking-wider text-white/45">{% trans "Ambiance" %}</div>
+            <div class="mt-1 text-sm font-bold text-white">{% trans "Petit groupe premium" %}</div>
+          </div>
+        </div>
+
+        <div class="mt-5">
+          {% if user.is_authenticated %}
+            {% if is_participant %}
+              <form method="post" action="/sorties/{{ sortie.pk }}/quitter/">{% csrf_token %}
+                <button type="submit" class="btn-secondary w-full">✓ {% trans "Tu participes — Annuler" %}</button>
+              </form>
+            {% else %}
+              <form method="post" action="/sorties/{{ sortie.pk }}/rejoindre/">{% csrf_token %}
+                <button type="submit" class="btn-primary w-full">{% if sortie.is_free %}{% trans "Rejoindre" %}{% else %}{% trans "Réserver" %}{% endif %}</button>
+              </form>
+            {% endif %}
+          {% else %}
+            <a href="/connexion/?next={{ request.path }}" class="btn-primary w-full text-center block">{% trans "Connecte-toi pour rejoindre" %}</a>
+          {% endif %}
+          <p class="mt-3 text-center text-xs text-white/45">{% trans "Aucun engagement avant validation" %}</p>
+        </div>
+
+        <div class="mt-6 pt-6 border-t border-white/10 space-y-2 text-sm">
+          <div class="flex justify-between"><span class="text-white/55">{% trans "Annulation" %}</span><span class="text-white">{% trans "Gratuite 24h avant" %}</span></div>
+          <div class="flex justify-between"><span class="text-white/55">{% trans "Frais de service" %}</span><span class="text-white">0€</span></div>
+        </div>
+
+        <button type="button" class="mt-5 w-full text-xs text-white/60 hover:text-white underline">{% trans "Signaler cette sortie" %}</button>
+      </div>
+    </aside>
 
   </div>
 </div>

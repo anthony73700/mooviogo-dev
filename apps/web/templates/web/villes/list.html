@@ -4,39 +4,46 @@
 
 {% block content %}
 
-<div class="pg-hdr">
-  <div class="mx-auto max-w-5xl px-4">
-    <p class="slabel mb-3">Partout en France</p>
-    <h1 style="font-size:2.25rem;font-weight:900;color:#fff;letter-spacing:-0.03em;line-height:1.1">Explorer par ville</h1>
-    <p style="margin-top:0.45rem;font-size:0.9rem;color:rgba(255,255,255,0.4)">Trouve des sorties et restaurants dans ta ville</p>
+<section class="relative overflow-hidden border-b border-white/5">
+  <div class="absolute inset-0 bg-grad-aurora opacity-25"></div>
+  <div class="absolute -top-32 -left-24 h-96 w-96 rounded-full bg-neon-500/30 blur-3xl"></div>
+  <div class="absolute -bottom-32 -right-24 h-96 w-96 rounded-full bg-electric-400/20 blur-3xl"></div>
+  <div class="relative mx-auto max-w-6xl px-4 py-16 text-center">
+    <p class="h-eyebrow text-electric-300">Partout en France</p>
+    <h1 class="mt-3 font-display text-4xl sm:text-5xl font-extrabold text-white tracking-tight">Choisis ta <span class="grad-text">ville</span></h1>
+    <p class="mt-3 text-white/65 max-w-xl mx-auto">Trouve sorties, restos et events là où tu vis.</p>
   </div>
-</div>
+</section>
 
-<div class="mx-auto max-w-5xl px-4" style="padding-top:3rem;padding-bottom:5rem">
+<div class="mx-auto max-w-6xl px-4 py-12">
   {% if cities %}
-  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:0.9rem">
+  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
     {% for city in cities %}
-    <a href="/ville/{{ city.slug }}/" class="pk" style="display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.4rem;text-decoration:none">
-      <div>
-        <p style="font-size:1rem;font-weight:800;color:#fff;margin-bottom:0.25rem">{{ city.name }}</p>
-        {% if city.sortie_count %}
-        <p style="font-size:0.72rem;color:rgba(255,255,255,0.35)">{{ city.sortie_count }} sortie{{ city.sortie_count|pluralize }}</p>
-        {% else %}
-        <p style="font-size:0.72rem;color:rgba(255,255,255,0.2)">Découvrir</p>
-        {% endif %}
+    <a href="/ville/{{ city.slug }}/" class="group relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-night-800 to-night-900 p-5 aspect-square flex flex-col justify-between hover:border-flamingo-500/40 hover:shadow-neon-sm transition-all">
+      <div class="absolute inset-0 bg-grad-brand opacity-0 group-hover:opacity-15 transition-opacity"></div>
+      <div class="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-flamingo-500/20 blur-3xl group-hover:bg-neon-500/40 transition-colors"></div>
+      <div class="relative">
+        <p class="text-[0.65rem] uppercase tracking-wider text-white/45 font-bold">Ville</p>
+        <p class="mt-1 font-display text-xl font-extrabold text-white">{{ city.name }}</p>
       </div>
-      <svg xmlns="http://www.w3.org/2000/svg" style="width:1rem;height:1rem;color:rgba(255,255,255,0.2);flex-shrink:0;transition:color 0.15s" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="city-arrow"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+      <div class="relative flex items-end justify-between">
+        {% if city.sortie_count %}
+        <div>
+          <p class="font-display text-2xl font-extrabold grad-text">{{ city.sortie_count }}</p>
+          <p class="text-[0.65rem] uppercase tracking-wider text-white/55 font-semibold">sortie{{ city.sortie_count|pluralize }}</p>
+        </div>
+        {% else %}
+        <span class="chip chip-neutral text-[0.65rem]">À découvrir</span>
+        {% endif %}
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-white/30 group-hover:text-flamingo-300 group-hover:translate-x-1 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+      </div>
     </a>
     {% endfor %}
   </div>
   {% else %}
-  <div style="text-align:center;padding:5rem 2rem">
-    <p style="color:rgba(255,255,255,0.3)">Aucune ville disponible pour le moment</p>
+  <div class="panel p-16 text-center">
+    <p class="text-white/55">Aucune ville disponible pour le moment.</p>
   </div>
   {% endif %}
 </div>
-
-<style>
-  .pk:hover .city-arrow { color:#FF8A66; }
-</style>
 {% endblock %}
