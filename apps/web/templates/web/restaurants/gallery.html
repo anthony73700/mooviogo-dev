@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ venue.name }} - {% trans "Photos" %} | Mooviogo{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-7xl px-4 py-8">
+  <nav class="mb-6 text-xs text-white/55 flex items-center gap-2">
+    <a href="/" class="hover:text-white">{% trans "Accueil" %}</a>
+    <span>›</span>
+    <a href="/restaurants/" class="hover:text-white">{% trans "Restaurants" %}</a>
+    <span>›</span>
+    <a href="/restaurants/{{ venue.city_slug }}/{{ venue.slug }}/" class="hover:text-white">{{ venue.name }}</a>
+    <span>›</span>
+    <span class="text-white">{% trans "Photos" %}</span>
+  </nav>
+
+  <div class="mb-6 flex items-end justify-between gap-4">
+    <div>
+      <span class="h-eyebrow">{% trans "Galerie" %}</span>
+      <h1 class="mt-2 font-display text-3xl font-bold text-white">{{ venue.name }} · {% trans "Toutes les photos" %}</h1>
+    </div>
+    <a href="/restaurants/{{ venue.city_slug }}/{{ venue.slug }}/" class="btn-secondary btn-sm">{% trans "Retour au restaurant" %}</a>
+  </div>
+
+  <section class="card p-5 sm:p-6">
+    <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+      {% for photo in gallery_photos %}
+      <a href="{{ photo.image_url }}" target="_blank" rel="noopener noreferrer" class="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 min-h-[180px] sm:min-h-[220px]">
+        <img src="{{ photo.image_url }}" alt="{{ venue.name }} - photo {{ forloop.counter }}" loading="lazy" class="absolute inset-0 w-full h-full object-cover transition duration-300 group-hover:scale-105" />
+        <span class="absolute left-2 bottom-2 rounded-full border border-white/25 bg-black/40 px-2.5 py-1 text-[11px] font-semibold text-white">
+          {{ photo.caption|default:_('Photo') }}
+        </span>
+      </a>
+      {% empty %}
+      <div class="col-span-full text-center py-12 text-white/65">{% trans "Aucune photo disponible pour le moment." %}</div>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

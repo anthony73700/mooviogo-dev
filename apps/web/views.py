@@ -45,7 +45,7 @@ from apps.partners.models import Partner
 from apps.payments.models import Payment
 from apps.reports.models import Report
 from apps.reports.services import send_report_moderation_notifications
-from apps.restaurants.models import RestaurantTimeSlot, RestaurantVenue
+from apps.restaurants.models import RestaurantTimeSlot, RestaurantVenue, RestaurantVenuePhoto
 from apps.sorties.models import Sortie, SortieParticipant
 from apps.tickets.models import Ticket, TicketScanAudit
 from mooviogo.observability import alert_on_threshold, emit_alert, emit_event
@@ -951,7 +951,72 @@ def restaurant_detail(request, city_slug, slug):
         date__gte=today,
         status=RestaurantTimeSlot.SlotStatus.OPEN,
     ).order_by("date", "time")[:20]
-    return render(request, "web/restaurants/detail.html", {"venue": venue, "slots": slots})
+
+    gallery_photos = list(
+        RestaurantVenuePhoto.objects.filter(venue=venue, is_active=True)
+        .order_by("position", "id")
+        .values("image_url", "caption")
+    )
+    if not gallery_photos and venue.cover_image_url:
+        gallery_photos = [{"image_url": venue.cover_image_url, "caption": ""}]
+    preview_photos = list(gallery_photos[:4])
+    if preview_photos:
+        while len(preview_photos) < 4:
+            preview_photos.append(preview_photos[len(preview_photos) % len(preview_photos)])
+
+    city_venues = []
+    for item in (
+        RestaurantVenue.objects.filter(city_slug=venue.city_slug, is_active=True)
+        .order_by("name")
+        .values("name", "slug", "city_slug", "city_label", "address", "cuisine_type")
+    ):
+        city_label = item.get("city_label") or venue.city_label or venue.city_slug
+        full_address = (item.get("address") or "").strip()
+        if full_address:
+            full_address = f"{full_address}, {city_label}"
+        else:
+            full_address = city_label
+
+        city_venues.append(
+            {
+                "name": item.get("name") or "",
+                "slug": item.get("slug") or "",
+                "city_slug": item.get("city_slug") or venue.city_slug,
+                "city_label": city_label,
+                "address": item.get("address") or "",
+                "full_address": full_address,
+                "cuisine_type": item.get("cuisine_type") or "",
+                "is_current": item.get("slug") == venue.slug,
+            }
+        )
+
+    return render(request, "web/restaurants/detail.html", {
+        "venue": venue,
+        "slots": slots,
+        "highlight_photos": preview_photos,
+        "gallery_photos_count": len(gallery_photos),
+        "city_venues": city_venues,
+    })
+
+
+def restaurant_photos(request, city_slug, slug):
+    professional_redirect = _redirect_professional_account(request)
+    if professional_redirect:
+        return professional_redirect
+
+    venue = get_object_or_404(RestaurantVenue, city_slug=city_slug, slug=slug)
+    gallery_photos = list(
+        RestaurantVenuePhoto.objects.filter(venue=venue, is_active=True)
+        .order_by("position", "id")
+        .values("image_url", "caption")
+    )
+    if not gallery_photos and venue.cover_image_url:
+        gallery_photos = [{"image_url": venue.cover_image_url, "caption": ""}]
+
+    return render(request, "web/restaurants/gallery.html", {
+        "venue": venue,
+        "gallery_photos": gallery_photos,
+    })
 
 
 @login_required

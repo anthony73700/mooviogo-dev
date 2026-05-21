@@ -60,6 +60,22 @@ class RestaurantVenue(models.Model):
         return f"{self.name} ({self.city_label})"
 
 
+class RestaurantVenuePhoto(models.Model):
+    venue = models.ForeignKey(RestaurantVenue, on_delete=models.CASCADE, related_name="gallery_photos")
+    image_url = models.URLField()
+    caption = models.CharField(max_length=140, blank=True)
+    position = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "restaurants_venue_photo"
+        ordering = ["position", "id"]
+
+    def __str__(self) -> str:
+        return f"Photo {self.venue.name} #{self.position}"
+
+
 class RestaurantTimeSlot(models.Model):
     class SlotStatus(models.TextChoices):
         OPEN = "OPEN", "Disponible"

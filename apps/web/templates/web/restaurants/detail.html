@@ -5,17 +5,28 @@
 
 {% block extra_head %}
 <style>
-  .detail-store-grid { display:grid; grid-template-columns:minmax(0,1.08fr) minmax(320px,.92fr); gap:1rem; }
+  .detail-store-grid { display:grid; grid-template-columns:1fr; gap:1rem; }
   .detail-store-card { position:relative; overflow:hidden; border:1px solid rgba(255,255,255,.08); border-radius:2rem; box-shadow:0 30px 80px -40px rgba(0,0,0,.82); }
   .detail-store-card.light { background:linear-gradient(180deg,#fbfbfd 0%,#eef1f6 100%); color:#0a0f16; }
   .detail-store-card.dark { background:linear-gradient(180deg,#0e1218 0%,#090c12 100%); color:#fff; }
+  .detail-store-card--hero { color:#fff; min-height:440px; }
+  .detail-store-bg-media { position:absolute; inset:0; z-index:0; }
+  .detail-store-bg-media img { width:100%; height:100%; object-fit:cover; }
+  .detail-store-card--hero::before { content:""; position:absolute; inset:0; z-index:1; background:linear-gradient(180deg,rgba(6,8,12,.3) 6%,rgba(6,8,12,.5) 36%,rgba(6,8,12,.82) 100%); }
   .detail-store-body { padding:1.5rem; }
+  .detail-store-card--hero .detail-store-body { position:relative; z-index:2; }
   .detail-store-title { font-family:"Geist",Inter,sans-serif; font-size:clamp(2.3rem,5vw,4.9rem); line-height:.98; letter-spacing:-.05em; font-weight:800; }
-  .detail-store-copy { margin-top:1rem; max-width:38rem; font-size:1rem; line-height:1.75; color:rgba(255,255,255,.64); }
+  .detail-store-copy { margin:1rem auto 0; max-width:38rem; font-size:1rem; line-height:1.75; color:rgba(255,255,255,.64); }
   .detail-store-card.light .detail-store-copy { color:rgba(10,15,22,.62); }
+  .detail-store-card--hero .detail-store-copy { color:rgba(255,255,255,.9); }
   .detail-store-meta { display:grid; gap:.75rem; grid-template-columns:repeat(3,minmax(0,1fr)); margin-top:1.4rem; }
-  .detail-store-meta > div { border:1px solid rgba(255,255,255,.08); border-radius:1.1rem; background:rgba(255,255,255,.04); padding:.95rem 1rem; }
+  .detail-store-meta > div { border:1px solid rgba(255,255,255,.08); border-radius:1.1rem; background:rgba(255,255,255,.04); padding:.95rem 1rem; text-align:center; }
   .detail-store-card.light .detail-store-meta > div { background:rgba(10,15,22,.04); border-color:rgba(10,15,22,.08); }
+  .detail-store-card--hero .detail-store-meta > div { background:rgba(7,10,16,.3); border-color:rgba(255,255,255,.2); }
+  .detail-store-card--hero .text-black\/70,
+  .detail-store-card--hero .text-black\/38,
+  .detail-store-card--hero .text-black\/88,
+  .detail-store-card--hero .text-black\/85 { color:#fff !important; }
   .detail-store-figure { position:relative; min-height:520px; }
   .detail-store-figure img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
   .detail-store-figure::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(6,8,12,.04) 12%,rgba(6,8,12,.18) 46%,rgba(6,8,12,.88) 100%); }
@@ -30,6 +41,53 @@
   .detail-hero-panel { border:1px solid rgba(255,255,255,.1); border-radius:1.5rem; background:rgba(8,7,18,.46); padding:1rem; backdrop-filter:blur(18px); }
   .detail-meta-grid { display:grid; gap:.75rem; grid-template-columns:repeat(3,minmax(0,1fr)); }
   .booking-sticky { position:sticky; top:140px; }
+  .booking-panel-fork { border:1px solid rgba(255,255,255,.16); border-radius:1.25rem; background:linear-gradient(180deg,rgba(255,255,255,.08) 0%, rgba(255,255,255,.03) 100%); box-shadow:0 24px 48px -34px rgba(0,0,0,.9), inset 0 1px 0 rgba(255,255,255,.18); }
+  .booking-fork-head { text-align:center; margin-bottom:.9rem; }
+  .booking-fork-title { font-size:1.5rem; font-weight:800; letter-spacing:-.02em; color:#fff; }
+  .booking-fork-subtitle { margin-top:.2rem; font-size:.8rem; color:rgba(255,255,255,.62); }
+  .booking-fork-helper { text-align:center; font-size:.74rem; color:rgba(255,255,255,.58); }
+  .booking-fork-block { border:1px solid rgba(255,255,255,.12); border-radius:1rem; padding:.8rem; background:rgba(8,14,22,.42); }
+  .booking-fork-block--calendar { background:linear-gradient(180deg,rgba(122,44,255,.22) 0%,rgba(243,28,127,.14) 100%); border-color:rgba(255,255,255,.24); box-shadow:inset 0 1px 0 rgba(255,255,255,.2); }
+  .booking-fork-block--calendar .booking-fork-label { color:rgba(255,255,255,.82); }
+  .booking-fork-label { font-size:.68rem; text-transform:uppercase; letter-spacing:.08em; color:rgba(255,255,255,.58); font-weight:700; margin-bottom:.55rem; }
+  .booking-strong-label { display:block; width:100%; text-align:center; font-size:.86rem; font-weight:800; letter-spacing:.04em; text-transform:uppercase; color:#fff; margin-bottom:.55rem; }
+  .booking-day-nav { display:flex; align-items:center; justify-content:space-between; gap:.5rem; margin-bottom:.55rem; }
+  .booking-day-nav-btn { width:30px; height:30px; border-radius:999px; border:1px solid rgba(255,255,255,.28); background:rgba(255,255,255,.12); color:#fff; font-size:.95rem; font-weight:800; line-height:1; display:grid; place-items:center; }
+  .booking-day-nav-btn:disabled { opacity:.35; cursor:not-allowed; }
+  .booking-day-nav-month { font-size:.72rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:rgba(255,255,255,.92); }
+  .booking-day-weekdays { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:.3rem; margin-bottom:.3rem; }
+  .booking-day-weekdays span { text-align:center; font-size:.6rem; text-transform:uppercase; letter-spacing:.08em; color:rgba(255,255,255,.72); font-weight:700; }
+  .booking-day-rail { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:.3rem; }
+  .booking-day-empty { height:34px; }
+  .booking-day-chip { position:relative; width:100%; height:34px; border:1px solid rgba(255,255,255,.24); border-radius:.6rem; background:rgba(12,18,31,.42); color:#fff; text-align:center; font-size:.74rem; font-weight:800; line-height:1; transition:all .15s ease; }
+  .booking-day-chip:hover { border-color:rgba(255,255,255,.45); background:rgba(14,20,35,.58); }
+  .booking-day-chip::after { content:""; position:absolute; left:50%; bottom:4px; width:4px; height:4px; border-radius:999px; background:rgba(255,255,255,.7); transform:translateX(-50%); }
+  .booking-day-chip.is-active { background:linear-gradient(135deg,#7a2cff 0%,#f31c7f 100%); color:#fff; border-color:rgba(255,255,255,.88); box-shadow:0 12px 24px -14px rgba(122,44,255,.7); }
+  .booking-day-chip.is-unavailable { opacity:.28; cursor:not-allowed; filter:grayscale(.2); }
+  .booking-day-chip.is-unavailable::after { display:none; }
+  .booking-fork-row { display:flex; align-items:center; justify-content:space-between; gap:.8rem; }
+  .booking-fork-select { border:1px solid rgba(255,255,255,.15); border-radius:.8rem; background:rgba(8,14,22,.5); }
+  .booking-party-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:.62rem; }
+  .booking-party-option { position:relative; }
+  .booking-party-option input { position:absolute; inset:0; opacity:0; cursor:pointer; }
+  .booking-party-face { display:grid; place-items:center; height:42px; border-radius:.78rem; border:1px solid rgba(255,255,255,.22); background:rgba(12,18,31,.42); color:rgba(245,249,255,.9); font-size:.9rem; font-weight:800; transition:all .16s ease; }
+  .booking-party-option input:hover + .booking-party-face { border-color:rgba(255,255,255,.42); background:rgba(14,20,35,.58); }
+  .booking-party-option input:checked + .booking-party-face { border-color:rgba(255,255,255,.9); background:linear-gradient(135deg,#7a2cff 0%,#f31c7f 100%); color:#fff; box-shadow:0 12px 24px -16px rgba(122,44,255,.75); }
+  .booking-party-option input:focus-visible + .booking-party-face { outline:2px solid rgba(255,255,255,.72); outline-offset:2px; }
+  .booking-times-wrap { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.62rem; }
+  .booking-slot { position:relative; }
+  .booking-slot.is-hidden { display:none; }
+  .booking-slot input { position:absolute; inset:0; opacity:0; cursor:pointer; }
+  .booking-slot .face { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.15rem; padding:.62rem .4rem; border:1px solid rgba(255,255,255,.16); border-radius:.78rem; background:rgba(255,255,255,.04); transition:all .16s ease; min-height:70px; }
+  .booking-slot-time { font-size:.92rem; font-weight:800; color:#fff; }
+  .booking-slot-seats { display:none; }
+  .booking-slot input:checked + .face { background:linear-gradient(180deg,#ffffff 0%,#ecf2fb 100%); border-color:rgba(255,255,255,.95); box-shadow:0 10px 20px -14px rgba(255,255,255,.9); }
+  .booking-slot input:checked + .face .booking-slot-time,
+  .booking-slot input:checked + .face .booking-slot-seats { color:#101a2a; }
+  .booking-slot input:disabled + .face { opacity:.38; }
+  .booking-fork-select { border:1px solid rgba(255,255,255,.15); border-radius:.8rem; background:rgba(8,14,22,.5); }
+  .booking-cta-fork { display:block; width:100%; border:0; border-radius:.85rem; padding:.76rem .9rem; font-size:.92rem; font-weight:800; text-align:center; color:#fff !important; background:linear-gradient(90deg,#7a2cff 0%,#f31c7f 100%); box-shadow:0 14px 28px -16px rgba(122,44,255,.85); text-decoration:none !important; }
+  .booking-cta-fork:hover { filter:saturate(1.08) brightness(1.02); transform:translateY(-1px); }
   .ring-avatar { display:inline-grid; place-items:center; height:2.5rem; width:2.5rem; border-radius:9999px; background:linear-gradient(135deg,#A832F5,#F31C7F); color:#fff; font-weight:700; box-shadow:0 0 0 2px rgba(255,255,255,0.06); }
   .star-row svg { color:#FF6A4D; }
   .slot-radio input { position:absolute; opacity:0; inset:0; cursor:pointer; }
@@ -40,18 +98,137 @@
   .slot-radio input:checked + .face .d { color:rgba(255,255,255,0.85); }
   .detail-signal-rail { display:grid; gap:.75rem; grid-template-columns:repeat(3,minmax(0,1fr)); }
   .detail-signal-card { border:1px solid rgba(255,255,255,.08); border-radius:1.2rem; background:rgba(255,255,255,.03); padding:1rem; box-shadow:inset 0 1px 0 rgba(255,255,255,.04); backdrop-filter:blur(14px); }
-  .detail-gallery-grid { display:grid; gap:1rem; grid-template-columns:1.15fr .85fr; }
-  .detail-gallery-main, .detail-gallery-stack > * { position:relative; overflow:hidden; border-radius:1.5rem; border:1px solid rgba(255,255,255,.08); min-height:220px; box-shadow:0 22px 54px -32px rgba(0,0,0,.82); }
-  .detail-gallery-main { min-height:420px; }
-  .detail-gallery-main::after, .detail-gallery-stack > *::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(6,4,14,.08) 8%,rgba(6,4,14,.14) 38%,rgba(6,4,14,.92) 100%); }
-  .detail-gallery-stack { display:grid; gap:1rem; }
-  .detail-gallery-copy { position:absolute; inset:auto 0 0 0; z-index:1; padding:1rem; }
+  .detail-signal-card--center { text-align:center; }
+  .detail-gradient-label { font-size:.82rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; background:linear-gradient(90deg,#7a2cff 0%,#ff4d8d 100%); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .detail-signal-maintext { margin-top:.55rem; font-size:1.12rem; line-height:1.35; font-weight:700; color:#fff; }
+  .detail-signal-subtext { margin-top:.35rem; font-size:1.12rem; line-height:1.35; font-weight:700; color:#fff; }
+  .detail-menu-day-card { text-align:center; }
+  .detail-menu-day-title { font-size:.82rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; background:linear-gradient(90deg,#7a2cff 0%,#ff4d8d 100%); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .detail-menu-day-line { margin-top:.55rem; font-size:1.12rem; line-height:1.35; font-weight:700; color:#fff; }
+  .detail-menu-day-price { margin-top:.35rem; font-size:1.12rem; line-height:1.35; font-weight:700; color:#fff; }
+  .detail-signal-actions { margin-top:.75rem; display:flex; flex-wrap:wrap; gap:.5rem; justify-content:center; }
+  .detail-action-btn { display:inline-flex; align-items:center; justify-content:center; border-radius:999px; border:0; background:linear-gradient(90deg,#7a2cff 0%,#ff4d8d 100%); color:#fff; padding:.38rem .82rem; font-size:.72rem; font-weight:800; box-shadow:0 10px 20px -12px rgba(122,44,255,.9); transition:transform .16s ease, box-shadow .16s ease, filter .16s ease; }
+  .detail-action-btn:hover { transform:translateY(-1px); filter:saturate(1.08); box-shadow:0 14px 24px -12px rgba(122,44,255,.95); }
+  .detail-menu-modal { position:fixed; inset:0; z-index:80; display:none; align-items:center; justify-content:center; padding:1rem; isolation:isolate; }
+  .detail-menu-modal.is-open { display:flex; }
+  .detail-menu-modal-backdrop { position:absolute; inset:0; z-index:1; background:rgba(2,4,8,.7); backdrop-filter:blur(9px); }
+  .detail-menu-modal-panel { position:relative; z-index:2; width:min(900px,100%); max-height:88vh; display:flex; flex-direction:column; border:1px solid rgba(255,255,255,.14); border-radius:1.4rem; background:linear-gradient(180deg,#111726 0%,#0a0f17 100%); box-shadow:0 30px 90px -42px rgba(0,0,0,.9); overflow:hidden; }
+  .detail-menu-modal-head { display:flex; align-items:center; justify-content:flex-end; gap:.55rem; padding:.85rem 1.1rem .65rem; border-bottom:1px solid rgba(255,255,255,.08); }
+  .detail-menu-modal-title { font-size:1.34rem; font-weight:800; letter-spacing:-.02em; color:#fff; }
+  .detail-menu-modal-subtitle { margin-top:.18rem; font-size:.84rem; color:rgba(255,255,255,.6); text-align:center; }
+  .detail-menu-modal-close { display:inline-flex; align-items:center; justify-content:center; border-radius:999px; border:1px solid rgba(255,255,255,.2); background:rgba(255,255,255,.08); color:#fff; padding:.3rem .7rem; font-size:.74rem; font-weight:700; line-height:1; }
+  .detail-menu-modal-tabs { display:flex; justify-content:center; gap:.5rem; padding:.8rem 1.1rem; border-bottom:1px solid rgba(255,255,255,.08); overflow:auto; }
+  .detail-menu-tab { border:1px solid rgba(255,255,255,.2); border-radius:999px; background:rgba(255,255,255,.06); color:#fff; padding:.38rem .85rem; font-size:.74rem; font-weight:800; text-transform:uppercase; letter-spacing:.05em; white-space:nowrap; }
+  .detail-menu-tab.is-active { border-color:transparent; background:linear-gradient(90deg,#7a2cff 0%,#ff4d8d 100%); }
+  .detail-menu-modal-body { padding:1rem 1.1rem 1.2rem; overflow:auto; display:grid; gap:1rem; }
+  .detail-menu-section { border:1px solid rgba(255,255,255,.1); border-radius:1rem; background:rgba(255,255,255,.04); padding:.9rem; }
+  .detail-menu-section-label { font-size:.8rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; background:linear-gradient(90deg,#7a2cff 0%,#ff4d8d 100%); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .detail-menu-section-label--center { display:block; text-align:center; }
+  .detail-menu-subsection { margin-top:1.1rem; border-top:2px solid rgba(255,255,255,.2); padding-top:1rem; }
+  .detail-menu-subsection:first-of-type { margin-top:.5rem; border-top:0; padding-top:.35rem; }
+  .detail-menu-subsection-label { display:block; text-align:center; margin:.2rem 0 .65rem; font-size:.72rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:rgba(255,255,255,.65); }
+  .detail-menu-subsection-label--gradient { background:linear-gradient(90deg,#7a2cff 0%,#ff4d8d 100%); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .detail-menu-items { margin-top:.7rem; display:grid; gap:1rem; }
+  .detail-menu-item { padding-top:0; }
+  .detail-menu-item:first-child { padding-top:0; }
+  .detail-menu-item-head { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:baseline; gap:.8rem; }
+  .detail-menu-item-name { font-size:.96rem; font-weight:700; color:#fff; }
+  .detail-menu-item-price { font-size:.9rem; font-weight:800; color:#fff; }
+  .detail-menu-item-desc { margin-top:.34rem; font-size:.84rem; line-height:1.45; color:rgba(255,255,255,.65); }
+  .detail-map-section { position:relative; overflow:hidden; border:1px solid rgba(255,255,255,.13); border-radius:1.4rem; background:radial-gradient(120% 160% at 0% 0%, rgba(122,44,255,.2) 0%, rgba(15,19,31,.95) 52%, rgba(10,14,24,.98) 100%); box-shadow:0 34px 70px -44px rgba(0,0,0,.9), inset 0 1px 0 rgba(255,255,255,.17); backdrop-filter:blur(16px); }
+  .detail-map-header { text-align:left; }
+  .detail-map-kicker { display:inline-flex; align-items:center; gap:.45rem; border:1px solid rgba(255,255,255,.2); border-radius:999px; background:rgba(9,14,24,.5); padding:.26rem .62rem; font-size:.66rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:rgba(244,248,255,.86); }
+  .detail-map-kicker::before { content:""; width:7px; height:7px; border-radius:999px; background:linear-gradient(135deg,#7a2cff 0%,#ff4d8d 100%); box-shadow:0 0 0 4px rgba(122,44,255,.22); }
+  .detail-map-title { margin-top:.75rem; font-size:clamp(1.15rem,2vw,1.48rem); font-weight:800; letter-spacing:-.015em; color:#f8fbff; }
+  .detail-map-subtitle { margin-top:.45rem; max-width:62ch; font-size:.88rem; line-height:1.55; color:rgba(231,240,255,.74); }
+  .detail-map-meta { margin-top:1rem; display:flex; flex-wrap:wrap; gap:.55rem; justify-content:flex-start; }
+  .detail-map-pill { border:1px solid rgba(255,255,255,.2); border-radius:999px; background:rgba(7,12,20,.45); color:rgba(246,249,255,.95); font-size:.7rem; font-weight:700; letter-spacing:.02em; padding:.34rem .72rem; }
+  .detail-map-topbar { margin-top:.95rem; display:flex; align-items:center; justify-content:space-between; gap:.8rem; flex-wrap:wrap; }
+  .detail-map-mode-chip { display:inline-flex; align-items:center; gap:.38rem; border:1px solid rgba(255,255,255,.24); border-radius:999px; background:rgba(8,12,18,.58); padding:.28rem .62rem; color:rgba(242,247,255,.92); font-size:.66rem; font-weight:800; letter-spacing:.07em; text-transform:uppercase; }
+  .detail-map-mode-chip::before { content:""; width:6px; height:6px; border-radius:999px; background:linear-gradient(135deg,#7a2cff 0%,#ff4d8d 100%); }
+  .detail-map-body { margin-top:1rem; display:grid; grid-template-columns:minmax(0,1.2fr) minmax(240px,.8fr); gap:.85rem; align-items:start; }
+  .detail-map-shell { border:1px solid rgba(255,255,255,.16); border-radius:1.05rem; overflow:hidden; background:rgba(10,14,22,.6); box-shadow:inset 0 1px 0 rgba(255,255,255,.12); }
+  .detail-map-canvas { height:370px; width:100%; }
+  .detail-map-legend { display:grid; gap:.5rem; text-align:left; max-height:370px; overflow:auto; padding-right:.12rem; }
+  .detail-map-legend-link { display:block; text-decoration:none; }
+  .detail-map-legend-item { border:1px solid rgba(255,255,255,.12); border-radius:.95rem; background:rgba(9,14,24,.58); padding:.62rem .76rem; display:flex; align-items:flex-start; justify-content:space-between; gap:.65rem; transition:all .16s ease; }
+  .detail-map-legend-item:hover { border-color:rgba(255,255,255,.24); background:rgba(13,19,31,.76); transform:translateY(-1px); }
+  .detail-map-legend-item.is-current { border-color:rgba(255,255,255,.45); background:linear-gradient(135deg,rgba(122,44,255,.32) 0%,rgba(243,28,127,.2) 100%); box-shadow:0 12px 22px -18px rgba(122,44,255,.9); }
+  .detail-map-legend-title { font-size:.86rem; font-weight:680; color:#f6f9ff; line-height:1.25; }
+  .detail-map-legend-cuisine { margin-top:.24rem; font-size:.7rem; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:rgba(255,255,255,.78); }
+  .detail-map-legend-sub { font-size:.76rem; color:rgba(221,231,245,.7); margin-top:.15rem; line-height:1.35; }
+  .detail-map-legend-tag { margin-top:.34rem; display:inline-flex; align-items:center; border:1px solid rgba(255,255,255,.28); border-radius:999px; padding:.14rem .46rem; font-size:.62rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:#fff; background:rgba(8,12,20,.45); }
+  .detail-map-emoji { width:10px; height:10px; margin-top:.35rem; border-radius:999px; background:linear-gradient(135deg,#7a2cff 0%,#ff4d8d 100%); box-shadow:0 0 0 4px rgba(122,44,255,.18); font-size:0; }
+  .leaflet-control-zoom a { width:30px !important; height:30px !important; line-height:30px !important; border-radius:10px !important; border:1px solid rgba(255,255,255,.18) !important; background:rgba(12,18,28,.72) !important; color:#f5f8ff !important; }
+  .leaflet-bar { border:0 !important; box-shadow:none !important; }
+  .restaurant-map-marker { position:relative; width:40px; height:48px; display:grid; place-items:center; }
+  .restaurant-map-pin { position:relative; z-index:2; width:30px; height:30px; border-radius:18px 18px 18px 0; transform:rotate(-45deg); background:linear-gradient(135deg,#7a2cff 0%,#ff4d8d 100%); border:1px solid rgba(255,255,255,.5); box-shadow:0 8px 18px -8px rgba(0,0,0,.85); display:grid; place-items:center; }
+  .restaurant-map-pin > span { transform:rotate(45deg); font-size:0.95rem; line-height:1; }
+  .restaurant-map-pin--current { width:36px; height:36px; box-shadow:0 12px 24px -10px rgba(0,0,0,.9), 0 0 0 4px rgba(122,44,255,.22); }
+  .restaurant-map-pulse { position:absolute; z-index:1; width:24px; height:24px; border-radius:999px; background:radial-gradient(circle, rgba(255,77,141,.45) 0%, rgba(122,44,255,.3) 45%, rgba(122,44,255,0) 75%); animation:restaurantMapPulse 1.9s ease-out infinite; bottom:2px; }
+  @keyframes restaurantMapPulse {
+    0% { transform:scale(.55); opacity:.95; }
+    70% { transform:scale(1.55); opacity:.18; }
+    100% { transform:scale(1.75); opacity:0; }
+  }
+  .detail-map-popup-title { font-size:.88rem; font-weight:800; color:#141824; margin-bottom:.2rem; }
+  .detail-map-popup-sub { font-size:.76rem; color:#424d62; margin-bottom:.45rem; line-height:1.35; }
+  .detail-map-route-btn { display:inline-flex; align-items:center; justify-content:center; border-radius:999px; border:0; padding:.34rem .72rem; font-size:.74rem; font-weight:800; color:#fff !important; text-decoration:none !important; background:linear-gradient(90deg,#7a2cff 0%,#ff4d8d 100%); box-shadow:0 8px 16px -10px rgba(122,44,255,.8); }
+  .detail-map-popup-links { margin-top:.3rem; font-size:.72rem; color:#51607a; }
+  .detail-map-popup-links a { color:#47546d; text-decoration:none; }
+  .detail-map-popup-links a:hover { text-decoration:underline; }
+  .detail-review-card { border:1px solid rgba(255,255,255,.1); border-radius:1rem; background:rgba(255,255,255,.03); padding:1rem; }
+  .detail-review-summary { margin-bottom:1rem; border:1px solid rgba(255,255,255,.12); border-radius:1rem; background:linear-gradient(145deg, rgba(255,255,255,.08) 0%, rgba(255,255,255,.03) 100%); padding:1rem; opacity:0; transform:translateY(16px) scale(.985); transition:opacity .5s ease, transform .5s ease; }
+  .detail-review-summary.is-visible { opacity:1; transform:translateY(0) scale(1); }
+  .detail-review-head { display:flex; align-items:flex-end; justify-content:space-between; gap:.8rem; }
+  .detail-review-title { font-size:.82rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:rgba(255,255,255,.65); }
+  .detail-review-score { font-size:2rem; line-height:1; font-weight:800; color:#fff; }
+  .detail-review-score span { font-size:.95rem; color:rgba(255,255,255,.7); }
+  .detail-review-tag { margin-top:.3rem; font-size:.86rem; font-weight:700; color:#fff; }
+  .detail-review-count { margin-top:.1rem; font-size:.76rem; color:rgba(255,255,255,.6); }
+  .detail-review-metrics { margin-top:.8rem; display:grid; gap:.6rem; }
+  .detail-review-row { display:grid; gap:.24rem; }
+  .detail-review-row-head { display:flex; align-items:center; justify-content:space-between; font-size:.82rem; color:#fff; }
+  .detail-review-row-head span:last-child { font-weight:800; }
+  .detail-review-bar { height:7px; border-radius:999px; background:rgba(255,255,255,.16); overflow:hidden; }
+  .detail-review-bar-fill { display:block; height:100%; width:0; border-radius:999px; background:linear-gradient(90deg,#7a2cff 0%,#ff4d8d 100%); box-shadow:0 3px 12px -8px rgba(122,44,255,.9); }
+  .detail-review-dynamic { transition:opacity .35s ease, transform .35s ease; }
+  .detail-review-dynamic.is-updating { opacity:.2; transform:translateY(4px); }
+  .detail-gallery-showcase { display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); grid-template-rows:repeat(2,minmax(0,1fr)); gap:.5rem; height:360px; }
+  .detail-gallery-item { position:relative; overflow:hidden; border-radius:1.35rem; border:1px solid rgba(255,255,255,.08); box-shadow:0 22px 54px -32px rgba(0,0,0,.82); }
+  .detail-gallery-item--main { grid-column:1 / span 8; grid-row:1 / span 2; }
+  .detail-gallery-item--side-top { grid-column:9 / span 4; grid-row:1 / span 1; }
+  .detail-gallery-item--side-bottom { grid-column:9 / span 4; grid-row:2 / span 1; }
+  .detail-gallery-item--fallback { grid-column:1 / span 12; grid-row:1 / span 2; }
+  .detail-gallery-actions { margin-top:1rem; display:flex; justify-content:center; }
+  .detail-gallery-more-btn { display:inline-flex; align-items:center; justify-content:center; gap:.45rem; border-radius:999px; border:1px solid rgba(255,255,255,.2); background:rgba(255,255,255,.06); color:#fff; padding:.6rem 1.1rem; font-size:.82rem; font-weight:700; transition:all .18s ease; }
+  .detail-gallery-more-btn:hover { background:rgba(255,255,255,.14); border-color:rgba(255,255,255,.35); }
+  .detail-gallery-more-btn::after { content:"→"; font-size:.95rem; line-height:1; }
+  .detail-gallery-link { display:block; width:100%; height:100%; cursor:zoom-in; }
+  .detail-gallery-item img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; transition:transform .5s cubic-bezier(.22,1,.36,1); }
+  .detail-gallery-item::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(6,4,14,0) 10%,rgba(6,4,14,.14) 58%,rgba(6,4,14,.52) 100%); pointer-events:none; }
+  .detail-gallery-item:hover img { transform:scale(1.045); }
+  .detail-gallery-badge { position:absolute; left:.6rem; bottom:.6rem; z-index:1; display:inline-flex; align-items:center; gap:.35rem; border-radius:999px; border:1px solid rgba(255,255,255,.18); background:rgba(7,10,16,.45); padding:.24rem .56rem; font-size:.64rem; font-weight:700; color:#fff; }
   .detail-buzz-grid { display:grid; gap:1rem; grid-template-columns:repeat(3,minmax(0,1fr)); }
   .detail-buzz-card { border:1px solid rgba(255,255,255,.08); border-radius:1.3rem; background:rgba(255,255,255,.03); padding:1rem; backdrop-filter:blur(14px); }
   .detail-booking-note { border:1px solid rgba(255,255,255,.08); border-radius:1.3rem; background:rgba(255,255,255,.03); padding:1rem; }
-  @media (max-width:1024px){ .detail-signal-rail, .detail-buzz-grid, .detail-gallery-grid, .detail-store-grid, .detail-store-meta { grid-template-columns:1fr; } .detail-store-figure { min-height:360px; } }
+  @media (max-width:1024px){ .detail-signal-rail, .detail-buzz-grid, .detail-store-grid, .detail-store-meta { grid-template-columns:1fr; } .detail-store-figure { min-height:360px; } .detail-gallery-showcase { grid-template-columns:1fr; grid-template-rows:repeat(3,minmax(0,1fr)); gap:.5rem; height:540px; } .detail-gallery-item--main, .detail-gallery-item--side-top, .detail-gallery-item--side-bottom, .detail-gallery-item--fallback { grid-column:1 / span 1; } .detail-gallery-item--main { grid-row:1 / span 1; } .detail-gallery-item--side-top { grid-row:2 / span 1; } .detail-gallery-item--side-bottom { grid-row:3 / span 1; } }
+  @media (max-width:640px){ .detail-gallery-showcase { height:480px; } .detail-gallery-item { border-radius:1rem; } .detail-map-canvas { height:280px; } }
+  @media (max-width:1024px){ .detail-map-body { grid-template-columns:1fr; } }
+  @media (max-width:768px){ .detail-map-shell--mobile-sticky { position:sticky; top:78px; z-index:24; border-color:rgba(255,255,255,.16); box-shadow:0 14px 36px -24px rgba(0,0,0,.92), inset 0 1px 0 rgba(255,255,255,.1); } .detail-map-legend { max-height:190px; overflow:auto; } }
   @media (max-width:768px){ .detail-hero, .detail-hero-content { min-height:460px; } .detail-meta-grid { grid-template-columns:1fr; } }
 </style>
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+  crossorigin=""
+/>
+<script
+  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+  crossorigin=""
+></script>
 {% endblock %}
 
 {% block content %}
@@ -74,8 +251,15 @@
   </nav>
 
   <section class="mb-10 detail-store-grid fade-up">
-    <div class="detail-store-card light">
-      <div class="detail-store-body">
+    <div class="detail-store-card detail-store-card--hero">
+      <div class="detail-store-bg-media" aria-hidden="true">
+        {% if venue.cover_image_url %}
+        <img src="{{ venue.cover_image_url }}" alt="" loading="lazy" />
+        {% elif highlight_photos %}
+        <img src="{{ highlight_photos.0.image_url }}" alt="" loading="lazy" />
+        {% endif %}
+      </div>
+      <div class="detail-store-body text-center">
         <span class="text-[0.8rem] font-semibold tracking-tight text-black/70">{% trans "Restaurant" %}</span>
         <h1 class="detail-store-title mt-3">{{ venue.name }}</h1>
         <p class="detail-store-copy">{{ venue.description|default:_('Une entrée de page plus proche de l’hospitality premium: calme, lisible, et orientée décision.')|truncatechars:190 }}</p>
@@ -93,42 +277,126 @@
             <div class="mt-2 text-sm font-semibold text-black/88">{% trans "Confirmation instantanée" %}</div>
           </div>
         </div>
-        <a href="#booking-panel" class="detail-store-link text-black/85">{% trans "Choisir un créneau" %}</a>
       </div>
     </div>
 
-    <div class="detail-store-card dark detail-store-figure">
-      {% if venue.cover_image_url %}<img src="{{ venue.cover_image_url }}" alt="{{ venue.name }}" />{% else %}<div class="absolute inset-0 bg-grad-brand"></div>{% endif %}
-      <div class="detail-store-overlay">
-        <div class="flex flex-wrap gap-2">
-          {% if venue.cuisine_type %}<span class="detail-store-pill">{{ venue.cuisine_type }}</span>{% endif %}
-          {% if venue.price_range %}<span class="detail-store-pill">{{ venue.price_range }}</span>{% endif %}
-          <span class="detail-store-pill">📍 {{ venue.city_label|default:venue.city_slug }}</span>
-        </div>
-        <h2 class="mt-4 font-display text-3xl font-extrabold tracking-tight text-white">{% trans "La bonne table doit se comprendre en un regard" %}</h2>
-        <p class="mt-2 max-w-lg text-sm leading-7 text-white/66">{% trans "Cadre, niveau de service, type de soirée et prochain clic utile: tout doit être évident avant la réservation." %}</p>
-      </div>
+  </section>
+
+  <section class="card p-6 fade-up stagger-1 mt-10">
+    <div class="detail-signal-rail">
+      <div class="detail-signal-card detail-signal-card--center micro-float ambient-ring"><div class="detail-gradient-label">{% trans "À propos" %}</div><p class="detail-signal-maintext">{% trans "Une cuisine méditerranéenne généreuse" %}</p><p class="detail-signal-subtext">{% trans "Produits frais, service soigné et terrasse agréable" %}</p></div>
+      <div class="detail-signal-card detail-signal-card--center micro-float ambient-ring"><div class="detail-gradient-label">{% trans "Notre carte" %}</div><p class="detail-signal-maintext">{% trans "Dinner date / rooftop" %}</p><p class="detail-signal-subtext">{% trans "Découvrez la carte qui donne envie de réserver tout de suite: assiettes signature, belles bouteilles et ambiance rooftop." %}</p><div class="detail-signal-actions"><button type="button" class="detail-action-btn" data-open-menu-modal>{% trans "Voir notre carte" %}</button></div></div>
+      <div class="detail-signal-card detail-menu-day-card micro-float ambient-ring"><div class="detail-menu-day-title">{% trans "Menu du jour" %}</div><p class="detail-menu-day-line">{% trans "Dorade grillée et ses légumes" %}</p><p class="detail-menu-day-line">{% trans "Dessert au choix" %}</p><p class="detail-menu-day-price">20,00 €</p></div>
     </div>
   </section>
 
-  <div class="mt-10 grid grid-cols-1 lg:grid-cols-12 gap-10">
+  <div class="detail-menu-modal" id="menu-modal" aria-hidden="true">
+    <div class="detail-menu-modal-backdrop" data-close-menu-modal></div>
+    <div class="detail-menu-modal-panel" role="dialog" aria-modal="true" aria-labelledby="menu-modal-title">
+      <div class="detail-menu-modal-head">
+        <button type="button" class="detail-menu-modal-close" data-close-menu-modal aria-label="{% trans 'Fermer' %}">{% trans "Fermer" %}</button>
+      </div>
+      <div class="detail-menu-modal-tabs">
+        <button type="button" class="detail-menu-tab is-active" data-menu-tab="plats">{% trans "Nos plats" %}</button>
+        <button type="button" class="detail-menu-tab" data-menu-tab="menus">{% trans "Nos menus" %}</button>
+        <button type="button" class="detail-menu-tab" data-menu-tab="boissons">{% trans "Nos boissons" %}</button>
+      </div>
+      <div class="detail-menu-modal-body">
+        <section class="detail-menu-section" data-menu-panel="plats">
+          <div class="detail-menu-section-label">{% trans "Nos plats" %}</div>
+          <div class="detail-menu-subsection">
+            <div class="detail-menu-subsection-label detail-menu-subsection-label--gradient">{% trans "Nos viande" %}</div>
+            <div class="detail-menu-items">
+              <article class="detail-menu-item"><div class="detail-menu-item-head"><h4 class="detail-menu-item-name">{% trans "Magret de canard rôti" %}</h4><span class="detail-menu-item-price">27 €</span></div><p class="detail-menu-item-desc">{% trans "Sauce miel-thym, pommes grenailles et légumes glacés." %}</p></article>
+              <article class="detail-menu-item"><div class="detail-menu-item-head"><h4 class="detail-menu-item-name">{% trans "Filet de boeuf grillé" %}</h4><span class="detail-menu-item-price">32 €</span></div><p class="detail-menu-item-desc">{% trans "Purée maison, jus corsé et jeunes pousses." %}</p></article>
+            </div>
+          </div>
+          <div class="detail-menu-subsection">
+            <div class="detail-menu-subsection-label detail-menu-subsection-label--gradient">{% trans "Nos poison" %}</div>
+            <div class="detail-menu-items">
+              <article class="detail-menu-item"><div class="detail-menu-item-head"><h4 class="detail-menu-item-name">{% trans "Dorade grillée et légumes de saison" %}</h4><span class="detail-menu-item-price">24 €</span></div><p class="detail-menu-item-desc">{% trans "Poisson grillé minute, légumes du marché et jus citronné aux herbes." %}</p></article>
+              <article class="detail-menu-item"><div class="detail-menu-item-head"><h4 class="detail-menu-item-name">{% trans "Tataki de thon, agrumes et herbes fraîches" %}</h4><span class="detail-menu-item-price">26 €</span></div><p class="detail-menu-item-desc">{% trans "Thon snacké, vinaigrette yuzu, graines torréfiées et salade croquante." %}</p></article>
+            </div>
+          </div>
+          <div class="detail-menu-subsection">
+            <div class="detail-menu-subsection-label detail-menu-subsection-label--gradient">{% trans "Nos dessert" %}</div>
+            <div class="detail-menu-items">
+              <article class="detail-menu-item"><div class="detail-menu-item-head"><h4 class="detail-menu-item-name">{% trans "Tarte citron meringuée" %}</h4><span class="detail-menu-item-price">9 €</span></div><p class="detail-menu-item-desc">{% trans "Crème citron maison et meringue italienne." %}</p></article>
+              <article class="detail-menu-item"><div class="detail-menu-item-head"><h4 class="detail-menu-item-name">{% trans "Fondant chocolat" %}</h4><span class="detail-menu-item-price">10 €</span></div><p class="detail-menu-item-desc">{% trans "Servi tiède avec glace vanille." %}</p></article>
+            </div>
+          </div>
+          <div class="detail-menu-subsection">
+            <div class="detail-menu-subsection-label detail-menu-subsection-label--gradient">{% trans "Nos fromage" %}</div>
+            <div class="detail-menu-items">
+              <article class="detail-menu-item"><div class="detail-menu-item-head"><h4 class="detail-menu-item-name">{% trans "Assiette de fromages affinés" %}</h4><span class="detail-menu-item-price">11 €</span></div><p class="detail-menu-item-desc">{% trans "Sélection de 3 fromages selon arrivage." %}</p></article>
+            </div>
+          </div>
+        </section>
+        <section class="detail-menu-section" data-menu-panel="menus" hidden>
+          <div class="detail-menu-section-label detail-menu-section-label--center">{% trans "Nos menus" %}</div>
+          <div class="detail-menu-subsection">
+            <div class="detail-menu-subsection-label">{% trans "Menu déjeuner" %}</div>
+            <div class="detail-menu-items">
+              <article class="detail-menu-item"><div class="detail-menu-item-head"><h4 class="detail-menu-item-name">{% trans "Entrée + Plat" %}</h4><span class="detail-menu-item-price">24 €</span></div><p class="detail-menu-item-desc">{% trans "Exemple: carpaccio de daurade, dorade grillée et légumes de saison." %}</p></article>
+            </div>
+          </div>
+          <div class="detail-menu-subsection">
+            <div class="detail-menu-subsection-label">{% trans "Menu du jour" %}</div>
+            <div class="detail-menu-items">
+              <article class="detail-menu-item"><div class="detail-menu-item-head"><h4 class="detail-menu-item-name">{% trans "Plat + Dessert" %}</h4><span class="detail-menu-item-price">20 €</span></div><p class="detail-menu-item-desc">{% trans "Exemple: plat du marché et dessert du chef." %}</p></article>
+            </div>
+          </div>
+          <div class="detail-menu-subsection">
+            <div class="detail-menu-subsection-label">{% trans "Menu dégustation" %}</div>
+            <div class="detail-menu-items">
+              <article class="detail-menu-item"><div class="detail-menu-item-head"><h4 class="detail-menu-item-name">{% trans "Parcours en 5 services" %}</h4><span class="detail-menu-item-price">49 €</span></div><p class="detail-menu-item-desc">{% trans "Mise en bouche, entrée, poisson ou viande, dessert, mignardises." %}</p></article>
+            </div>
+          </div>
+        </section>
+        <section class="detail-menu-section" data-menu-panel="boissons" hidden>
+          <div class="detail-menu-section-label detail-menu-section-label--center">{% trans "Nos boissons" %}</div>
+          <div class="detail-menu-items">
+            <article class="detail-menu-item"><div class="detail-menu-item-head"><h4 class="detail-menu-item-name">{% trans "Cocktails signatures" %}</h4><span class="detail-menu-item-price">12 €</span></div><p class="detail-menu-item-desc">{% trans "Créations maison avec fruits frais et spiritueux premium." %}</p></article>
+            <article class="detail-menu-item"><div class="detail-menu-item-head"><h4 class="detail-menu-item-name">{% trans "Verres de vin" %}</h4><span class="detail-menu-item-price">7 €</span></div><p class="detail-menu-item-desc">{% trans "Sélection de vins blancs, rouges et rosés servis au verre." %}</p></article>
+            <article class="detail-menu-item"><div class="detail-menu-item-head"><h4 class="detail-menu-item-name">{% trans "Mocktails & boissons fraîches" %}</h4><span class="detail-menu-item-price">6 €</span></div><p class="detail-menu-item-desc">{% trans "Alternatives sans alcool, maison et de saison." %}</p></article>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <section class="card p-6 fade-up stagger-2 mt-14">
+    <div class="flex items-end justify-between gap-4 mb-5">
+      <div>
+        <span class="h-eyebrow">{% trans "Highlights" %}</span>
+        <h2 class="mt-2 font-display text-xl font-bold text-white">{% trans "Une page plus magazine, plus lifestyle" %}</h2>
+      </div>
+      <span class="chip chip-sunset">{% trans "Photo-led" %}</span>
+    </div>
+    <div class="detail-gallery-showcase" id="highlight-gallery">
+      {% for photo in highlight_photos|slice:":3" %}
+      <div class="detail-gallery-item ambient-ring micro-float {% if forloop.counter == 1 %}detail-gallery-item--main{% elif forloop.counter == 2 %}detail-gallery-item--side-top{% elif forloop.counter == 3 %}detail-gallery-item--side-bottom{% else %}detail-gallery-item--fallback{% endif %}">
+        <a href="{{ photo.image_url }}" target="_blank" rel="noopener noreferrer" class="detail-gallery-link" aria-label="{{ venue.name }} photo {{ forloop.counter }}">
+          <img src="{{ photo.image_url }}" alt="{{ venue.name }} - photo {{ forloop.counter }}" loading="lazy" />
+        </a>
+        <span class="detail-gallery-badge">
+          {% if forloop.counter == 1 %}
+            {% trans "Photo principale" %}
+          {% else %}
+            {{ photo.caption|default:_('Voir la photo') }}
+          {% endif %}
+        </span>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="detail-gallery-actions" id="highlight-gallery-actions">
+      <a href="/restaurants/{{ venue.city_slug }}/{{ venue.slug }}/photos/" class="detail-gallery-more-btn">{% trans "Voir plus" %} ({{ gallery_photos_count }})</a>
+    </div>
+  </section>
+
+  <div class="mt-8 grid grid-cols-1 lg:grid-cols-12 gap-10">
 
     <div class="lg:col-span-7 xl:col-span-8 space-y-10">
-
-      <section class="card p-6 fade-up stagger-1">
-        <div class="flex items-end justify-between gap-4 mb-5">
-          <div>
-            <span class="h-eyebrow">{% trans "Dinner intel" %}</span>
-            <h2 class="mt-2 font-display text-2xl font-bold text-white">{% trans "Une lecture plus premium avant réservation" %}</h2>
-          </div>
-          <span class="chip chip-dark">{% trans "Table decision" %}</span>
-        </div>
-        <div class="detail-signal-rail">
-          <div class="detail-signal-card micro-float ambient-ring"><div class="text-[0.65rem] uppercase tracking-wider text-white/45">{% trans "Signal" %}</div><div class="mt-2 text-lg font-bold text-white">{% trans "Très partagé ce soir" %}</div><p class="mt-2 text-sm text-white/58">{% trans "La fiche ressemble plus à un choix de soirée qu’à une page utilitaire." %}</p></div>
-          <div class="detail-signal-card micro-float ambient-ring"><div class="text-[0.65rem] uppercase tracking-wider text-white/45">{% trans "Mood" %}</div><div class="mt-2 text-lg font-bold text-white">{% trans "Dinner date / rooftop" %}</div><p class="mt-2 text-sm text-white/58">{% trans "Plus de désir, plus de projection, moins de friction." %}</p></div>
-          <div class="detail-signal-card micro-float ambient-ring"><div class="text-[0.65rem] uppercase tracking-wider text-white/45">{% trans "Booking" %}</div><div class="mt-2 text-lg font-bold text-white">{% trans "Créneaux ultra lisibles" %}</div><p class="mt-2 text-sm text-white/58">{% trans "Le bon slot est visible sans scroller longtemps." %}</p></div>
-        </div>
-      </section>
 
       {# Quick facts #}
       <section class="card p-6 grid grid-cols-2 sm:grid-cols-4 gap-3 fade-up stagger-1">
@@ -138,84 +406,41 @@
         <div class="panel text-center"><div class="text-2xl">📅</div><div class="text-[0.7rem] text-white/55 mt-1 uppercase tracking-wider">{% trans "Réservation" %}</div><div class="text-sm font-bold text-white">{% trans "Instantanée" %}</div></div>
       </section>
 
-      <section class="card p-6 fade-up stagger-2">
-        <div class="flex items-end justify-between gap-4 mb-5">
-          <div>
-            <span class="h-eyebrow">{% trans "Highlights" %}</span>
-            <h2 class="mt-2 font-display text-xl font-bold text-white">{% trans "Une page plus magazine, plus lifestyle" %}</h2>
+      {# Carte des restaurants de la ville #}
+      <section class="card p-6 fade-up stagger-3 detail-map-section">
+        <div class="detail-map-header">
+          <span class="detail-map-kicker">{% trans "City guide" %}</span>
+          <h2 class="detail-map-title">{% trans "Restaurants référencés en ville" %}</h2>
+          <p class="detail-map-subtitle">{% trans "Retrouvez une vue claire des adresses autour de vous. Le restaurant actuel est subtilement mis en avant pour une lecture immédiate." %}</p>
+          <div class="detail-map-meta">
+            <span class="detail-map-pill">🍽️ {{ city_venues|length }} {% trans "restaurants" %}</span>
+            <span class="detail-map-pill">📍 {{ venue.city_label|default:venue.city_slug }}</span>
           </div>
-          <span class="chip chip-sunset">{% trans "Photo-led" %}</span>
+          <div class="detail-map-topbar">
+            <div class="text-xs uppercase tracking-[0.18em] text-white/55">{% trans "Styles de carte" %}</div>
+            <span class="detail-map-mode-chip">{% trans "Satellite" %}</span>
+          </div>
         </div>
-        <div class="detail-gallery-grid">
-          <div class="detail-gallery-main ambient-ring micro-float">
-            {% if venue.cover_image_url %}<img src="{{ venue.cover_image_url }}" alt="{{ venue.name }}" class="absolute inset-0 h-full w-full object-cover ken-burns" />{% else %}<div class="absolute inset-0 bg-grad-brand"></div>{% endif %}
-            <div class="detail-gallery-copy">
-              <p class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-white/42">{% trans "Highlight room" %}</p>
-              <h3 class="mt-2 font-display text-3xl font-extrabold text-white">{{ venue.name }}</h3>
-              <p class="mt-2 text-sm text-white/65">{% trans "Le visuel principal doit vendre l’envie avant même le détail pratique." %}</p>
-            </div>
+
+        <div class="detail-map-body">
+          <div class="detail-map-shell detail-map-shell--mobile-sticky">
+            <div id="restaurant-city-map" class="detail-map-canvas" aria-label="{% trans 'Carte des restaurants' %}"></div>
           </div>
-          <div class="detail-gallery-stack">
-            <div class="ambient-ring micro-float">
-              <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,.06),_transparent_60%)]"></div>
-              <div class="detail-gallery-copy">
-                <p class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-white/42">{% trans "Crowd note" %}</p>
-                <h3 class="mt-2 text-xl font-bold text-white">{% trans "Très partagé dans les stories" %}</h3>
+          <div class="detail-map-legend">
+            {% for city_venue in city_venues %}
+            <a href="/restaurants/{{ city_venue.city_slug }}/{{ city_venue.slug }}/" class="detail-map-legend-link" aria-label="{{ city_venue.name }}">
+              <div class="detail-map-legend-item {% if city_venue.is_current %}is-current{% endif %}">
+                <div>
+                  <div class="detail-map-legend-title">{{ city_venue.name }}</div>
+                  {% if city_venue.cuisine_type %}<div class="detail-map-legend-cuisine">{{ city_venue.cuisine_type }}</div>{% endif %}
+                  <div class="detail-map-legend-sub">{{ city_venue.full_address }}</div>
+                  {% if city_venue.is_current %}<span class="detail-map-legend-tag">{% trans "Restaurant actuel" %}</span>{% endif %}
+                </div>
+                <span class="detail-map-emoji">🍴</span>
               </div>
-            </div>
-            <div class="ambient-ring micro-float">
-              <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,.05),_transparent_60%)]"></div>
-              <div class="detail-gallery-copy">
-                <p class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-white/42">{% trans "Booking note" %}</p>
-                <h3 class="mt-2 text-xl font-bold text-white">{% trans "Créneaux qui partent vite entre 20h et 21h" %}</h3>
-              </div>
-            </div>
+            </a>
+            {% endfor %}
           </div>
-        </div>
-      </section>
-
-      {% if venue.description %}
-      <section class="card p-6 fade-up stagger-2">
-        <h2 class="font-display text-xl font-bold text-white mb-3">{% trans "À propos" %}</h2>
-        <p class="text-white/75 whitespace-pre-line leading-relaxed">{{ venue.description }}</p>
-      </section>
-      {% endif %}
-
-      {# Infos pratiques #}
-      <section class="card p-6 space-y-4 fade-up stagger-3">
-        <h2 class="font-display text-xl font-bold text-white">{% trans "Infos pratiques" %}</h2>
-        {% if venue.address %}
-        <div class="flex items-start gap-3">
-          <span class="grid h-10 w-10 place-items-center rounded-xl bg-neon-500/15 text-xl shrink-0">📍</span>
-          <div><h3 class="font-bold text-white text-sm">{% trans "Adresse" %}</h3><p class="text-sm text-white/65 mt-0.5">{{ venue.address }}, {{ venue.city_label|default:venue.city_slug }}</p></div>
-        </div>
-        {% endif %}
-        {% if venue.phone %}
-        <div class="flex items-start gap-3">
-          <span class="grid h-10 w-10 place-items-center rounded-xl bg-flamingo-500/15 text-xl shrink-0">📞</span>
-          <div><h3 class="font-bold text-white text-sm">{% trans "Téléphone" %}</h3><a href="tel:{{ venue.phone }}" class="text-sm text-flamingo-300 hover:text-flamingo-200 mt-0.5 block">{{ venue.phone }}</a></div>
-        </div>
-        {% endif %}
-        {% if venue.website %}
-        <div class="flex items-start gap-3">
-          <span class="grid h-10 w-10 place-items-center rounded-xl bg-electric-400/15 text-xl shrink-0">🌐</span>
-          <div><h3 class="font-bold text-white text-sm">{% trans "Site web" %}</h3><a href="{{ venue.website }}" rel="noopener noreferrer nofollow" target="_blank" class="text-sm text-electric-300 hover:text-electric-200 mt-0.5 break-all">{{ venue.website }}</a></div>
-        </div>
-        {% endif %}
-      </section>
-
-      <section class="card p-6 fade-up stagger-3">
-        <div class="flex items-end justify-between gap-4 mb-5">
-          <div>
-            <span class="h-eyebrow">{% trans "Buzz table" %}</span>
-            <h2 class="mt-2 font-display text-xl font-bold text-white">{% trans "Ce que les gens retiennent vraiment" %}</h2>
-          </div>
-          <span class="chip chip-electric">{% trans "Social discovery" %}</span>
-        </div>
-        <div class="detail-buzz-grid">
-          <div class="detail-buzz-card ambient-ring micro-float"><p class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-white/42">{% trans "Saved" %}</p><p class="mt-2 text-lg font-bold text-white">1.8k</p><p class="mt-2 text-sm text-white/60">{% trans "Enregistré dans les listes “dîner ce soir”." %}</p></div>
-          <div class="detail-buzz-card ambient-ring micro-float"><p class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-white/42">{% trans "Stories" %}</p><p class="mt-2 text-lg font-bold text-white">326</p><p class="mt-2 text-sm text-white/60">{% trans "Mentions dans les highlights communautaires." %}</p></div>
-          <div class="detail-buzz-card ambient-ring micro-float"><p class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-white/42">{% trans "Mood" %}</p><p class="mt-2 text-lg font-bold text-white">{% trans "Date / friends" %}</p><p class="mt-2 text-sm text-white/60">{% trans "Le type de signal qui aide à choisir plus vite." %}</p></div>
         </div>
       </section>
 
@@ -227,20 +452,75 @@
             4.7 · 243 {% trans "avis" %}
           </h2>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          {% for n in "ABCD" %}
-          <div class="panel">
+        <div class="detail-review-summary" data-review-reveal>
+          <div class="detail-review-head">
+            <div>
+              <div class="detail-review-title">{% trans "Avis" %}</div>
+              <div class="detail-review-tag">{% trans "Exceptionnel" %}</div>
+              <div class="detail-review-count"><span data-review-number data-target="3131" data-decimals="0">3131</span> {% trans "avis" %}</div>
+            </div>
+            <div class="detail-review-score"><span data-review-number data-target="8.5" data-decimals="1">8.5</span><span>/10</span></div>
+          </div>
+          <div class="detail-review-metrics">
+            <div class="detail-review-row">
+              <div class="detail-review-row-head"><span>{% trans "Plats" %}</span><span data-review-number data-target="8.5" data-decimals="1">8.5</span></div>
+              <div class="detail-review-bar"><span class="detail-review-bar-fill" data-review-bar data-score="8.5"></span></div>
+            </div>
+            <div class="detail-review-row">
+              <div class="detail-review-row-head"><span>{% trans "Service" %}</span><span data-review-number data-target="8.7" data-decimals="1">8.7</span></div>
+              <div class="detail-review-bar"><span class="detail-review-bar-fill" data-review-bar data-score="8.7"></span></div>
+            </div>
+            <div class="detail-review-row">
+              <div class="detail-review-row-head"><span>{% trans "Ambiance" %}</span><span data-review-number data-target="8.5" data-decimals="1">8.5</span></div>
+              <div class="detail-review-bar"><span class="detail-review-bar-fill" data-review-bar data-score="8.5"></span></div>
+            </div>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5" data-review-rotator>
+          <div class="panel detail-review-dynamic" data-review-slot="0">
             <div class="flex items-center gap-3 mb-3">
-              <span class="ring-avatar">{{ n }}</span>
+              <span class="ring-avatar" data-review-initial>A</span>
               <div>
-                <div class="text-sm font-bold text-white">{% if forloop.counter == 1 %}Antoine V.{% elif forloop.counter == 2 %}Camille B.{% elif forloop.counter == 3 %}Mehdi K.{% else %}Julie T.{% endif %}</div>
-                <div class="text-xs text-white/45">{% trans "Il y a" %} {{ forloop.counter }} {% trans "jours" %}</div>
+                <div class="text-sm font-bold text-white" data-review-name>Antoine V.</div>
+                <div class="text-xs text-white/45"><span>{% trans "Il y a" %}</span> <span data-review-age>1 {% trans "jour" %}</span></div>
               </div>
             </div>
             <div class="star-row flex gap-0.5 mb-2">{% for _ in "12345" %}<svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>{% endfor %}</div>
-            <p class="text-sm text-white/70 line-clamp-3">{% if forloop.counter == 1 %}{% trans "Cuisine excellente, service impeccable, cadre magnifique. À refaire !" %}{% elif forloop.counter == 2 %}{% trans "Super resto pour un date, plats raffinés et carte des vins au top." %}{% elif forloop.counter == 3 %}{% trans "Adresse à connaître, ambiance chaleureuse et personnel adorable." %}{% else %}{% trans "Très bonne découverte, je recommande sans hésitation." %}{% endif %}</p>
+            <p class="text-sm text-white/70 line-clamp-3" data-review-text>Cuisine excellente, service impeccable, cadre magnifique. À refaire !</p>
           </div>
-          {% endfor %}
+          <div class="panel detail-review-dynamic" data-review-slot="1">
+            <div class="flex items-center gap-3 mb-3">
+              <span class="ring-avatar" data-review-initial>B</span>
+              <div>
+                <div class="text-sm font-bold text-white" data-review-name>Camille B.</div>
+                <div class="text-xs text-white/45"><span>{% trans "Il y a" %}</span> <span data-review-age>2 {% trans "jours" %}</span></div>
+              </div>
+            </div>
+            <div class="star-row flex gap-0.5 mb-2">{% for _ in "12345" %}<svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>{% endfor %}</div>
+            <p class="text-sm text-white/70 line-clamp-3" data-review-text>Super resto pour un date, plats raffinés et carte des vins au top.</p>
+          </div>
+          <div class="panel detail-review-dynamic" data-review-slot="2">
+            <div class="flex items-center gap-3 mb-3">
+              <span class="ring-avatar" data-review-initial>C</span>
+              <div>
+                <div class="text-sm font-bold text-white" data-review-name>Mehdi K.</div>
+                <div class="text-xs text-white/45"><span>{% trans "Il y a" %}</span> <span data-review-age>3 {% trans "jours" %}</span></div>
+              </div>
+            </div>
+            <div class="star-row flex gap-0.5 mb-2">{% for _ in "12345" %}<svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>{% endfor %}</div>
+            <p class="text-sm text-white/70 line-clamp-3" data-review-text>Adresse à connaître, ambiance chaleureuse et personnel adorable.</p>
+          </div>
+          <div class="panel detail-review-dynamic" data-review-slot="3">
+            <div class="flex items-center gap-3 mb-3">
+              <span class="ring-avatar" data-review-initial>D</span>
+              <div>
+                <div class="text-sm font-bold text-white" data-review-name>Julie T.</div>
+                <div class="text-xs text-white/45"><span>{% trans "Il y a" %}</span> <span data-review-age>4 {% trans "jours" %}</span></div>
+              </div>
+            </div>
+            <div class="star-row flex gap-0.5 mb-2">{% for _ in "12345" %}<svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>{% endfor %}</div>
+            <p class="text-sm text-white/70 line-clamp-3" data-review-text>Très bonne découverte, je recommande sans hésitation.</p>
+          </div>
         </div>
       </section>
 
@@ -248,89 +528,68 @@
 
     {# ───── Booking sidebar ───── #}
     <aside class="lg:col-span-5 xl:col-span-4">
-      <div id="booking-panel" class="booking-sticky card p-6 fade-up ambient-ring">
-        <div class="mb-4 flex flex-wrap gap-2">
-          <span class="chip chip-electric">{% trans "Confirmation instantanée" %}</span>
-          <span class="chip chip-dark">{% trans "Annulation souple" %}</span>
-          <span class="chip chip-flamingo">{% trans "Table highlight" %}</span>
+      <div id="booking-panel" class="booking-sticky card p-6 fade-up ambient-ring booking-panel-fork">
+        <div class="booking-fork-head">
+          <div class="booking-fork-title">{% trans "Reserver une table" %}</div>
+          <div class="booking-fork-subtitle">{% trans "Choisissez votre creneau en quelques secondes" %}</div>
         </div>
-        <div class="flex items-baseline justify-between mb-1">
-          <span class="font-display text-2xl font-extrabold text-white">{% trans "Réserver" %}</span>
-          <span class="inline-flex items-center gap-1 text-xs text-white font-semibold">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-sunset-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>4.7
-          </span>
-        </div>
-        <p class="text-sm text-white/55 mt-1 mb-1">{% trans "Choisis ton créneau ci-dessous" %}</p>
-        {% if venue.reservation_mode == "MANUAL" %}
-        <p class="text-xs text-amber-300/90 mb-5">{% trans "Validation manuelle: le restaurant confirme ou refuse ta demande." %}</p>
-        {% else %}
-        <p class="text-xs text-emerald-300/90 mb-5">{% trans "Confirmation automatique selon les places restantes." %}</p>
-        {% endif %}
-
-        {% if user.is_authenticated %}
-        <a href="/sorties/creer/?city={{ venue.city_label|default:venue.city_slug|urlencode }}&location={{ venue.name|add:' - '|add:venue.address|urlencode }}&type=COMMUNAUTAIRE"
-           class="btn-secondary w-full text-center block mb-4">
-          {% trans "Organiser une sortie ici" %}
-        </a>
-        {% else %}
-        <a href="/connexion/?next=/sorties/creer/?city={{ venue.city_label|default:venue.city_slug|urlencode }}&location={{ venue.name|add:' - '|add:venue.address|urlencode }}&type=COMMUNAUTAIRE"
-           class="btn-secondary w-full text-center block mb-4">
-          {% trans "Connecte-toi pour organiser une sortie ici" %}
-        </a>
-        {% endif %}
 
         {% if slots %}
-        <form method="post" action="/restaurants/{{ venue.city_slug }}/{{ venue.slug }}/reserver/" class="space-y-4">
+        <form method="post" action="/restaurants/{{ venue.city_slug }}/{{ venue.slug }}/reserver/" class="space-y-4" id="booking-form">
           {% csrf_token %}
-          <div class="panel py-3 px-4">
-            <div class="text-[0.65rem] uppercase tracking-wider text-white/45">{% trans "Pourquoi réserver ici" %}</div>
-            <div class="mt-1 text-sm font-bold text-white">{% trans "Meilleurs créneaux visibles en un regard" %}</div>
-            <p class="mt-2 text-xs text-white/50">{% trans "Lecture rapide, choix immédiat, et moins de friction avant le clic." %}</p>
+
+          <div class="booking-fork-block booking-fork-block--calendar">
+            <div class="booking-fork-label">{% trans "Date" %}</div>
+            <div class="booking-day-nav">
+              <button type="button" class="booking-day-nav-btn" data-booking-prev aria-label="{% trans 'Date precedente' %}">‹</button>
+              <div class="booking-day-nav-month" data-booking-month></div>
+              <button type="button" class="booking-day-nav-btn" data-booking-next aria-label="{% trans 'Date suivante' %}">›</button>
+            </div>
+            <div class="booking-day-weekdays" aria-hidden="true">
+              <span>Lu</span><span>Ma</span><span>Me</span><span>Je</span><span>Ve</span><span>Sa</span><span>Di</span>
+            </div>
+            <div class="booking-day-rail" data-booking-days></div>
           </div>
-          <div class="grid grid-cols-3 gap-2">
-            {% for s in slots|slice:":9" %}
-            <label class="slot-radio relative">
+
+          <div class="booking-fork-block">
+            <div class="booking-fork-row">
+              <label class="booking-strong-label">{% trans "Nombres de personnes" %}</label>
+            </div>
+            <div class="booking-party-grid" role="radiogroup" aria-label="{% trans 'Nombre de personnes' %}">
+              {% for i in "12345678" %}
+              <label class="booking-party-option" aria-label="{{ i }} {% if i == '1' %}{% trans 'personne' %}{% else %}{% trans 'personnes' %}{% endif %}">
+                <input type="radio" name="party_size" value="{{ i }}" {% if forloop.first %}checked{% endif %} />
+                <span class="booking-party-face">{{ i }}</span>
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="booking-fork-block">
+            <div class="booking-strong-label">{% trans "Horaires" %}</div>
+            <div class="booking-times-wrap" data-booking-slots>
+            {% for s in slots %}
+            <label class="booking-slot" data-slot-date="{{ s.date|date:'Y-m-d' }}" data-slot-day="{{ s.date|date:'D' }}" data-slot-daynum="{{ s.date|date:'d' }}" data-slot-month="{{ s.date|date:'M' }}">
               <input type="radio" name="slot_id" value="{{ s.id }}" {% if forloop.first %}checked{% endif %} {% if s.confirmed_count >= s.capacity %}disabled{% endif %} />
-              <span class="face {% if s.confirmed_count >= s.capacity %}opacity-40{% endif %}">
-                <span class="d">{{ s.date|date:"d M" }}</span>
-                <span class="t">{{ s.time|time:"H:i" }}</span>
-                <span class="d">{{ s.remaining_seats }} {% trans "places" %}</span>
+              <span class="face">
+                <span class="booking-slot-time">{{ s.time|time:"H:i" }}</span>
               </span>
             </label>
             {% endfor %}
           </div>
-
-          <div class="panel py-3 px-4">
-            <label class="text-[0.65rem] uppercase tracking-wider text-white/45">{% trans "Personnes" %}</label>
-            <div class="flex items-center justify-between mt-1">
-              <select name="party_size" class="bg-transparent border-0 text-sm font-bold text-white focus:ring-0 focus:outline-none">
-                {% for i in "12345678" %}<option value="{{ i }}" class="bg-night-900">{{ i }} {% if i == "1" %}personne{% else %}personnes{% endif %}</option>{% endfor %}
-              </select>
-            </div>
           </div>
 
           {% if user.is_authenticated %}
-            <button type="submit" class="btn-primary w-full shine">{% trans "Réserver maintenant" %}</button>
+            <button type="submit" class="booking-cta-fork">{% trans "Reserver maintenant" %}</button>
           {% else %}
-            <a href="/connexion/?next={{ request.path }}" class="btn-primary w-full text-center block shine">{% trans "Connecte-toi pour réserver" %}</a>
+            <a href="/connexion/?next={{ request.path }}" class="booking-cta-fork">{% trans "Connecte-toi pour reserver" %}</a>
           {% endif %}
-          <p class="text-center text-xs text-white/45">{% trans "Confirmation immédiate par email" %}</p>
-          <div class="detail-booking-note mt-4">
-            <p class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-white/42">{% trans "Pourquoi ça convertit mieux" %}</p>
-            <p class="mt-2 text-sm leading-6 text-white/64">{% trans "Plus de désir, plus de signal social et une hiérarchie plus nette entre mood, créneau et action principale." %}</p>
-          </div>
-          <div class="grid grid-cols-2 gap-3 text-xs text-white/55">
-            <div class="panel py-3 px-4">🍷 {% trans "Cadre premium" %}</div>
-            <div class="panel py-3 px-4">⭐ {% trans "Très bien noté" %}</div>
-          </div>
+          <p class="booking-fork-helper">{% trans "Confirmation immediate par email" %}</p>
         </form>
         {% else %}
         <div class="panel text-center py-8">
           <div class="text-3xl mb-2">📅</div>
           <p class="text-sm text-white/65">{% trans "Aucun créneau disponible pour l'instant." %}</p>
-          {% if user.is_authenticated %}
-          <a href="/sorties/creer/?city={{ venue.city_label|default:venue.city_slug|urlencode }}&location={{ venue.name|add:' - '|add:venue.address|urlencode }}&type=COMMUNAUTAIRE" class="btn-secondary btn-sm mt-4">{% trans "Organiser une sortie dans ce restaurant" %}</a>
-          {% endif %}
           {% if venue.phone %}<a href="tel:{{ venue.phone }}" class="btn-secondary btn-sm mt-4">📞 {% trans "Appeler" %}</a>{% endif %}
         </div>
         {% endif %}
@@ -344,4 +603,521 @@
 
   </div>
 </div>
+{{ city_venues|json_script:"city-venues-data" }}
+<script>
+  (function () {
+    var modal = document.getElementById("menu-modal");
+    if (!modal) {
+      return;
+    }
+
+    function openModal() {
+      modal.classList.add("is-open");
+      modal.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeModal() {
+      modal.classList.remove("is-open");
+      modal.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+    }
+
+    document.querySelectorAll("[data-open-menu-modal]").forEach(function (trigger) {
+      trigger.addEventListener("click", openModal);
+    });
+
+    var tabs = modal.querySelectorAll("[data-menu-tab]");
+    var panels = modal.querySelectorAll("[data-menu-panel]");
+
+    tabs.forEach(function (tab) {
+      tab.addEventListener("click", function () {
+        var target = tab.getAttribute("data-menu-tab");
+        tabs.forEach(function (item) {
+          item.classList.toggle("is-active", item === tab);
+        });
+        panels.forEach(function (panel) {
+          panel.hidden = panel.getAttribute("data-menu-panel") !== target;
+        });
+      });
+    });
+
+    modal.querySelectorAll("[data-close-menu-modal]").forEach(function (trigger) {
+      trigger.addEventListener("click", closeModal);
+    });
+
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape" && modal.classList.contains("is-open")) {
+        closeModal();
+      }
+    });
+  })();
+
+  (function () {
+    var bookingForm = document.getElementById("booking-form");
+    if (!bookingForm) {
+      return;
+    }
+
+    var dayRail = bookingForm.querySelector("[data-booking-days]");
+    var monthLabel = bookingForm.querySelector("[data-booking-month]");
+    var prevButton = bookingForm.querySelector("[data-booking-prev]");
+    var nextButton = bookingForm.querySelector("[data-booking-next]");
+    var slotNodes = Array.prototype.slice.call(bookingForm.querySelectorAll(".booking-slot"));
+    if (!dayRail || !slotNodes.length || !monthLabel || !prevButton || !nextButton) {
+      return;
+    }
+
+    var seen = {};
+    slotNodes.forEach(function (slot) {
+      var dateKey = slot.getAttribute("data-slot-date");
+      if (dateKey) {
+        seen[dateKey] = true;
+      }
+    });
+
+    var parseDateKey = function (dateKey) {
+      var parts = (dateKey || "").split("-");
+      if (parts.length !== 3) {
+        return null;
+      }
+      var year = parseInt(parts[0], 10);
+      var month = parseInt(parts[1], 10) - 1;
+      var day = parseInt(parts[2], 10);
+      return new Date(year, month, day);
+    };
+
+    var formatDateKey = function (dateObj) {
+      var y = dateObj.getFullYear();
+      var m = String(dateObj.getMonth() + 1).padStart(2, "0");
+      var d = String(dateObj.getDate()).padStart(2, "0");
+      return y + "-" + m + "-" + d;
+    };
+
+    var openDateKeys = Object.keys(seen).sort();
+    if (!openDateKeys.length) {
+      return;
+    }
+
+    var today = new Date();
+    var startDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    var endDate = new Date(today.getFullYear(), 11, 31);
+    var activeDate = slotNodes[0].getAttribute("data-slot-date") || openDateKeys[0];
+    var activeDateObj = parseDateKey(activeDate) || startDate;
+    var viewYear = activeDateObj.getFullYear();
+    var viewMonth = activeDateObj.getMonth();
+
+    var ensureCheckedVisible = function () {
+      var checked = bookingForm.querySelector(".booking-slot:not(.is-hidden) input:checked");
+      if (checked) {
+        return;
+      }
+      var firstEnabled = bookingForm.querySelector(".booking-slot:not(.is-hidden) input:not(:disabled)");
+      if (firstEnabled) {
+        firstEnabled.checked = true;
+      }
+    };
+
+    var applyDateFilter = function () {
+      slotNodes.forEach(function (slot) {
+        var show = slot.getAttribute("data-slot-date") === activeDate;
+        slot.classList.toggle("is-hidden", !show);
+      });
+      ensureCheckedVisible();
+    };
+
+    var firstAvailableDateInMonth = function (year, month) {
+      for (var i = 0; i < openDateKeys.length; i += 1) {
+        var d = parseDateKey(openDateKeys[i]);
+        if (d && d.getFullYear() === year && d.getMonth() === month) {
+          return openDateKeys[i];
+        }
+      }
+      return null;
+    };
+
+    var isBeforeStart = function (dateObj) {
+      return dateObj.getTime() < startDate.getTime();
+    };
+
+    var isAfterEnd = function (dateObj) {
+      return dateObj.getTime() > endDate.getTime();
+    };
+
+    var renderMonth = function () {
+      dayRail.innerHTML = "";
+      var firstOfMonth = new Date(viewYear, viewMonth, 1);
+      var leading = (firstOfMonth.getDay() + 6) % 7;
+      var daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+
+      for (var pad = 0; pad < leading; pad += 1) {
+        var empty = document.createElement("div");
+        empty.className = "booking-day-empty";
+        dayRail.appendChild(empty);
+      }
+
+      for (var day = 1; day <= daysInMonth; day += 1) {
+        (function (dayNumber) {
+          var dateObj = new Date(viewYear, viewMonth, dayNumber);
+          var dateKey = formatDateKey(dateObj);
+          var hasSlot = !!seen[dateKey];
+          var unavailable = !hasSlot || isBeforeStart(dateObj) || isAfterEnd(dateObj);
+
+          var button = document.createElement("button");
+          button.type = "button";
+          button.className = "booking-day-chip" + (dateKey === activeDate ? " is-active" : "") + (unavailable ? " is-unavailable" : "");
+          button.textContent = String(dayNumber);
+          if (unavailable) {
+            button.disabled = true;
+          }
+          button.addEventListener("click", function () {
+            if (unavailable) {
+              return;
+            }
+            activeDate = dateKey;
+            applyDateFilter();
+            renderMonth();
+          });
+          dayRail.appendChild(button);
+        })(day);
+      }
+
+      monthLabel.textContent = new Intl.DateTimeFormat("fr-FR", { month: "long", year: "numeric" }).format(firstOfMonth);
+
+      var minMonth = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+      var maxMonth = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
+      var currentMonth = new Date(viewYear, viewMonth, 1);
+      prevButton.disabled = currentMonth.getTime() <= minMonth.getTime();
+      nextButton.disabled = currentMonth.getTime() >= maxMonth.getTime();
+    };
+
+    prevButton.addEventListener("click", function () {
+      var minMonth = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+      var candidate = new Date(viewYear, viewMonth - 1, 1);
+      if (candidate.getTime() < minMonth.getTime()) {
+        return;
+      }
+      viewYear = candidate.getFullYear();
+      viewMonth = candidate.getMonth();
+      var firstAvailable = firstAvailableDateInMonth(viewYear, viewMonth);
+      if (firstAvailable) {
+        activeDate = firstAvailable;
+        applyDateFilter();
+      }
+      renderMonth();
+    });
+
+    nextButton.addEventListener("click", function () {
+      var maxMonth = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
+      var candidate = new Date(viewYear, viewMonth + 1, 1);
+      if (candidate.getTime() > maxMonth.getTime()) {
+        return;
+      }
+      viewYear = candidate.getFullYear();
+      viewMonth = candidate.getMonth();
+      var firstAvailable = firstAvailableDateInMonth(viewYear, viewMonth);
+      if (firstAvailable) {
+        activeDate = firstAvailable;
+        applyDateFilter();
+      }
+      renderMonth();
+    });
+
+    applyDateFilter();
+    renderMonth();
+  })();
+
+  (function () {
+    var rotator = document.querySelector("[data-review-rotator]");
+    if (!rotator) {
+      return;
+    }
+
+    var cards = Array.prototype.slice.call(rotator.querySelectorAll("[data-review-slot]"));
+    if (cards.length !== 4) {
+      return;
+    }
+
+    var reviews = [
+      { initial: "A", name: "Antoine V.", age: "1 jour", text: "Cuisine excellente, service impeccable, cadre magnifique. A refaire !" },
+      { initial: "B", name: "Camille B.", age: "2 jours", text: "Super resto pour un date, plats raffines et carte des vins au top." },
+      { initial: "C", name: "Mehdi K.", age: "3 jours", text: "Adresse a connaitre, ambiance chaleureuse et personnel adorable." },
+      { initial: "D", name: "Julie T.", age: "4 jours", text: "Tres bonne decouverte, je recommande sans hesitation." },
+      { initial: "E", name: "Sarah L.", age: "5 jours", text: "Service rapide, assiettes genereuses et une ambiance parfaite pour un diner en duo." },
+      { initial: "F", name: "Nicolas R.", age: "6 jours", text: "Belle surprise: cuisson parfaite et equipe tres accueillante du debut a la fin." },
+      { initial: "G", name: "Maya P.", age: "1 semaine", text: "Cadre tres agreable, plats soignes et excellent rapport qualite-prix." },
+      { initial: "H", name: "Karim S.", age: "8 jours", text: "Une adresse sure a Marseille, ambiance conviviale et cuisine au niveau." }
+    ];
+
+    var startIndex = 0;
+    var renderWindow = function () {
+      cards.forEach(function (card, cardIndex) {
+        card.classList.add("is-updating");
+        var review = reviews[(startIndex + cardIndex) % reviews.length];
+        window.setTimeout(function () {
+          var initial = card.querySelector("[data-review-initial]");
+          var name = card.querySelector("[data-review-name]");
+          var age = card.querySelector("[data-review-age]");
+          var text = card.querySelector("[data-review-text]");
+          if (initial) initial.textContent = review.initial;
+          if (name) name.textContent = review.name;
+          if (age) age.textContent = review.age;
+          if (text) text.textContent = review.text;
+          card.classList.remove("is-updating");
+        }, 170);
+      });
+    };
+
+    window.setInterval(function () {
+      startIndex = (startIndex + 1) % reviews.length;
+      renderWindow();
+    }, 30000);
+  })();
+
+  (function () {
+    var reviewCard = document.querySelector("[data-review-reveal]");
+    if (!reviewCard) {
+      return;
+    }
+
+    var started = false;
+    var animateNumber = function (node) {
+      var target = parseFloat(node.getAttribute("data-target") || "0");
+      var decimals = parseInt(node.getAttribute("data-decimals") || "0", 10);
+      var duration = 900;
+      var startTime = null;
+
+      var step = function (timestamp) {
+        if (!startTime) {
+          startTime = timestamp;
+        }
+        var progress = Math.min((timestamp - startTime) / duration, 1);
+        var eased = 1 - Math.pow(1 - progress, 3);
+        var current = target * eased;
+        node.textContent = decimals > 0 ? current.toFixed(decimals) : Math.round(current).toString();
+        if (progress < 1) {
+          window.requestAnimationFrame(step);
+        }
+      };
+
+      window.requestAnimationFrame(step);
+    };
+
+    var animateBar = function (node) {
+      var rawScore = parseFloat(node.getAttribute("data-score") || "0");
+      var target = Math.max(0, Math.min(rawScore * 10, 100));
+      var duration = 900;
+      var startTime = null;
+
+      var step = function (timestamp) {
+        if (!startTime) {
+          startTime = timestamp;
+        }
+        var progress = Math.min((timestamp - startTime) / duration, 1);
+        var eased = 1 - Math.pow(1 - progress, 3);
+        node.style.width = (target * eased).toFixed(2) + "%";
+        if (progress < 1) {
+          window.requestAnimationFrame(step);
+        }
+      };
+
+      window.requestAnimationFrame(step);
+    };
+
+    var startReviewAnim = function () {
+      if (started) {
+        return;
+      }
+      started = true;
+      reviewCard.classList.add("is-visible");
+      reviewCard.querySelectorAll("[data-review-number]").forEach(animateNumber);
+      reviewCard.querySelectorAll("[data-review-bar]").forEach(animateBar);
+    };
+
+    if (!("IntersectionObserver" in window)) {
+      startReviewAnim();
+      return;
+    }
+
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          startReviewAnim();
+          observer.disconnect();
+        }
+      });
+    }, { threshold: 0.35 });
+
+    observer.observe(reviewCard);
+  })();
+
+  (function () {
+    var mapRoot = document.getElementById("restaurant-city-map");
+    var dataNode = document.getElementById("city-venues-data");
+    if (!mapRoot || !dataNode || typeof L === "undefined") {
+      return;
+    }
+
+    var cityVenues = [];
+    try {
+      cityVenues = JSON.parse(dataNode.textContent || "[]");
+    } catch (error) {
+      cityVenues = [];
+    }
+    if (!Array.isArray(cityVenues) || !cityVenues.length) {
+      return;
+    }
+
+    var map = L.map(mapRoot, { zoomControl: true, scrollWheelZoom: false });
+    var fallbackLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    });
+    var satelliteLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+      maxZoom: 20,
+      attribution: 'Tiles &copy; Esri',
+    });
+    satelliteLayer.on("tileerror", function () {
+      if (!map.hasLayer(fallbackLayer)) {
+        fallbackLayer.addTo(map);
+      }
+    });
+    satelliteLayer.addTo(map);
+
+    var geocode = function (query) {
+      var url = "https://nominatim.openstreetmap.org/search?format=json&limit=1&q=" + encodeURIComponent(query);
+      return fetch(url, { headers: { Accept: "application/json" } })
+        .then(function (response) {
+          if (!response.ok) {
+            return null;
+          }
+          return response.json();
+        })
+        .then(function (result) {
+          if (!result || !result.length) {
+            return null;
+          }
+          return {
+            lat: parseFloat(result[0].lat),
+            lng: parseFloat(result[0].lon),
+          };
+        })
+        .catch(function () {
+          return null;
+        });
+    };
+
+    var geocodeVenue = function (item) {
+      var queryCandidates = [
+        item.full_address || "",
+        [item.address || "", item.city_label || "", "France"].join(", "),
+        [item.name || "", item.city_label || "", "France"].join(", "),
+      ]
+        .map(function (entry) { return (entry || "").replace(/\s+/g, " ").trim(); })
+        .filter(function (entry, index, all) { return entry && all.indexOf(entry) === index; });
+
+      var attempt = function (idx) {
+        if (idx >= queryCandidates.length) {
+          return Promise.resolve(null);
+        }
+        return geocode(queryCandidates[idx]).then(function (coords) {
+          if (coords) {
+            return coords;
+          }
+          return attempt(idx + 1);
+        });
+      };
+
+      return attempt(0);
+    };
+
+    var isMobileViewport = window.matchMedia("(max-width: 768px)").matches;
+
+    var getNavigationLinks = function (destination, origin) {
+      var dest = destination.lat + "," + destination.lng;
+      var waze = "https://waze.com/ul?ll=" + dest + "&navigate=yes";
+      var google = "https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent(dest) + "&travelmode=driving";
+      if (origin && Number.isFinite(origin.lat) && Number.isFinite(origin.lng)) {
+        google += "&origin=" + encodeURIComponent(origin.lat + "," + origin.lng);
+      }
+      var apple = "https://maps.apple.com/?daddr=" + encodeURIComponent(dest) + "&dirflg=d";
+      return { waze: waze, google: google, apple: apple };
+    };
+
+    var openNavigationFromMarker = function (destination) {
+      if (!isMobileViewport || !navigator.geolocation) {
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        function (position) {
+          var origin = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          };
+          var links = getNavigationLinks(destination, origin);
+          window.location.href = links.waze;
+        },
+        function () {
+          // If geolocation is unavailable or denied, keep normal popup behavior.
+        },
+        { enableHighAccuracy: false, timeout: 5000, maximumAge: 60000 }
+      );
+    };
+
+    Promise.all(
+      cityVenues.map(function (item) {
+        return geocodeVenue(item).then(function (coords) {
+          return { item: item, coords: coords };
+        });
+      })
+    ).then(function (items) {
+      var resolved = items.filter(function (entry) {
+        return entry.coords && Number.isFinite(entry.coords.lat) && Number.isFinite(entry.coords.lng);
+      });
+
+      if (!resolved.length) {
+        map.setView([43.2965, 5.3698], 12);
+        return;
+      }
+
+      var bounds = [];
+      resolved.forEach(function (entry) {
+        var isCurrent = !!entry.item.is_current;
+        var links = getNavigationLinks(entry.coords);
+        var icon = L.divIcon({
+          className: "",
+          html: '<div class="restaurant-map-marker"><div class="restaurant-map-pin' + (isCurrent ? ' restaurant-map-pin--current' : '') + '"><span>🍽️</span></div>' +
+            (isCurrent ? '<span class="restaurant-map-pulse"></span>' : '') +
+            '</div>',
+          iconSize: isCurrent ? [40, 48] : [36, 44],
+          iconAnchor: isCurrent ? [20, 40] : [18, 36],
+        });
+
+        var marker = L.marker([entry.coords.lat, entry.coords.lng], { icon: icon }).addTo(map);
+        var venueUrl = "/restaurants/" + (entry.item.city_slug || "") + "/" + (entry.item.slug || "") + "/";
+        marker.bindPopup(
+          '<div class="detail-map-popup-title">' + (entry.item.name || "Restaurant") + '</div>' +
+          '<div class="detail-map-popup-sub">' + (entry.item.full_address || "") + (isCurrent ? '<br><em>Vous etes ici</em>' : '') + '</div>' +
+          '<a class="detail-map-route-btn" href="' + links.waze + '" target="_blank" rel="noopener noreferrer">Itineraire</a>' +
+          '<div class="detail-map-popup-links"><a href="' + links.google + '" target="_blank" rel="noopener noreferrer">Google Maps</a> · ' +
+          '<a href="' + links.apple + '" target="_blank" rel="noopener noreferrer">Plans</a> · ' +
+          '<a href="' + venueUrl + '">Voir la page</a></div>'
+        );
+        marker.on("click", function () {
+          openNavigationFromMarker(entry.coords);
+        });
+        if (isCurrent) {
+          marker.openPopup();
+        }
+        bounds.push([entry.coords.lat, entry.coords.lng]);
+      });
+
+      if (bounds.length === 1) {
+        map.setView(bounds[0], 14);
+      } else {
+        map.fitBounds(bounds, { padding: [28, 28] });
+      }
+    });
+  })();
+</script>
 {% endblock %}

@@ -37,6 +37,7 @@ urlpatterns = [
     # Restaurants
     path("restaurants/", views.restaurants_list, name="restaurants-list"),
     path("restaurants/<slug:city_slug>/<slug:slug>/", views.restaurant_detail, name="restaurant-detail"),
+    path("restaurants/<slug:city_slug>/<slug:slug>/photos/", views.restaurant_photos, name="restaurant-photos"),
     path("restaurants/<slug:city_slug>/<slug:slug>/reserver/", views.restaurant_book, name="restaurant-book"),
 
     # Events

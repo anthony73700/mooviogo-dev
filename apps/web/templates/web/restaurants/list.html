@@ -286,9 +286,9 @@
         <div class="mx-auto max-w-3xl text-center">
           <h3 class="envies-title">{% trans "La table dont tout le monde parle… avant qu’il n’y ait plus de place." %}</h3>
         </div>
-        <a href="/feed/">{% trans "Voir le feed" %} →</a>
+        <a href="/restaurants/{{ featured_restaurant.city_slug }}/{{ featured_restaurant.slug }}/">{% trans "Voir le feed" %} →</a>
       </div>
-      <article class="restaurant-feature block interactive-card card-tilt ambient-ring group">
+      <article class="restaurant-feature block interactive-card card-tilt ambient-ring group" data-featured-link="/restaurants/{{ featured_restaurant.city_slug }}/{{ featured_restaurant.slug }}/" role="link" tabindex="0" aria-label="{{ featured_restaurant.name }}">
         {% if featured_restaurant.cover_image_url %}
           <img src="{{ featured_restaurant.cover_image_url }}" alt="{{ featured_restaurant.name }}" class="restaurant-feature-media ken-burns" loading="lazy" />
         {% else %}
@@ -416,5 +416,33 @@
   </nav>
   {% endif %}
 </section>
+
+<script>
+  (function () {
+    var featuredCard = document.querySelector("[data-featured-link]");
+    if (!featuredCard) {
+      return;
+    }
+
+    var targetUrl = featuredCard.getAttribute("data-featured-link");
+    if (!targetUrl) {
+      return;
+    }
+
+    featuredCard.addEventListener("click", function (event) {
+      if (event.target.closest("a, button, input, select, textarea, label")) {
+        return;
+      }
+      window.location.href = targetUrl;
+    });
+
+    featuredCard.addEventListener("keydown", function (event) {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        window.location.href = targetUrl;
+      }
+    });
+  })();
+</script>
 
 {% endblock %}
