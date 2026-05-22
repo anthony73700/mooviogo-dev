@@ -20,6 +20,24 @@
   <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
     {% for city in cities %}
     <a href="/ville/{{ city.slug }}/" class="group relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-night-800 to-night-900 p-5 aspect-square flex flex-col justify-between hover:border-flamingo-500/40 hover:shadow-neon-sm transition-all">
+      {% if city.slug == "marseille" %}
+      <img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80" alt="Marseille - Notre-Dame de la Garde" class="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+      {% elif city.slug == "paris" %}
+      <img src="https://images.unsplash.com/photo-1502602898536-47ad22581b52?auto=format&fit=crop&w=1200&q=80" alt="Paris - Tour Eiffel" class="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+      {% elif city.slug == "lyon" %}
+      <img src="https://images.unsplash.com/photo-1567600559274-7b2f7f6f5f4b?auto=format&fit=crop&w=1200&q=80" alt="Lyon - Vieux Lyon" class="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+      {% elif city.slug == "bordeaux" %}
+      <img src="https://images.unsplash.com/photo-1593078165899-c2a0f5f2f0ef?auto=format&fit=crop&w=1200&q=80" alt="Bordeaux - Place de la Bourse" class="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+      {% elif city.slug == "toulouse" %}
+      <img src="https://images.unsplash.com/photo-1633725895640-2688f6d5e5a8?auto=format&fit=crop&w=1200&q=80" alt="Toulouse - Place du Capitole" class="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+      {% elif city.slug == "nice" %}
+      <img src="https://images.unsplash.com/photo-1533105079780-92b9be482077?auto=format&fit=crop&w=1200&q=80" alt="Nice - Promenade des Anglais" class="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+      {% elif city.slug == "nantes" %}
+      <img src="https://images.unsplash.com/photo-1593014109523-22d3e0dbe58d?auto=format&fit=crop&w=1200&q=80" alt="Nantes - centre-ville" class="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+      {% elif city.slug == "lille" %}
+      <img src="https://images.unsplash.com/photo-1608052875385-37e04714b9de?auto=format&fit=crop&w=1200&q=80" alt="Lille - Grand Place" class="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+      {% endif %}
+      <div class="absolute inset-0 bg-gradient-to-b from-night-900/40 via-night-900/52 to-night-900/88"></div>
       <div class="absolute inset-0 bg-grad-brand opacity-0 group-hover:opacity-15 transition-opacity"></div>
       <div class="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-flamingo-500/20 blur-3xl group-hover:bg-neon-500/40 transition-colors"></div>
       <div class="relative">

@@ -440,10 +440,13 @@
   <div class="flex items-end justify-between mb-6 gap-4 flex-wrap">
     <div>
       <span class="h-eyebrow">🍽️ {% trans "À table" %}</span>
-      <h2 class="h-section text-white mt-1">{% trans "Restos à réserver" %}</h2>
-      <p class="text-sm text-white/55 mt-1">{% trans "Une table pour ce soir, demain, le week-end." %}</p>
+      <h2 class="h-section text-white mt-1">{% trans "Les bons plans autour de toi" %}</h2>
+      <p class="text-sm text-white/55 mt-1">{% trans "Découvre les restaurants autour de toi" %}</p>
     </div>
-    <a href="/restaurants/" class="btn-secondary btn-sm">{% trans "Tous les restos" %}</a>
+    <div class="hidden sm:flex items-center gap-2 text-xs text-white/55">
+      <span>{% trans "Trier par" %}:</span>
+      <button class="chip chip-neutral" type="button">{% trans "Pertinence" %}</button>
+    </div>
   </div>
 
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 home-mobile-rail">
@@ -481,6 +484,55 @@
     <div class="col-span-full panel text-center text-white/55 py-12">
       <div class="text-3xl mb-3">🍝</div>
       <p>{% trans "Aucun resto pour l'instant." %}</p>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+{# ═════════════ SORTIE PARTNERS ═════════════ #}
+<section class="mx-auto max-w-7xl px-4 py-12 border-t border-white/[0.05]">
+  <div class="flex items-end justify-between mb-6 gap-4 flex-wrap">
+    <div>
+      <span class="h-eyebrow">🎯 {% trans "Partenaires de sortie" %}</span>
+      <h2 class="h-section text-white mt-1">{% trans "Karting, paintball, laser game" %}</h2>
+      <p class="text-sm text-white/55 mt-1">{% trans "Réserve une activité en quelques secondes avec nos partenaires vérifiés." %}</p>
+    </div>
+    <a href="/partenaires/" class="btn-secondary btn-sm">{% trans "Tous les partenaires" %}</a>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 home-mobile-rail">
+    {% for partner in partners|slice:":8" %}
+    <a href="/partenaires/" class="home-photo-card home-photo-card-eq block group">
+      {% if partner.cover_image_url %}
+        <img src="{{ partner.cover_image_url }}" alt="{{ partner.name }}" loading="lazy" class="home-photo-media" />
+      {% else %}
+        <div class="absolute inset-0 bg-grad-brand"></div>
+      {% endif %}
+      <div class="home-photo-badges">
+        <span class="chip chip-dark">🤝 {% trans "Partenaire sortie" %}</span>
+        {% if partner.category %}<span class="chip chip-sunset">{{ partner.category }}</span>{% else %}<span class="chip chip-sunset">{% trans "Activité" %}</span>{% endif %}
+      </div>
+      <div class="home-photo-content">
+        <div class="flex items-center justify-between gap-2 mb-1">
+          <div class="font-display text-2xl font-extrabold tracking-tight text-white">{{ partner.name }}</div>
+          <span class="inline-flex items-center gap-0.5 text-xs font-semibold text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-sunset-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+            4.{% widthratio forloop.counter 10 8 %}
+          </span>
+        </div>
+        <p class="home-photo-sub">{{ partner.short_description|default:_('Karting, paintball, laser game et activités à réserver sans friction.')|truncatechars:105 }}</p>
+        <div class="mt-4 flex flex-wrap items-center gap-2 text-xs text-white/70">
+          {% if partner.city %}<span>📍 {{ partner.city }}</span>{% endif %}
+          {% if partner.category %}<span>•</span><span>{{ partner.category }}</span>{% endif %}
+          {% if partner.is_verified %}<span>•</span><span class="text-electric-300 font-semibold">{% trans "Vérifié" %}</span>{% endif %}
+        </div>
+      </div>
+    </a>
+    {% empty %}
+    <div class="col-span-full panel text-center text-white/55 py-12">
+      <div class="text-3xl mb-3">🎯</div>
+      <p>{% trans "Aucun partenaire sortie pour l'instant." %}</p>
+      <a href="/partenaires/" class="btn-secondary btn-sm mt-4">{% trans "Voir les partenaires" %}</a>
     </div>
     {% endfor %}
   </div>

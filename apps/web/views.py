@@ -1119,6 +1119,8 @@ def evenements_list(request):
     events = Event.objects.filter(
         status=Event.Status.PUBLISHED,
         is_partner_event=False,
+    ).exclude(
+        slug="apero-reseau-mooviogo-bordeaux",
     ).order_by("starts_at")
     return render(request, "web/evenements/list.html", {"events": events})
 

@@ -60,19 +60,60 @@
   .restaurant-feature { position:relative; overflow:hidden; min-height:420px; border-radius:28px; border:1px solid rgba(255,255,255,.08); }
   .restaurant-feature::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(6,4,14,.03) 12%,rgba(6,4,14,.18) 44%,rgba(6,4,14,.95) 100%); }
   .restaurant-feature-media { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
-  .restaurant-feature-content { position:absolute; inset:auto 0 0 0; z-index:2; padding:1.2rem; }
+  .restaurant-feature-content { position:absolute; inset:auto 0 0 0; z-index:2; padding:1.2rem; text-align:center; }
   .restaurant-feature-metrics { display:grid; gap:.75rem; grid-template-columns:repeat(3,minmax(0,1fr)); }
   .restaurant-metric { border:1px solid rgba(255,255,255,.08); border-radius:1rem; background:rgba(8,7,18,.52); padding:.85rem .95rem; backdrop-filter:blur(14px); }
   .restaurant-side-list { display:grid; gap:.75rem; }
   .restaurant-side-row { display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; border:1px solid rgba(255,255,255,.06); border-radius:20px; background:rgba(255,255,255,.025); padding:1rem; transition:transform .24s cubic-bezier(.22,1,.36,1), border-color .2s ease, background-color .2s ease; }
   .restaurant-side-row:hover { transform:translateY(-2px); border-color:rgba(255,255,255,.14); background:rgba(255,255,255,.04); }
-  .restaurant-badge-col { display:flex; flex-wrap:wrap; gap:.55rem; }
+  .restaurant-badge-col { display:flex; flex-wrap:wrap; gap:.55rem; justify-content:center; }
+  .btn-reserver-gradient {
+    border:0;
+    color:#fff;
+    background:linear-gradient(90deg,#7a2cff 0%,#ff4d8d 100%);
+    box-shadow:0 16px 30px -18px rgba(122,44,255,.95);
+  }
+  .btn-reserver-gradient:hover {
+    filter:brightness(1.05);
+    transform:translateY(-1px);
+  }
+  .card-reserve-btn {
+    min-width: 180px;
+    justify-content: center;
+    padding-left: 1.35rem;
+    padding-right: 1.35rem;
+  }
   .list-photo-card { position:relative; min-height:420px; overflow:hidden; border-radius:30px; border:1px solid rgba(255,255,255,.08); box-shadow:0 28px 70px -34px rgba(0,0,0,.88); }
   .list-photo-card::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(6,4,14,.04) 14%,rgba(6,4,14,.2) 42%,rgba(6,4,14,.94) 100%); pointer-events:none; }
   .list-photo-media { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; transition:transform .7s cubic-bezier(.22,1,.36,1), filter .35s ease; }
   .group:hover .list-photo-media { transform:scale(1.06); filter:saturate(1.08); }
   .list-photo-top { position:absolute; inset:1rem 1rem auto 1rem; z-index:2; display:flex; align-items:flex-start; justify-content:space-between; gap:.75rem; }
   .list-photo-bottom { position:absolute; inset:auto 0 0 0; z-index:2; padding:1.1rem; }
+  .status-initial-gradient {
+    background:linear-gradient(90deg,#7a2cff 0%,#ff4d8d 100%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    font-weight:900;
+  }
+  .promo-chip-1 {
+    color:#fff;
+    border:0;
+    background:linear-gradient(90deg,#ff3f7f 0%,#ff7a59 100%);
+    box-shadow:0 10px 22px -14px rgba(255,63,127,.9);
+  }
+  .promo-chip-2 {
+    color:#fff;
+    border:0;
+    background:linear-gradient(90deg,#6f3dff 0%,#b24dff 100%);
+    box-shadow:0 10px 22px -14px rgba(111,61,255,.92);
+  }
+  .promo-chip-3 {
+    color:#fff;
+    border:0;
+    background:linear-gradient(90deg,#ff7a18 0%,#ffb347 100%);
+    box-shadow:0 10px 22px -14px rgba(255,122,24,.9);
+  }
   .save-btn { position:absolute; top:.55rem; right:.55rem; z-index:2; display:grid; place-items:center; height:2rem; width:2rem; border-radius:9999px; background:rgba(0,0,0,0.45); backdrop-filter:blur(8px); color:#fff; border:1px solid rgba(255,255,255,0.15); transition:all .2s; }
   .save-btn:hover { background:rgba(243,28,127,0.8); border-color:#F31C7F; }
   .cuisine-rail {
@@ -243,6 +284,121 @@
     letter-spacing:.015em;
     color:rgba(255,255,255,.58);
   }
+  .partner-section {
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:1.35rem;
+    background:rgba(255,255,255,.02);
+    padding:1rem;
+    box-shadow:0 20px 44px -34px rgba(0,0,0,.9);
+    margin:0 0 2rem;
+  }
+  .partner-head {
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:.8rem;
+    margin-bottom:.8rem;
+  }
+  .partner-rail {
+    display:flex;
+    gap:.72rem;
+    overflow-x:auto;
+    padding:.2rem .1rem .36rem;
+    scrollbar-width:none;
+    scroll-snap-type:x mandatory;
+  }
+  .partner-rail::-webkit-scrollbar { display:none; }
+  .partner-card {
+    position:relative;
+    flex:0 0 auto;
+    width:260px;
+    min-height:276px;
+    border-radius:1.1rem;
+    border:1px solid rgba(255,255,255,.1);
+    overflow:hidden;
+    box-shadow:0 22px 34px -24px rgba(0,0,0,.92);
+    scroll-snap-align:start;
+    transition:transform .24s cubic-bezier(.22,1,.36,1), border-color .2s ease;
+  }
+  .partner-card::after {
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(180deg,rgba(6,8,12,.1) 18%,rgba(6,8,12,.46) 56%,rgba(6,8,12,.92) 100%);
+    pointer-events:none;
+  }
+  .partner-card:hover {
+    transform:translateY(-2px);
+    border-color:rgba(255,255,255,.24);
+  }
+  .partner-media {
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    transition:transform .6s cubic-bezier(.22,1,.36,1);
+  }
+  .partner-card:hover .partner-media { transform:scale(1.04); }
+  .partner-content {
+    position:absolute;
+    inset:auto 0 0 0;
+    z-index:1;
+    padding:.82rem;
+  }
+  .partner-topline {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:.55rem;
+  }
+  .partner-kicker {
+    display:inline-flex;
+    align-items:center;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.24);
+    background:rgba(255,255,255,.08);
+    padding:.24rem .54rem;
+    font-size:.62rem;
+    font-weight:760;
+    letter-spacing:.04em;
+    color:rgba(255,255,255,.9);
+  }
+  .partner-price {
+    font-size:.72rem;
+    font-weight:800;
+    color:rgba(255,255,255,.92);
+  }
+  .partner-name-row {
+    margin-top:.45rem;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:.55rem;
+  }
+  .partner-rating {
+    font-size:.74rem;
+    font-weight:800;
+    color:#fff;
+    letter-spacing:.01em;
+  }
+  .partner-name {
+    font-size:1.02rem;
+    font-weight:800;
+    color:#fff;
+    letter-spacing:-.02em;
+  }
+  .partner-desc {
+    margin-top:.3rem;
+    font-size:.76rem;
+    line-height:1.42;
+    color:rgba(255,255,255,.74);
+  }
+  .partner-meta {
+    margin-top:.45rem;
+    font-size:.69rem;
+    color:rgba(255,255,255,.7);
+  }
   @media (max-width: 1024px) { .list-hero-grid, .restaurant-editorial, .restaurant-feature-metrics, .store-list-grid, .store-list-meta { grid-template-columns:1fr; } }
   @media (max-width: 640px) { .envie-card { width:174px; min-height:198px; } }
 </style>
@@ -286,7 +442,6 @@
         <div class="mx-auto max-w-3xl text-center">
           <h3 class="envies-title">{% trans "La table dont tout le monde parle… avant qu’il n’y ait plus de place." %}</h3>
         </div>
-        <a href="/restaurants/{{ featured_restaurant.city_slug }}/{{ featured_restaurant.slug }}/">{% trans "Voir le feed" %} →</a>
       </div>
       <article class="restaurant-feature block interactive-card card-tilt ambient-ring group" data-featured-link="/restaurants/{{ featured_restaurant.city_slug }}/{{ featured_restaurant.slug }}/" role="link" tabindex="0" aria-label="{{ featured_restaurant.name }}">
         {% if featured_restaurant.cover_image_url %}
@@ -296,15 +451,13 @@
         {% endif %}
         <div class="restaurant-feature-content">
           <div class="restaurant-badge-col">
-            <span class="chip chip-sunset">{% trans "Dinner radar" %}</span>
-            <span class="chip chip-dark">{% trans "Photo-led" %}</span>
             {% if featured_restaurant.price_range %}<span class="chip chip-electric">{{ featured_restaurant.price_range }}</span>{% endif %}
             {% if featured_is_promoted %}<span class="chip chip-neon">{% trans "Mise en avant sponsorisée" %}</span>{% endif %}
           </div>
           <h3 class="mt-3 font-display text-4xl font-extrabold tracking-tight text-white">{{ featured_restaurant.name }}</h3>
-          <p class="mt-3 max-w-2xl text-sm leading-7 text-white/68">{{ featured_restaurant.description|default:_('Une adresse pensée comme un choix de soirée, pas seulement comme une fiche de réservation.')|truncatechars:150 }}</p>
-          <div class="mt-4 flex flex-wrap gap-2">
-            <a href="/restaurants/{{ featured_restaurant.city_slug }}/{{ featured_restaurant.slug }}/#booking-panel" class="btn-dice btn-sm">{% trans "Réserver" %}</a>
+          <p class="mt-3 max-w-2xl mx-auto text-sm leading-7 text-white/68">{{ featured_restaurant.description|default:_('Une adresse pensée comme un choix de soirée, pas seulement comme une fiche de réservation.')|truncatechars:150 }}</p>
+          <div class="mt-4 flex flex-wrap gap-2 justify-center">
+            <a href="/restaurants/{{ featured_restaurant.city_slug }}/{{ featured_restaurant.slug }}/#booking-panel" class="btn-dice btn-sm btn-reserver-gradient">{% trans "Réserver" %}</a>
             <a href="/restaurants/{{ featured_restaurant.city_slug }}/{{ featured_restaurant.slug }}/" class="btn-secondary btn-sm">{% trans "Voir la fiche" %}</a>
           </div>
           <div class="restaurant-feature-metrics mt-5">
@@ -354,32 +507,26 @@
     </div>
   </section>
 
-  <div class="flex items-center justify-between mb-5">
-    <h2 class="h-section text-white">{{ page_obj.paginator.count }} {% trans "restos" %}</h2>
-    <div class="hidden sm:flex items-center gap-2 text-xs text-white/55">
-      <span>{% trans "Trier par" %}:</span>
-      <button class="chip chip-neutral">{% trans "Pertinence" %}</button>
-    </div>
+  <div class="mb-6 text-center">
+    <h2 class="h-section text-white mt-1">{% trans "Les bons plans autour de toi" %}</h2>
   </div>
 
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 fade-up stagger-2">
-    {% for r in venues %}
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-5 fade-up stagger-2">
+    {% for r in venues|slice:":8" %}
     <a href="/restaurants/{{ r.city_slug }}/{{ r.slug }}/" class="list-photo-card interactive-card card-tilt ambient-ring tap-bounce block group">
       <div class="list-photo-top">
-        <div class="flex flex-wrap gap-2">
-          <span class="chip chip-dark">🍽️ {% trans "Table" %}</span>
-          {% if r.price_range %}<span class="chip chip-sunset">{{ r.price_range }}</span>{% endif %}
-        </div>
-        <button type="button" class="save-btn" aria-label="{% trans 'Enregistrer' %}" onclick="event.preventDefault();this.classList.toggle('text-flamingo-400');">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21s-7-4.534-9.5-9C1.07 9.36 2.5 6 5.5 6c1.74 0 3.41 1 4.5 2.5C11.09 7 12.76 6 14.5 6c3 0 4.43 3.36 3 6-2.5 4.466-9.5 9-9.5 9z" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+        {% cycle "promo-chip-1" "promo-chip-2" "promo-chip-3" as promo_class silent %}
+        <span class="chip {{ promo_class }}">{% cycle "-20%" "-10%" "-30%" %}</span>
       </div>
       {% if r.cover_image_url %}
         <img src="{{ r.cover_image_url }}" alt="{{ r.name }}" loading="lazy" class="list-photo-media" />
+      {% elif r.slug == "le-comptoir-du-marche" %}
+        <img src="https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?auto=format&fit=crop&w=900&q=80" alt="{{ r.name }}" loading="lazy" class="list-photo-media" />
       {% else %}
         <div class="absolute inset-0 bg-grad-brand"></div>
       {% endif %}
-      <div class="list-photo-bottom">
-        <div class="flex items-center justify-between gap-2 mb-1">
+      <div class="list-photo-bottom text-center">
+        <div class="flex flex-col items-center gap-1 mb-1">
           <div class="font-display text-2xl font-extrabold tracking-tight text-white">{{ r.name }}</div>
           <span class="inline-flex items-center gap-0.5 text-xs font-semibold text-white shrink-0">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-sunset-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
@@ -387,14 +534,61 @@
           </span>
         </div>
         <p class="mt-2 text-sm leading-6 text-white/65 line-clamp-2">{{ r.description|default:_('Une adresse premium, mieux racontée, plus claire sur la réservation.')|truncatechars:100 }}</p>
-        <div class="mt-3 flex flex-wrap items-center gap-2 text-xs text-white/72">
-          <span>📍 {{ r.city_label|default:r.city_slug }}</span>
-          {% if r.cuisine_type %}<span>•</span><span>{{ r.cuisine_type }}</span>{% endif %}
-          {% if r.price_range %}<span>•</span><span class="text-white/75 font-semibold">{{ r.price_range }}</span>{% endif %}
+        <div class="mt-3 flex items-center justify-between gap-2 text-xs text-white/72">
+          <div class="flex flex-wrap items-center justify-center gap-2">
+            <span>📍 {{ r.city_label|default:r.city_slug }}</span>
+            {% if r.cuisine_type %}<span>•</span><span>{{ r.cuisine_type }}</span>{% endif %}
+          </div>
+          {% if r.price_range %}<span class="status-initial-gradient font-extrabold">{{ r.price_range }}</span>{% endif %}
         </div>
-        <div class="mt-3 pt-3 border-t border-white/10 flex items-center justify-between text-xs">
-          <span class="chip chip-electric">✓ {% trans "Dispo ce soir" %}</span>
-          <span class="text-flamingo-400 font-semibold group-hover:translate-x-1 transition-transform">{% trans "Réserver →" %}</span>
+        <div class="mt-4 flex justify-center">
+          <span class="btn-dice btn-sm btn-reserver-gradient card-reserve-btn pointer-events-none">{% trans "Réserver" %}</span>
+        </div>
+      </div>
+    </a>
+    {% empty %}
+    <div class="col-span-full panel text-center py-16">
+      <div class="text-5xl mb-4">🍝</div>
+      <h3 class="font-display text-xl font-bold text-white">{% trans "Aucun resto trouvé" %}</h3>
+      <p class="text-white/55 mt-2">{% trans "Essaie d'autres mots-clés ou une autre ville." %}</p>
+      <a href="/restaurants/" class="btn-secondary btn-sm mt-6">{% trans "Réinitialiser" %}</a>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="mb-6 mt-10 text-center">
+    <h2 class="h-section text-white mt-1">{% trans "Les restaurant autour de toi" %}</h2>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-5 fade-up stagger-2">
+    {% for r in venues|slice:":8" %}
+    <a href="/restaurants/{{ r.city_slug }}/{{ r.slug }}/" class="list-photo-card interactive-card card-tilt ambient-ring tap-bounce block group">
+      <div class="list-photo-top justify-end"></div>
+      {% if r.cover_image_url %}
+        <img src="{{ r.cover_image_url }}" alt="{{ r.name }}" loading="lazy" class="list-photo-media" />
+      {% elif r.slug == "le-comptoir-du-marche" %}
+        <img src="https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?auto=format&fit=crop&w=900&q=80" alt="{{ r.name }}" loading="lazy" class="list-photo-media" />
+      {% else %}
+        <div class="absolute inset-0 bg-grad-brand"></div>
+      {% endif %}
+      <div class="list-photo-bottom text-center">
+        <div class="flex flex-col items-center gap-1 mb-1">
+          <div class="font-display text-2xl font-extrabold tracking-tight text-white">{{ r.name }}</div>
+          <span class="inline-flex items-center gap-0.5 text-xs font-semibold text-white shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-sunset-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+            4.{% widthratio forloop.counter 18 9 %}
+          </span>
+        </div>
+        <p class="mt-2 text-sm leading-6 text-white/65 line-clamp-2">{{ r.description|default:_('Une adresse premium, mieux racontée, plus claire sur la réservation.')|truncatechars:100 }}</p>
+        <div class="mt-3 flex items-center justify-between gap-2 text-xs text-white/72">
+          <div class="flex flex-wrap items-center justify-center gap-2">
+            <span>📍 {{ r.city_label|default:r.city_slug }}</span>
+            {% if r.cuisine_type %}<span>•</span><span>{{ r.cuisine_type }}</span>{% endif %}
+          </div>
+          {% if r.price_range %}<span class="status-initial-gradient font-extrabold">{{ r.price_range }}</span>{% endif %}
+        </div>
+        <div class="mt-4 flex justify-center">
+          <span class="btn-dice btn-sm btn-reserver-gradient card-reserve-btn pointer-events-none">{% trans "Réserver" %}</span>
         </div>
       </div>
     </a>

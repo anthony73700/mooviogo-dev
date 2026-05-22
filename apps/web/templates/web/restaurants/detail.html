@@ -136,16 +136,14 @@
   .detail-menu-item-price { font-size:.9rem; font-weight:800; color:#fff; }
   .detail-menu-item-desc { margin-top:.34rem; font-size:.84rem; line-height:1.45; color:rgba(255,255,255,.65); }
   .detail-map-section { position:relative; overflow:hidden; border:1px solid rgba(255,255,255,.13); border-radius:1.4rem; background:radial-gradient(120% 160% at 0% 0%, rgba(122,44,255,.2) 0%, rgba(15,19,31,.95) 52%, rgba(10,14,24,.98) 100%); box-shadow:0 34px 70px -44px rgba(0,0,0,.9), inset 0 1px 0 rgba(255,255,255,.17); backdrop-filter:blur(16px); }
-  .detail-map-header { text-align:left; }
-  .detail-map-kicker { display:inline-flex; align-items:center; gap:.45rem; border:1px solid rgba(255,255,255,.2); border-radius:999px; background:rgba(9,14,24,.5); padding:.26rem .62rem; font-size:.66rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:rgba(244,248,255,.86); }
-  .detail-map-kicker::before { content:""; width:7px; height:7px; border-radius:999px; background:linear-gradient(135deg,#7a2cff 0%,#ff4d8d 100%); box-shadow:0 0 0 4px rgba(122,44,255,.22); }
-  .detail-map-title { margin-top:.75rem; font-size:clamp(1.15rem,2vw,1.48rem); font-weight:800; letter-spacing:-.015em; color:#f8fbff; }
-  .detail-map-subtitle { margin-top:.45rem; max-width:62ch; font-size:.88rem; line-height:1.55; color:rgba(231,240,255,.74); }
-  .detail-map-meta { margin-top:1rem; display:flex; flex-wrap:wrap; gap:.55rem; justify-content:flex-start; }
+  .detail-map-header { text-align:center; }
+  .detail-map-title { margin-top:.75rem; font-size:clamp(1.15rem,2vw,1.48rem); font-weight:800; letter-spacing:-.015em; color:#f8fbff; text-align:center !important; }
+  .detail-map-subtitle { margin:.45rem auto 0; max-width:62ch; font-size:.88rem; line-height:1.55; color:rgba(231,240,255,.74); text-align:center !important; }
+  .detail-map-meta { margin-top:1rem; display:flex; flex-wrap:wrap; gap:.55rem; justify-content:center; }
+  .detail-reviews-heading { justify-content:center !important; text-align:center !important; }
+  .detail-reviews-heading .detail-reviews-title { width:100%; justify-content:center !important; text-align:center !important; }
   .detail-map-pill { border:1px solid rgba(255,255,255,.2); border-radius:999px; background:rgba(7,12,20,.45); color:rgba(246,249,255,.95); font-size:.7rem; font-weight:700; letter-spacing:.02em; padding:.34rem .72rem; }
   .detail-map-topbar { margin-top:.95rem; display:flex; align-items:center; justify-content:space-between; gap:.8rem; flex-wrap:wrap; }
-  .detail-map-mode-chip { display:inline-flex; align-items:center; gap:.38rem; border:1px solid rgba(255,255,255,.24); border-radius:999px; background:rgba(8,12,18,.58); padding:.28rem .62rem; color:rgba(242,247,255,.92); font-size:.66rem; font-weight:800; letter-spacing:.07em; text-transform:uppercase; }
-  .detail-map-mode-chip::before { content:""; width:6px; height:6px; border-radius:999px; background:linear-gradient(135deg,#7a2cff 0%,#ff4d8d 100%); }
   .detail-map-body { margin-top:1rem; display:grid; grid-template-columns:minmax(0,1.2fr) minmax(240px,.8fr); gap:.85rem; align-items:start; }
   .detail-map-shell { border:1px solid rgba(255,255,255,.16); border-radius:1.05rem; overflow:hidden; background:rgba(10,14,22,.6); box-shadow:inset 0 1px 0 rgba(255,255,255,.12); }
   .detail-map-canvas { height:370px; width:100%; }
@@ -208,7 +206,6 @@
   .detail-gallery-item img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; transition:transform .5s cubic-bezier(.22,1,.36,1); }
   .detail-gallery-item::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(6,4,14,0) 10%,rgba(6,4,14,.14) 58%,rgba(6,4,14,.52) 100%); pointer-events:none; }
   .detail-gallery-item:hover img { transform:scale(1.045); }
-  .detail-gallery-badge { position:absolute; left:.6rem; bottom:.6rem; z-index:1; display:inline-flex; align-items:center; gap:.35rem; border-radius:999px; border:1px solid rgba(255,255,255,.18); background:rgba(7,10,16,.45); padding:.24rem .56rem; font-size:.64rem; font-weight:700; color:#fff; }
   .detail-buzz-grid { display:grid; gap:1rem; grid-template-columns:repeat(3,minmax(0,1fr)); }
   .detail-buzz-card { border:1px solid rgba(255,255,255,.08); border-radius:1.3rem; background:rgba(255,255,255,.03); padding:1rem; backdrop-filter:blur(14px); }
   .detail-booking-note { border:1px solid rgba(255,255,255,.08); border-radius:1.3rem; background:rgba(255,255,255,.03); padding:1rem; }
@@ -253,10 +250,12 @@
   <section class="mb-10 detail-store-grid fade-up">
     <div class="detail-store-card detail-store-card--hero">
       <div class="detail-store-bg-media" aria-hidden="true">
-        {% if venue.cover_image_url %}
-        <img src="{{ venue.cover_image_url }}" alt="" loading="lazy" />
+        {% if venue.slug == "le-comptoir-du-marche" %}
+        <img src="https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?auto=format&fit=crop&w=900&q=80" alt="" loading="lazy" />
+        {% elif venue.cover_image_url %}
+        <img src="{{ venue.cover_image_url }}" alt="" loading="lazy" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?auto=format&fit=crop&w=900&q=80';" />
         {% elif highlight_photos %}
-        <img src="{{ highlight_photos.0.image_url }}" alt="" loading="lazy" />
+        <img src="{{ highlight_photos.0.image_url }}" alt="" loading="lazy" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?auto=format&fit=crop&w=900&q=80';" />
         {% endif %}
       </div>
       <div class="detail-store-body text-center">
@@ -285,7 +284,7 @@
   <section class="card p-6 fade-up stagger-1 mt-10">
     <div class="detail-signal-rail">
       <div class="detail-signal-card detail-signal-card--center micro-float ambient-ring"><div class="detail-gradient-label">{% trans "À propos" %}</div><p class="detail-signal-maintext">{% trans "Une cuisine méditerranéenne généreuse" %}</p><p class="detail-signal-subtext">{% trans "Produits frais, service soigné et terrasse agréable" %}</p></div>
-      <div class="detail-signal-card detail-signal-card--center micro-float ambient-ring"><div class="detail-gradient-label">{% trans "Notre carte" %}</div><p class="detail-signal-maintext">{% trans "Dinner date / rooftop" %}</p><p class="detail-signal-subtext">{% trans "Découvrez la carte qui donne envie de réserver tout de suite: assiettes signature, belles bouteilles et ambiance rooftop." %}</p><div class="detail-signal-actions"><button type="button" class="detail-action-btn" data-open-menu-modal>{% trans "Voir notre carte" %}</button></div></div>
+      <div class="detail-signal-card detail-signal-card--center micro-float ambient-ring"><div class="detail-gradient-label">{% trans "Notre carte" %}</div><p class="detail-signal-subtext">{% trans "Un coup d'oeil et vous allez vouloir reserver: cliquez sur Voir notre carte." %}</p><div class="detail-signal-actions"><button type="button" class="detail-action-btn" data-open-menu-modal>{% trans "Voir notre carte" %}</button></div></div>
       <div class="detail-signal-card detail-menu-day-card micro-float ambient-ring"><div class="detail-menu-day-title">{% trans "Menu du jour" %}</div><p class="detail-menu-day-line">{% trans "Dorade grillée et ses légumes" %}</p><p class="detail-menu-day-line">{% trans "Dessert au choix" %}</p><p class="detail-menu-day-price">20,00 €</p></div>
     </div>
   </section>
@@ -366,26 +365,12 @@
   </div>
 
   <section class="card p-6 fade-up stagger-2 mt-14">
-    <div class="flex items-end justify-between gap-4 mb-5">
-      <div>
-        <span class="h-eyebrow">{% trans "Highlights" %}</span>
-        <h2 class="mt-2 font-display text-xl font-bold text-white">{% trans "Une page plus magazine, plus lifestyle" %}</h2>
-      </div>
-      <span class="chip chip-sunset">{% trans "Photo-led" %}</span>
-    </div>
     <div class="detail-gallery-showcase" id="highlight-gallery">
       {% for photo in highlight_photos|slice:":3" %}
       <div class="detail-gallery-item ambient-ring micro-float {% if forloop.counter == 1 %}detail-gallery-item--main{% elif forloop.counter == 2 %}detail-gallery-item--side-top{% elif forloop.counter == 3 %}detail-gallery-item--side-bottom{% else %}detail-gallery-item--fallback{% endif %}">
         <a href="{{ photo.image_url }}" target="_blank" rel="noopener noreferrer" class="detail-gallery-link" aria-label="{{ venue.name }} photo {{ forloop.counter }}">
           <img src="{{ photo.image_url }}" alt="{{ venue.name }} - photo {{ forloop.counter }}" loading="lazy" />
         </a>
-        <span class="detail-gallery-badge">
-          {% if forloop.counter == 1 %}
-            {% trans "Photo principale" %}
-          {% else %}
-            {{ photo.caption|default:_('Voir la photo') }}
-          {% endif %}
-        </span>
       </div>
       {% endfor %}
     </div>
@@ -409,16 +394,11 @@
       {# Carte des restaurants de la ville #}
       <section class="card p-6 fade-up stagger-3 detail-map-section">
         <div class="detail-map-header">
-          <span class="detail-map-kicker">{% trans "City guide" %}</span>
           <h2 class="detail-map-title">{% trans "Restaurants référencés en ville" %}</h2>
           <p class="detail-map-subtitle">{% trans "Retrouvez une vue claire des adresses autour de vous. Le restaurant actuel est subtilement mis en avant pour une lecture immédiate." %}</p>
           <div class="detail-map-meta">
             <span class="detail-map-pill">🍽️ {{ city_venues|length }} {% trans "restaurants" %}</span>
             <span class="detail-map-pill">📍 {{ venue.city_label|default:venue.city_slug }}</span>
-          </div>
-          <div class="detail-map-topbar">
-            <div class="text-xs uppercase tracking-[0.18em] text-white/55">{% trans "Styles de carte" %}</div>
-            <span class="detail-map-mode-chip">{% trans "Satellite" %}</span>
           </div>
         </div>
 
@@ -446,8 +426,8 @@
 
       {# Reviews mock #}
       <section class="card p-6 fade-up stagger-3">
-        <div class="flex items-end justify-between mb-5">
-          <h2 class="font-display text-xl font-bold text-white inline-flex items-center gap-2">
+        <div class="flex items-end justify-center mb-5 text-center detail-reviews-heading">
+          <h2 class="font-display text-xl font-bold text-white inline-flex items-center justify-center gap-2 w-full mx-auto detail-reviews-title">
             <span class="star-row inline-flex"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></span>
             4.7 · 243 {% trans "avis" %}
           </h2>
