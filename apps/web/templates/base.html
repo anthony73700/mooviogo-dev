@@ -205,6 +205,89 @@
       color: #374151 !important;
       border-color: #e5e7eb !important;
     }
+
+    /* ── Mobile-app polish ──────────────────────────────────────────
+       Bottom navigation visible only on small screens. Adds breathing
+       room under the main content so it isn't hidden behind the dock.
+       Desktop ( ≥ 640px / sm: ) is completely unaffected. */
+    @media (max-width: 639.98px) {
+      body { padding-bottom: calc(68px + env(safe-area-inset-bottom)); }
+      main.page-shell { padding-bottom: 1rem; }
+      /* Bigger tap targets on small screens */
+      a, button { -webkit-tap-highlight-color: transparent; }
+      /* Smoother native-like horizontal scroll */
+      .scroll-snap-x { scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
+      .scroll-snap-x > * { scroll-snap-align: start; }
+    }
+
+    .mobile-dock {
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      z-index: 60;
+      display: none;
+      padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+      background: rgba(5, 7, 12, 0.86);
+      border-top: 1px solid rgba(255,255,255,0.06);
+      backdrop-filter: blur(22px) saturate(140%);
+      -webkit-backdrop-filter: blur(22px) saturate(140%);
+      box-shadow: 0 -18px 48px -28px rgba(0,0,0,0.7);
+    }
+    @media (max-width: 639.98px) { .mobile-dock { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; } }
+    .mobile-dock a {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 3px;
+      padding: 7px 4px 5px;
+      min-height: 56px;
+      border-radius: 14px;
+      color: rgba(255,255,255,0.55);
+      font-size: 10px; font-weight: 600; letter-spacing: 0.01em;
+      text-decoration: none;
+      transition: color .18s ease, background-color .18s ease, transform .18s ease;
+    }
+    .mobile-dock a:active { transform: scale(0.94); }
+    .mobile-dock a svg { width: 22px; height: 22px; stroke-width: 1.8; }
+    .mobile-dock a.is-active {
+      color: #ffffff;
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    }
+    .mobile-dock a.is-active::before {
+      content: "";
+      position: absolute; top: 0;
+      height: 2px; width: 28px; border-radius: 0 0 4px 4px;
+      background: linear-gradient(90deg, #6aa8ff, #b07bff);
+    }
+    .mobile-dock a { position: relative; }
+    body.pro-white .mobile-dock { background: rgba(255,255,255,0.96); border-top-color: #e5e7eb; }
+    body.pro-white .mobile-dock a { color: #6b7280; }
+    body.pro-white .mobile-dock a.is-active { color: #111827; background: #f3f4f6; }
+
+    /* Bottom-sheet modal pattern for mobile */
+    .bottom-sheet {
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 80;
+      max-height: 85vh;
+      transform: translateY(100%);
+      transition: transform .32s cubic-bezier(.22,1,.36,1);
+      border-top-left-radius: 22px; border-top-right-radius: 22px;
+      background: rgba(8, 10, 16, 0.96);
+      border-top: 1px solid rgba(255,255,255,0.07);
+      box-shadow: 0 -24px 60px -20px rgba(0,0,0,0.7);
+      padding: 14px 16px calc(20px + env(safe-area-inset-bottom));
+      overflow-y: auto;
+    }
+    .bottom-sheet[data-open="true"] { transform: translateY(0); }
+    .bottom-sheet::before {
+      content: ""; display: block; width: 38px; height: 4px;
+      margin: 0 auto 10px; border-radius: 999px;
+      background: rgba(255,255,255,0.18);
+    }
+    .bottom-sheet-backdrop {
+      position: fixed; inset: 0; z-index: 79;
+      background: rgba(0,0,0,0.55); backdrop-filter: blur(6px);
+      opacity: 0; pointer-events: none;
+      transition: opacity .25s ease;
+    }
+    .bottom-sheet-backdrop[data-open="true"] { opacity: 1; pointer-events: auto; }
+    /* ── /Mobile-app polish ───────────────────────────────────────── */
   </style>
 </head>
 <body class="min-h-screen font-sans antialiased{% if IS_PRO_ACCOUNT %} pro-white{% endif %}">
@@ -443,6 +526,34 @@
       </div>
     </div>
   </div>
+  {% endif %}
+
+  {# ── Mobile bottom dock (visible <sm only) ───────────────── #}
+  {% if not IS_PRO_ACCOUNT %}
+  <nav class="mobile-dock" aria-label="{% trans 'Navigation principale' %}">
+    {% with p=request.path %}
+    <a href="/sorties/"     class="{% if '/sorties/' in p %}is-active{% endif %}" aria-label="{% trans 'Sorties' %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.39 4.84L20 8.27l-4 3.9.94 5.5L12 15.77 7.06 17.67 8 12.17l-4-3.9 5.61-1.43L12 2z"/></svg>
+      <span>{% trans "Sorties" %}</span>
+    </a>
+    <a href="/restaurants/" class="{% if '/restaurants/' in p %}is-active{% endif %}" aria-label="{% trans 'Restaurants' %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2v9a3 3 0 0 0 3 3v8"/><path d="M11 2v6"/><path d="M7 2v6"/><path d="M17 2c-2 0-3 2-3 5s1 5 3 5v10"/></svg>
+      <span>{% trans "Restos" %}</span>
+    </a>
+    <a href="/activities/"  class="{% if '/activities/' in p %}is-active{% endif %}" aria-label="{% trans 'Activités' %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2.2"/><path d="M9 22l1.5-6.5L8 13l1.5-4L13 11l3 1.5L19 10"/></svg>
+      <span>{% trans "Activités" %}</span>
+    </a>
+    <a href="/evenements/"  class="{% if '/evenements/' in p %}is-active{% endif %}" aria-label="{% trans 'Événements' %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M3 10h18"/><path d="M8 3v4M16 3v4"/></svg>
+      <span>{% trans "Events" %}</span>
+    </a>
+    <a href="/villes/"      class="{% if '/villes/' in p %}is-active{% endif %}" aria-label="{% trans 'Villes' %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+      <span>{% trans "Villes" %}</span>
+    </a>
+    {% endwith %}
+  </nav>
   {% endif %}
 
   {% block extra_js %}{% endblock %}
