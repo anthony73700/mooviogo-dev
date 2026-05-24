@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ offre.label }} | {% trans "Offres partenaires" %} | Mooviogo{% endblock %}
+
+{% block extra_head %}
+<style>
+  :root {
+    --offer-bg: #ffffff;
+    --offer-ink: #1d1d1f;
+    --offer-subtle: #6e6e73;
+    --offer-line: #e5e5e7;
+    --offer-blue: #0071e3;
+  }
+
+  body {
+    background: var(--offer-bg) !important;
+    background-image: none !important;
+  }
+
+  nav {
+    background: rgba(255, 255, 255, 0.9) !important;
+    border-bottom-color: var(--offer-line) !important;
+    backdrop-filter: saturate(180%) blur(20px);
+  }
+
+  nav a,
+  nav button,
+  nav span,
+  nav select {
+    color: var(--offer-ink) !important;
+  }
+
+  footer {
+    display: none;
+  }
+
+  .offer-shell {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 3.5rem 1rem 5rem;
+    color: var(--offer-ink);
+  }
+
+  .offer-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--offer-subtle);
+    text-decoration: none;
+  }
+
+  .offer-back:hover {
+    color: var(--offer-ink);
+  }
+
+  .offer-hero {
+    text-align: center;
+    margin-top: 1.4rem;
+    margin-bottom: 2.4rem;
+  }
+
+  .offer-kicker {
+    display: inline-block;
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--offer-blue);
+  }
+
+  .offer-title {
+    margin-top: 0.9rem;
+    font-size: clamp(2.2rem, 6vw, 4.3rem);
+    line-height: 1.04;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+  }
+
+  .offer-subtitle {
+    margin: 1rem auto 0;
+    max-width: 70ch;
+    color: var(--offer-subtle);
+    font-size: clamp(1rem, 2.2vw, 1.2rem);
+    line-height: 1.6;
+  }
+
+  .offer-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: 1fr;
+    margin-top: 2rem;
+  }
+
+  .offer-card {
+    border: 1px solid var(--offer-line);
+    border-radius: 24px;
+    background: #fff;
+    box-shadow: 0 12px 44px -34px rgba(0, 0, 0, 0.24);
+    padding: 1.4rem;
+  }
+
+  .offer-card.is-featured {
+    border-color: #c9def8;
+    box-shadow: 0 16px 52px -30px rgba(0, 113, 227, 0.25);
+    background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+  }
+
+  .offer-card h2 {
+    font-size: clamp(1.35rem, 3.4vw, 2rem);
+    line-height: 1.12;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  .offer-price {
+    margin-top: 0.5rem;
+    color: var(--offer-blue);
+    font-weight: 700;
+    font-size: 1.05rem;
+  }
+
+  .offer-list {
+    margin-top: 1rem;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 0.55rem;
+  }
+
+  .offer-list li {
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+    color: #303036;
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+
+  .offer-list li::before {
+    content: "\2713";
+    color: var(--offer-blue);
+    font-weight: 800;
+    margin-top: 0.04rem;
+  }
+
+  .offer-cta {
+    margin-top: 1.1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    border-radius: 999px;
+    padding: 0.65rem 1rem;
+    background: var(--offer-blue);
+    color: #fff;
+    font-size: 0.88rem;
+    font-weight: 700;
+  }
+
+  .offer-cta:hover {
+    filter: brightness(1.08);
+  }
+
+  @media (min-width: 900px) {
+    .offer-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.2rem;
+    }
+
+    .offer-card {
+      padding: 1.8rem;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="offer-shell">
+  <a href="/devenir-partenaire/" class="offer-back">&larr; {% trans "Retour aux offres" %}</a>
+
+  <header class="offer-hero">
+    <span class="offer-kicker">{% trans "Offre partenaire" %}</span>
+    <h1 class="offer-title">{{ offre.label }} x Mooviogo</h1>
+    <p class="offer-subtitle">{{ offre.subtitle }}</p>
+  </header>
+
+  <div class="offer-grid">
+    {% for plan in offre.plans %}
+    <article class="offer-card{% if forloop.counter == 2 %} is-featured{% endif %}">
+      <h2>{{ plan.name }}</h2>
+      <p class="offer-price">{{ plan.price }}</p>
+      <ul class="offer-list">
+        {% for item in plan.items %}
+        <li>{{ item }}</li>
+        {% endfor %}
+      </ul>
+      <a href="/devenir-partenaire/" class="offer-cta">{% trans "Demarrer avec cette offre" %}</a>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

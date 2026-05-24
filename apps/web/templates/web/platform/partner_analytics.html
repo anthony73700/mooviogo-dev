@@ -4,6 +4,49 @@
 
 {% block extra_head %}
 <style>
+  .pa-mini-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+  }
+
+  .pa-mini-card {
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    background: rgba(255,255,255,0.03);
+    padding: 0.72rem;
+  }
+
+  .pa-mini-label {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255,255,255,0.45);
+    font-weight: 700;
+  }
+
+  .pa-kpi-label {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255,255,255,0.45);
+    font-weight: 700;
+  }
+
+  .pa-mini-value {
+    margin-top: 0.28rem;
+    font-size: 1.05rem;
+    font-weight: 900;
+    color: #fff;
+  }
+
+  .pa-mini-meta {
+    margin-top: 0.18rem;
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.5);
+  }
+
   .pa-kpi-grid {
     display: grid;
     grid-template-columns: repeat(6, minmax(0, 1fr));
@@ -18,6 +61,56 @@
     padding: 0.56rem 0;
     border-bottom: 1px solid rgba(255,255,255,0.08);
   }
+  .pa-public {
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: 12px;
+    background: rgba(59, 130, 246, 0.08);
+    padding: 0.78rem;
+    margin-bottom: 0.85rem;
+  }
+  .pa-public-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 800;
+    color: #93c5fd;
+  }
+  .pa-public-link {
+    margin-top: 0.42rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    border: 1px solid rgba(147, 197, 253, 0.7);
+    padding: 0.48rem 0.82rem;
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: #dbeafe;
+    text-decoration: none;
+  }
+
+  body.pro-white .pa-mini-label,
+  body.pro-white .pa-kpi-label,
+  body.pro-white .pa-mini-meta,
+  body.pro-white .pa-event-row p:last-child {
+    color: #64748b !important;
+  }
+
+  body.pro-white .pa-mini-value,
+  body.pro-white .pa-event-row p:first-child {
+    color: #1d4ed8 !important;
+  }
+  body.pro-white .pa-public {
+    border-color: #bae6fd;
+    background: #f0f9ff;
+  }
+  body.pro-white .pa-public-label {
+    color: #0369a1;
+  }
+  body.pro-white .pa-public-link {
+    border-color: #0ea5e9;
+    color: #075985;
+  }
 
   @media (max-width: 1100px) {
     .pa-kpi-grid {
@@ -26,6 +119,10 @@
   }
 
   @media (max-width: 700px) {
+    .pa-mini-grid {
+      grid-template-columns: 1fr;
+    }
+
     .pa-kpi-grid {
       grid-template-columns: 1fr;
     }
@@ -48,13 +145,41 @@
 </div>
 
 <div class="mx-auto max-w-6xl px-4" style="padding-top:2rem;padding-bottom:4rem">
+  {% if public_page_url %}
+  <div class="pa-public">
+    <p class="pa-public-label">Page publique visible par les utilisateurs</p>
+    <a href="{{ public_page_url }}" target="_blank" rel="noopener" class="pa-public-link">{{ public_page_label|default:"Voir ma page publique" }}</a>
+  </div>
+  {% endif %}
+
+  {% if analytics_note %}
+  <div class="pk" style="padding:0.85rem;margin-bottom:0.8rem">
+    <p style="font-size:0.78rem;color:rgba(255,255,255,0.72)">{{ analytics_note }}</p>
+  </div>
+  {% endif %}
+
+  {% if highlight_blocks %}
+  <div style="display:flex;align-items:center;justify-content:space-between;margin:0 0 0.5rem 0.1rem">
+    <p style="font-size:0.74rem;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.52);font-weight:800">Resume rapide</p>
+  </div>
+  <section class="pa-mini-grid">
+    {% for block in highlight_blocks %}
+    <div class="pa-mini-card">
+      <p class="pa-mini-label">{{ block.label }}</p>
+      <p class="pa-mini-value">{{ block.value }}</p>
+      <p class="pa-mini-meta">{{ block.meta }}</p>
+    </div>
+    {% endfor %}
+  </section>
+  {% endif %}
+
   <section class="pa-kpi-grid">
-    <div class="pk" style="padding:1rem"><p class="slabel">{% trans "Events total" %}</p><p style="font-size:1.12rem;font-weight:900;color:#fff">{{ kpis.total_events }}</p></div>
-    <div class="pk" style="padding:1rem"><p class="slabel">{% trans "Actifs" %}</p><p style="font-size:1.12rem;font-weight:900;color:#fff">{{ kpis.active_events }}</p></div>
-    <div class="pk" style="padding:1rem"><p class="slabel">{% trans "A venir" %}</p><p style="font-size:1.12rem;font-weight:900;color:#fff">{{ kpis.upcoming_events }}</p></div>
-    <div class="pk" style="padding:1rem"><p class="slabel">{% trans "Conversion ville" %}</p><p style="font-size:1.12rem;font-weight:900;color:#fff">{{ kpis.conversion_rate }}%</p></div>
-    <div class="pk" style="padding:1rem"><p class="slabel">{% trans "Revenue ville" %}</p><p style="font-size:1.12rem;font-weight:900;color:#fff">{{ kpis.city_revenue }} cts</p></div>
-    <div class="pk" style="padding:1rem"><p class="slabel">{% trans "Promos actives" %}</p><p style="font-size:1.12rem;font-weight:900;color:#fff">{{ kpis.active_promotions }}</p></div>
+    <div class="pk" style="padding:1rem"><p class="pa-kpi-label">TOTAL EVENEMENTS</p><p style="font-size:1.12rem;font-weight:900;color:#fff">{{ kpis.total_events }}</p></div>
+    <div class="pk" style="padding:1rem"><p class="pa-kpi-label">ACTIFS</p><p style="font-size:1.12rem;font-weight:900;color:#fff">{{ kpis.active_events }}</p></div>
+    <div class="pk" style="padding:1rem"><p class="pa-kpi-label">A VENIR</p><p style="font-size:1.12rem;font-weight:900;color:#fff">{{ kpis.upcoming_events }}</p></div>
+    <div class="pk" style="padding:1rem"><p class="pa-kpi-label">CONVERSION VILLE</p><p style="font-size:1.12rem;font-weight:900;color:#fff">{{ kpis.conversion_rate }}%</p></div>
+    <div class="pk" style="padding:1rem"><p class="pa-kpi-label">REVENU VILLE</p><p style="font-size:1.12rem;font-weight:900;color:#fff">{{ kpis.city_revenue }} cts</p></div>
+    <div class="pk" style="padding:1rem"><p class="pa-kpi-label">PROMOS ACTIVES</p><p style="font-size:1.12rem;font-weight:900;color:#fff">{{ kpis.active_promotions }}</p></div>
   </section>
 
   <section class="pk" style="padding:1rem">

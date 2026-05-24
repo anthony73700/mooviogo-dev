@@ -19,7 +19,8 @@
   .home-mood-media.dining { object-position:center 55%; }
   .home-mood-media.community { object-position:center 32%; }
   .home-mood-orb { position:absolute; border-radius:9999px; filter:blur(60px); opacity:.5; }
-  .home-mood-content { position:relative; z-index:1; height:100%; display:flex; flex-direction:column; justify-content:flex-end; padding:1.5rem; }
+  .home-mood-content { position:relative; z-index:1; height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding:1.5rem; }
+  .home-mood-content h3 { width:100%; text-align:center; }
   .home-signal { border-radius:24px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.035); padding:1rem 1.1rem; backdrop-filter:blur(12px); box-shadow:inset 0 1px 0 rgba(255,255,255,.04); }
   .home-signal-value { font-family:"Geist",Inter,sans-serif; font-size:1.9rem; font-weight:800; line-height:1; letter-spacing:-.03em; color:#fff; }
   .home-signal-label { margin-top:.5rem; font-size:.7rem; letter-spacing:.18em; text-transform:uppercase; color:rgba(255,255,255,.42); font-weight:700; }
@@ -28,18 +29,865 @@
   .home-step { position:relative; overflow:hidden; border-radius:30px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.03); padding:1.25rem; box-shadow:0 24px 60px -34px rgba(0,0,0,.85); backdrop-filter:blur(16px); }
   .home-step-num { display:inline-grid; place-items:center; height:2.6rem; width:2.6rem; border-radius:9999px; font-family:"Geist",Inter,sans-serif; font-weight:800; color:#fff; background:linear-gradient(135deg,#5d8fff,#9bc2ff); box-shadow:0 12px 26px -10px rgba(93,143,255,.45); }
   .home-event-grid { display:grid; grid-template-columns:1.25fr .9fr; gap:1.25rem; }
+  .agenda-head-copy .h-section,
+  .agenda-head-copy .agenda-sub {
+    text-align:center;
+  }
   .home-event-stack { display:grid; gap:1rem; }
   .home-feature-event { position:relative; min-height:420px; overflow:hidden; border-radius:34px; border:1px solid rgba(255,255,255,.08); box-shadow:0 34px 90px -36px rgba(0,0,0,.82); }
   .home-feature-event::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(6,4,14,.05) 10%,rgba(6,4,14,.35) 55%,rgba(6,4,14,.95) 100%); }
+  .home-feature-event-top-title { position:absolute; top:1.2rem; left:1.2rem; right:1.2rem; z-index:2; }
   .home-feature-event-content { position:absolute; inset:auto 0 0 0; z-index:1; padding:1.5rem; }
   .home-mini-event { position:relative; overflow:hidden; border-radius:28px; border:1px solid rgba(255,255,255,.08); background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02)); padding:1.25rem; box-shadow:0 24px 60px -34px rgba(0,0,0,.84); }
+  .home-event-meta-blocks {
+    margin-top:.9rem;
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:.45rem;
+    width:100%;
+  }
+  .home-event-meta-block {
+    border-radius:.95rem;
+    background:rgba(0,0,0,.58);
+    border:1px solid rgba(255,255,255,.18);
+    padding:.45rem .55rem;
+    font-size:.74rem;
+    color:rgba(255,255,255,.92);
+    font-weight:700;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    min-height:2.15rem;
+    line-height:1.2;
+  }
+  .home-event-meta-blocks-compact {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:.4rem;
+  }
   .home-photo-card { position:relative; min-height:420px; overflow:hidden; border-radius:32px; border:1px solid rgba(255,255,255,.08); box-shadow:0 30px 80px -38px rgba(0,0,0,.88); }
+  .home-carousel {
+    display:flex;
+    gap:1rem;
+    overflow-x:auto;
+    overflow-y:hidden;
+    scroll-snap-type:x mandatory;
+    padding-bottom:.45rem;
+    -webkit-overflow-scrolling:touch;
+  }
+  .home-carousel > * {
+    flex:0 0 clamp(250px, 26vw, 320px);
+    scroll-snap-align:start;
+  }
+  .home-carousel::-webkit-scrollbar { height:8px; }
+  .home-carousel::-webkit-scrollbar-thumb {
+    background:rgba(255,255,255,.2);
+    border-radius:999px;
+  }
   .home-photo-card-eq { min-height:360px; }
   .home-photo-card::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(6,4,14,.08) 12%,rgba(6,4,14,.25) 45%,rgba(6,4,14,.92) 100%); pointer-events:none; }
   .home-photo-media { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; transition:transform .7s cubic-bezier(.22,1,.36,1), filter .35s ease; }
   .home-photo-card:hover .home-photo-media { transform:scale(1.06); filter:saturate(1.08); }
   .home-photo-badges { position:absolute; inset:1rem 1rem auto 1rem; z-index:1; display:flex; flex-wrap:wrap; gap:.5rem; }
   .home-photo-content { position:absolute; inset:auto 0 0 0; z-index:1; padding:1.25rem; }
+  .home-photo-content .font-display { width:100%; text-align:center; }
+  .top-sortie-card {
+    min-height:430px;
+    flex:0 0 clamp(320px, 31vw, 400px);
+  }
+  .tendance-sortie-card { flex:0 0 clamp(320px, 31vw, 400px); }
+  .list-photo-card {
+    position:relative;
+    min-height:430px;
+    overflow:hidden;
+    border-radius:30px;
+    border:1px solid rgba(255,255,255,.12);
+    box-shadow:0 30px 80px -36px rgba(0,0,0,.85);
+    transform:translateY(0);
+    transition:transform .3s cubic-bezier(.22,1,.36,1), box-shadow .35s ease, border-color .25s ease;
+  }
+  .list-photo-card::after {
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(180deg,rgba(7,10,18,.05) 8%,rgba(7,10,18,.2) 46%,rgba(7,10,18,.94) 100%);
+    pointer-events:none;
+  }
+  .list-photo-card:hover { transform:translateY(-4px); box-shadow:0 38px 92px -40px rgba(0,0,0,.95); }
+  .list-photo-card.card-member { border-color:rgba(119,231,198,.36); box-shadow:0 30px 78px -36px rgba(39,197,156,.42); }
+  .list-photo-card.card-member::before { content:""; position:absolute; inset:-35% auto auto -20%; height:280px; width:280px; border-radius:999px; background:radial-gradient(circle,rgba(52,211,153,.16),rgba(52,211,153,0)); z-index:1; pointer-events:none; }
+  .list-photo-media { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; transition:transform .75s cubic-bezier(.22,1,.36,1), filter .35s ease; filter:saturate(.98) contrast(1.02); }
+  .group:hover .list-photo-media { transform:scale(1.055); filter:saturate(1.1) contrast(1.05); }
+  .list-photo-top { position:absolute; inset:1rem 1rem auto 1rem; z-index:2; display:flex; align-items:flex-start; justify-content:space-between; gap:.75rem; }
+  .tendance-header {
+    display:block;
+  }
+  .list-photo-top.centered-host { justify-content:center; }
+  .list-photo-top.centered-host .save-btn { position:absolute; top:.55rem; right:.55rem; }
+  .tendance-top {
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:flex-start;
+    gap:.55rem;
+    min-height:2rem;
+    position:relative;
+  }
+  .activities-top-user {
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%, -50%);
+    display:inline-flex;
+    align-items:center;
+    gap:.42rem;
+    padding:.24rem .52rem .24rem .3rem;
+    border-radius:9999px;
+    border:1px solid rgba(255,255,255,.24);
+    background:rgba(12,16,26,.62);
+    color:#fff;
+    font-size:.72rem;
+    font-weight:800;
+    letter-spacing:.04em;
+    text-transform:uppercase;
+    backdrop-filter:blur(8px);
+    max-width:62%;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .activities-offer-block {
+    margin-top:.35rem;
+    margin-bottom:.5rem;
+    border-radius:1rem;
+    border:1px solid rgba(37,99,235,.46);
+    background:linear-gradient(135deg, rgba(37,99,235,.24), rgba(6,182,212,.18));
+    color:#fff;
+    font-size:.76rem;
+    font-weight:800;
+    letter-spacing:.02em;
+    padding:.5rem .62rem;
+    text-align:center;
+    transform:translateY(-.08rem);
+  }
+  .tendance-top-left {
+    display:flex;
+    align-items:center;
+    gap:.45rem;
+    min-width:0;
+  }
+  .tendance-rank {
+    display:inline-flex;
+    align-items:center;
+    gap:.25rem;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.22);
+    background:rgba(8,12,18,.74);
+    color:#fff;
+    padding:.28rem .54rem;
+    font-size:.7rem;
+    font-weight:800;
+    letter-spacing:.02em;
+  }
+  .host-chip {
+    display:inline-flex;
+    align-items:center;
+    gap:.42rem;
+    padding:.28rem .56rem .28rem .3rem;
+    border-radius:9999px;
+    border:1px solid rgba(255,255,255,.24);
+    background:rgba(12,16,26,.62);
+    color:#fff;
+    font-size:.72rem;
+    font-weight:800;
+    letter-spacing:.05em;
+    text-transform:uppercase;
+    backdrop-filter:blur(8px);
+  }
+  .host-avatar {
+    height:1.42rem;
+    width:1.42rem;
+    border-radius:9999px;
+    object-fit:cover;
+    border:1px solid rgba(255,255,255,.4);
+    box-shadow:0 6px 16px -10px rgba(0,0,0,.8);
+  }
+  .host-avatar-fallback {
+    display:inline-grid;
+    place-items:center;
+    height:1.42rem;
+    width:1.42rem;
+    border-radius:9999px;
+    border:1px solid rgba(255,255,255,.34);
+    background:linear-gradient(135deg, rgba(108,99,255,.95), rgba(123,97,255,.85));
+    color:#fff;
+    font-size:.58rem;
+    font-weight:900;
+    letter-spacing:.04em;
+  }
+  .save-btn {
+    display:inline-grid;
+    place-items:center;
+    width:2rem;
+    min-width:2rem;
+    height:2rem;
+    border-radius:9999px;
+    border:1px solid rgba(255,255,255,.26);
+    background:rgba(8,12,18,.7);
+    color:rgba(255,255,255,.94);
+    box-shadow:0 14px 30px -20px rgba(0,0,0,.95);
+    backdrop-filter:blur(8px);
+  }
+  .tendance-save-btn {
+    position:absolute;
+    right:0;
+    top:0;
+    margin-left:0;
+    flex:0 0 auto;
+  }
+  .list-photo-bottom { position:absolute; inset:auto 0 0 0; z-index:2; padding:1.1rem; }
+  .tendance-user-name {
+    margin-top:.45rem;
+    text-align:center;
+    font-size:.82rem;
+    font-weight:800;
+    letter-spacing:.03em;
+    color:#fff;
+    text-transform:uppercase;
+    text-shadow:0 3px 14px rgba(0,0,0,.45);
+    transform:translateY(-1.02rem);
+  }
+  .tendance-user-inline {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:.45rem;
+    max-width:100%;
+  }
+  .tendance-user-inline span:last-child {
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    max-width:180px;
+  }
+  .tendance-top-title {
+    margin-top:.62rem;
+    text-align:center;
+    font-family:"SF Pro Display","Geist",Inter,sans-serif;
+    font-size:1.22rem;
+    line-height:1.14;
+    font-weight:900;
+    color:#fff;
+    letter-spacing:-.01em;
+    text-shadow:0 4px 16px rgba(0,0,0,.52);
+    display:-webkit-box;
+    -webkit-box-orient:vertical;
+    -webkit-line-clamp:2;
+    overflow:hidden;
+  }
+  .tendance-card-bottom {
+    display:flex;
+    flex-direction:column;
+    min-height:252px;
+  }
+  .sortie-card-date {
+    display:grid;
+    place-items:center;
+    min-width:3.3rem;
+    border-radius:1rem;
+    background:rgba(0,0,0,.62);
+    border:1px solid rgba(255,255,255,.18);
+    padding:.45rem .5rem;
+    line-height:1;
+  }
+  .sortie-card-date strong {
+    font-size:1.18rem;
+    font-weight:900;
+    color:#fff;
+  }
+  .sortie-card-date span {
+    margin-top:.24rem;
+    font-size:.62rem;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:rgba(255,255,255,.72);
+    font-weight:700;
+  }
+  .sortie-card-meta {
+    display:flex;
+    align-items:center;
+    gap:.45rem;
+    margin-top:.55rem;
+    font-size:.78rem;
+    color:rgba(255,255,255,.88);
+    font-weight:700;
+  }
+  .sortie-card-title {
+    margin-top:.7rem;
+    font-family:"SF Pro Display","Geist",Inter,sans-serif;
+    font-size:1.2rem;
+    line-height:1.18;
+    font-weight:900;
+    color:#fff;
+    letter-spacing:-.02em;
+  }
+  .sortie-card-desc {
+    margin-top:3.1rem;
+    font-size:.9rem;
+    line-height:1.62;
+    color:rgba(255,255,255,.82);
+  }
+  .sortie-card-footer {
+    margin-top:.85rem;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:.65rem;
+    font-size:.82rem;
+    color:rgba(255,255,255,.9);
+    font-weight:700;
+  }
+  .sortie-card-link {
+    color:#fff;
+    font-weight:900;
+    letter-spacing:.01em;
+  }
+  .tendance-stats {
+    margin-top:auto;
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:.42rem;
+    width:100%;
+  }
+  .tendance-stat {
+    border-radius:1rem;
+    background:rgba(0,0,0,.62);
+    border:1px solid rgba(255,255,255,.18);
+    padding:.48rem .62rem;
+    font-size:.74rem;
+    color:rgba(255,255,255,.9);
+    font-weight:700;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:.3rem;
+    min-height:2.1rem;
+    white-space:nowrap;
+    width:100%;
+  }
+  .tendance-title { text-align:center; margin-top:.52rem; }
+  .tendance-participants-wrap {
+    display:flex;
+    align-items:center;
+    gap:.55rem;
+    min-width:0;
+    flex:1 1 auto;
+  }
+  .tendance-participants-icon {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    height:1.9rem;
+    min-width:1.9rem;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.18);
+    background:rgba(0,0,0,.48);
+    color:#fff;
+    font-size:.78rem;
+  }
+  .tendance-progress {
+    position:relative;
+    height:.52rem;
+    border-radius:999px;
+    background:rgba(255,255,255,.2);
+    overflow:hidden;
+    flex:1 1 auto;
+    min-width:88px;
+  }
+  .tendance-progress-fill {
+    display:block;
+    height:100%;
+    border-radius:999px;
+    background:linear-gradient(135deg,#7C3AED,#2563EB);
+    box-shadow:0 3px 12px -8px rgba(37,99,235,.9);
+  }
+  .tendance-bottom-row {
+    margin-top:.42rem;
+    display:flex;
+    flex-direction:column;
+    align-items:stretch;
+    gap:.65rem;
+  }
+  .tendance-participants {
+    font-size:.8rem;
+    color:rgba(255,255,255,.9);
+    font-weight:700;
+    white-space:nowrap;
+  }
+  .tendance-join-btn {
+    display:inline-flex;
+    justify-content:center;
+    width:min(72%, 220px);
+    margin-left:auto;
+    margin-right:auto;
+  }
+  .tendance-sortie-card .tendance-join-btn,
+  .tendance-sortie-card .tendance-save-btn {
+    background:linear-gradient(135deg,#7C3AED,#2563EB) !important;
+    border-color:transparent !important;
+    color:#fff !important;
+  }
+  .tendance-sortie-card .tendance-join-btn:hover,
+  .tendance-sortie-card .tendance-save-btn:hover {
+    filter:brightness(1.06);
+  }
+  .activities-sortie-card .tendance-progress-fill {
+    background:linear-gradient(135deg,#2563EB,#06B6D4);
+    box-shadow:0 3px 12px -8px rgba(6,182,212,.9);
+  }
+  .activities-sortie-card .tendance-join-btn,
+  .activities-sortie-card .tendance-save-btn {
+    background:linear-gradient(135deg,#2563EB,#06B6D4) !important;
+    border-color:transparent !important;
+    color:#fff !important;
+  }
+  .home-restaurants-carousel .list-photo-card {
+    min-height:420px;
+    border:1px solid rgba(255,255,255,.08);
+    box-shadow:0 28px 70px -34px rgba(0,0,0,.88);
+  }
+  .home-restaurants-carousel .list-photo-card::after {
+    background:linear-gradient(180deg,rgba(6,4,14,.04) 14%,rgba(6,4,14,.2) 42%,rgba(6,4,14,.94) 100%);
+  }
+  .home-restaurants-carousel .list-photo-top {
+    inset:1rem 1rem auto 1rem;
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:.75rem;
+  }
+  .home-restaurants-carousel .home-resto-rating-badge {
+    display:inline-flex;
+    align-items:center;
+    gap:.45rem;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.24);
+    background:rgba(8,12,18,.72);
+    color:#fff;
+    padding:.3rem .56rem;
+    font-size:.72rem;
+    font-weight:800;
+    letter-spacing:.01em;
+    backdrop-filter:blur(8px);
+  }
+  .home-restaurants-carousel .home-resto-rating-val {
+    display:inline-flex;
+    align-items:center;
+    gap:.25rem;
+  }
+  .home-restaurants-carousel .home-resto-meta-blocks {
+    margin-top:.75rem;
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:.42rem;
+    width:100%;
+  }
+  .home-restaurants-carousel .home-resto-meta-block {
+    border-radius:1rem;
+    background:rgba(0,0,0,.62);
+    border:1px solid rgba(255,255,255,.18);
+    padding:.48rem .62rem;
+    font-size:.74rem;
+    color:rgba(255,255,255,.9);
+    font-weight:700;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:.32rem;
+    min-height:2.1rem;
+    white-space:nowrap;
+  }
+  .home-restaurants-carousel .home-resto-top-title {
+    position:absolute;
+    left:50%;
+    top:2.35rem;
+    transform:translateX(-50%);
+    width:min(86%, 320px);
+    text-align:center;
+    font-family:"SF Pro Display","Geist",Inter,sans-serif;
+    font-size:1.2rem;
+    line-height:1.14;
+    font-weight:900;
+    color:#fff;
+    letter-spacing:-.01em;
+    text-shadow:0 4px 16px rgba(0,0,0,.52);
+    display:-webkit-box;
+    -webkit-box-orient:vertical;
+    -webkit-line-clamp:2;
+    overflow:hidden;
+    pointer-events:none;
+  }
+  .home-restaurants-carousel .list-photo-bottom {
+    text-align:center;
+  }
+  .home-restaurants-carousel .status-initial-gradient {
+    background:linear-gradient(90deg,#FF6B35 0%,#FF8A5B 100%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    font-weight:900;
+  }
+  .home-restaurants-carousel .promo-chip-1 {
+    color:#fff;
+    border:0;
+    background:linear-gradient(90deg,#FF6B35 0%,#FF8A5B 100%);
+    box-shadow:0 10px 22px -14px rgba(255,107,53,.9);
+  }
+  .home-restaurants-carousel .promo-chip-2 {
+    color:#fff;
+    border:0;
+    background:linear-gradient(90deg,#FF8A5B 0%,#FF6B35 100%);
+    box-shadow:0 10px 22px -14px rgba(255,138,91,.92);
+  }
+  .home-restaurants-carousel .promo-chip-3 {
+    color:#fff;
+    border:0;
+    background:linear-gradient(90deg,#FF8A5B 0%,#FF6B35 100%);
+    box-shadow:0 10px 22px -14px rgba(255,138,91,.9);
+  }
+  .home-restaurants-carousel .btn-reserver-gradient {
+    border:0;
+    color:#fff;
+    background:linear-gradient(90deg,#FF6B35 0%,#FF8A5B 100%);
+    box-shadow:0 16px 30px -18px rgba(255,107,53,.82);
+  }
+  .home-restaurants-carousel .card-reserve-btn {
+    min-width:180px;
+    justify-content:center;
+    padding-left:1.35rem;
+    padding-right:1.35rem;
+  }
+  .home-partner-carousel .home-partner-top {
+    display:flex;
+    justify-content:flex-start;
+    align-items:flex-start;
+    width:100%;
+  }
+  .home-partner-carousel .home-partner-top .chip {
+    font-size:.96rem;
+    padding:.48rem .8rem;
+  }
+  .home-partner-carousel .home-partner-top-title {
+    position:absolute;
+    left:50%;
+    top:1rem;
+    transform:translateX(-50%);
+    width:min(86%, 460px);
+    text-align:center;
+    z-index:3;
+    font-family:"SF Pro Display","Geist",Inter,sans-serif;
+    font-size:1.62rem;
+    line-height:1.14;
+    font-weight:900;
+    color:#fff;
+    letter-spacing:-.01em;
+    text-shadow:0 4px 16px rgba(0,0,0,.52);
+    display:-webkit-box;
+    -webkit-box-orient:vertical;
+    -webkit-line-clamp:2;
+    overflow:hidden;
+    pointer-events:none;
+  }
+  .home-partner-carousel .home-partner-pitch {
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%, -50%);
+    width:min(86%, 560px);
+    margin-top:0;
+    color:#fff;
+    font-size:1.16rem;
+    line-height:1.5;
+    min-height:0;
+    text-align:center;
+    z-index:2;
+    display:-webkit-box;
+    -webkit-box-orient:vertical;
+    -webkit-line-clamp:2;
+    overflow:hidden;
+  }
+  .home-partner-carousel .home-partner-city-block {
+    margin-top:auto;
+    border-radius:.78rem;
+    background:rgba(0,0,0,.62);
+    border:1px solid rgba(255,255,255,.18);
+    padding:.4rem .62rem;
+    font-size:1.2rem;
+    color:rgba(255,255,255,.92);
+    font-weight:800;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-height:1.75rem;
+    white-space:nowrap;
+  }
+  .home-partner-section .home-carousel {
+    gap:1.2rem;
+    padding:0 0 1.6rem;
+    scroll-padding-left:0;
+    scroll-padding-right:0;
+    scroll-snap-type:x mandatory;
+    scroll-behavior:smooth;
+    scrollbar-width:none;
+  }
+  .home-partner-section .home-carousel::-webkit-scrollbar {
+    display:none;
+  }
+  .home-partner-section .home-carousel > * {
+    flex:0 0 clamp(320px, 70vw, 820px);
+    scroll-snap-align:start;
+  }
+  .home-partner-section .home-photo-card {
+    min-height:620px;
+    border-radius:34px;
+    border:1px solid rgba(255,255,255,.08);
+    box-shadow:0 38px 90px -44px rgba(0,0,0,.92);
+    opacity:.64;
+    transform:scale(.94);
+    filter:saturate(.88) brightness(.88);
+    transition:transform .65s cubic-bezier(.22,1,.36,1), border-color .35s ease, opacity .45s ease, filter .45s ease, box-shadow .45s ease;
+  }
+  .home-partner-section .home-photo-badges {
+    inset:1rem auto auto 1rem;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:.55rem;
+  }
+  .home-partner-section .home-photo-content.top-restaurant-content {
+    inset:auto 1rem 1rem 1rem;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+    min-height:8.8rem;
+    z-index:2;
+  }
+  .home-partner-section .home-photo-card.is-active {
+    opacity:1;
+    transform:scale(1);
+    filter:saturate(1.05) brightness(1);
+    border-color:rgba(255,255,255,.22);
+    box-shadow:0 44px 120px -52px rgba(0,0,0,.98);
+  }
+  .home-partner-section .home-partner-dots {
+    margin-top:1.05rem;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:.48rem;
+  }
+  .home-partner-section .home-partner-dot {
+    height:.5rem;
+    width:.5rem;
+    border-radius:999px;
+    border:0;
+    padding:0;
+    background:rgba(255,255,255,.3);
+    box-shadow:0 0 0 1px rgba(255,255,255,.08) inset;
+    transition:width .28s ease, background-color .28s ease, transform .28s ease;
+    cursor:pointer;
+  }
+  .home-partner-section .home-partner-dot.is-active {
+    width:1.6rem;
+    background:rgba(255,255,255,.9);
+    transform:translateY(-1px);
+  }
+  .home-partner-section .home-photo-card::after {
+    background:linear-gradient(180deg,rgba(6,9,14,.04),rgba(6,9,14,.35) 52%,rgba(6,9,14,.9) 100%);
+  }
+  .home-partner-section .home-photo-card::before {
+    content:"";
+    position:absolute;
+    inset:0;
+    background:radial-gradient(120% 80% at 50% -12%, rgba(255,255,255,.16), transparent 62%);
+    pointer-events:none;
+    z-index:1;
+  }
+  .home-partner-section .home-photo-card:hover {
+    transform:translateY(-6px);
+    border-color:rgba(255,255,255,.18);
+  }
+  .home-partner-section .home-photo-card:hover .home-photo-media {
+    transform:scale(1.04);
+    filter:saturate(1.1) contrast(1.06);
+  }
+  @media (max-width: 768px) {
+    .home-partner-section .home-carousel > * {
+      flex-basis:86vw;
+    }
+    .home-partner-section .home-photo-card {
+      min-height:520px;
+      border-radius:28px;
+    }
+    .home-partner-carousel .home-partner-top-title {
+      left:50%;
+      transform:translateX(-50%);
+      width:86%;
+      font-size:1.36rem;
+    }
+    .home-partner-carousel .home-partner-pitch {
+      font-size:1rem;
+    }
+    .home-partner-carousel .home-partner-city-block {
+      font-size:1.02rem;
+    }
+  }
+  .top-sortie-content {
+    display:flex;
+    flex-direction:column;
+    min-height:262px;
+  }
+  .top-sortie-topline {
+    min-height:1.9rem;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:.5rem;
+    flex-wrap:nowrap;
+  }
+  .top-sortie-topline .rank-badge {
+    display:inline-flex;
+    align-items:center;
+    gap:.35rem;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.18);
+    background:rgba(8,12,18,.72);
+    color:#fff;
+    padding:.3rem .58rem;
+    font-size:.68rem;
+    font-weight:800;
+    letter-spacing:.03em;
+    text-transform:uppercase;
+    min-width:1.9rem;
+    justify-content:center;
+  }
+  .top-sortie-title {
+    margin-top:.6rem;
+    min-height:3.65rem;
+    display:-webkit-box;
+    -webkit-box-orient:vertical;
+    -webkit-line-clamp:2;
+    overflow:hidden;
+    text-align:left;
+    line-height:1.18;
+  }
+  .top-sortie-sub {
+    margin-top:.45rem;
+    min-height:3.95rem;
+    display:-webkit-box;
+    -webkit-box-orient:vertical;
+    -webkit-line-clamp:3;
+    overflow:hidden;
+  }
+  .top-sortie-meta {
+    margin-top:.7rem;
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:.72rem;
+  }
+  .top-sortie-date {
+    display:grid;
+    place-items:center;
+    min-width:3.2rem;
+    border-radius:1rem;
+    border:1px solid rgba(255,255,255,.14);
+    background:rgba(255,255,255,.06);
+    padding:.55rem .45rem;
+  }
+  .top-sortie-date strong {
+    font-family:"Geist",Inter,sans-serif;
+    font-size:1.15rem;
+    line-height:1;
+    color:#fff;
+  }
+  .top-sortie-date span {
+    margin-top:.18rem;
+    font-size:.62rem;
+    font-weight:700;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:rgba(255,255,255,.58);
+  }
+  .top-sortie-datetime {
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:.42rem;
+    font-size:.76rem;
+    color:rgba(255,255,255,.85);
+    font-weight:600;
+  }
+  .top-sortie-footer {
+    margin-top:auto;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:.55rem;
+    font-size:.82rem;
+    color:rgba(255,255,255,.78);
+  }
+  .top-sortie-link {
+    color:#fff;
+    font-weight:700;
+    transition:transform .24s ease;
+  }
+  .group:hover .top-sortie-link { transform:translateX(3px); }
+  .top-restaurant-content {
+    display:flex;
+    flex-direction:column;
+    min-height:252px;
+    padding-bottom:.85rem;
+  }
+  .top-restaurant-card {
+    min-height:470px;
+    border-color:rgba(255,255,255,.1);
+    transition:transform .45s cubic-bezier(.22,1,.36,1), border-color .3s ease, box-shadow .3s ease;
+  }
+  .top-restaurant-card::before {
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    z-index:0;
+    background:radial-gradient(120% 80% at 50% -16%, rgba(255,255,255,.22), transparent 62%);
+  }
+  .top-restaurant-card:hover {
+    transform:translateY(-6px);
+    border-color:rgba(255,255,255,.2);
+    box-shadow:0 34px 90px -36px rgba(0,0,0,.9);
+  }
+  .top-restaurant-card .home-photo-media { filter:saturate(1.03) contrast(1.02); }
+  .top-restaurant-card:hover .home-photo-media { filter:saturate(1.1) contrast(1.04); }
+  .top-restaurant-title {
+    min-height:3.75rem;
+    line-height:1.2;
+    display:-webkit-box;
+    -webkit-box-orient:vertical;
+    -webkit-line-clamp:2;
+    overflow:hidden;
+  }
+  .top-restaurant-meta { min-height:1.25rem; }
+  .top-restaurant-cta {
+    margin-top:auto !important;
+    margin-bottom:.25rem !important;
+    margin-left:auto;
+    margin-right:auto;
+    position:relative;
+    top:0;
+    border:1px solid rgba(255,255,255,.25);
+    box-shadow:0 14px 30px -16px rgba(0,0,0,.65);
+  }
   .home-photo-sub { margin-top:.6rem; font-size:.82rem; line-height:1.65; color:rgba(255,255,255,.68); }
   .home-curation { display:grid; grid-template-columns:1.15fr .85fr; gap:1rem; }
   .home-curation-main, .home-curation-side { position:relative; overflow:hidden; border-radius:30px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.03); box-shadow:0 24px 60px -34px rgba(0,0,0,.84); backdrop-filter:blur(14px); }
@@ -70,6 +918,96 @@
   .home-social-side { padding:1rem; }
   .home-pulse-list { display:grid; gap:.8rem; }
   .home-pulse-row { display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; border:1px solid rgba(255,255,255,.06); border-radius:20px; background:rgba(255,255,255,.025); padding:1rem; }
+  .pros-panel {
+    position:relative;
+    overflow:hidden;
+    border-radius:2rem;
+    border:1px solid rgba(29,78,216,.18);
+    background:
+      radial-gradient(120% 90% at -10% -20%, rgba(59,130,246,.16), transparent 55%),
+      radial-gradient(90% 70% at 110% 120%, rgba(56,189,248,.14), transparent 58%),
+      linear-gradient(135deg, #ffffff, #f4f8ff);
+    box-shadow:0 28px 70px -44px rgba(29,78,216,.35), inset 0 1px 0 rgba(255,255,255,.9);
+    padding:2.1rem;
+  }
+  .pros-panel::before {
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background:linear-gradient(180deg, rgba(147,197,253,.24), transparent 28%);
+  }
+  .pros-grid { position:relative; z-index:1; display:grid; gap:1.1rem; }
+  .pros-eyebrow {
+    color:#1d4ed8;
+    background:#dbeafe;
+    border:1px solid #bfdbfe;
+    padding:.3rem .62rem;
+    border-radius:999px;
+    display:inline-flex;
+    align-items:center;
+    gap:.35rem;
+    font-weight:800;
+  }
+  .pros-title {
+    color:#1d4ed8;
+  }
+  .pros-copy {
+    margin-top:1rem;
+    color:rgba(29,78,216,.86);
+    max-width:58ch;
+    line-height:1.72;
+    text-align:center;
+    margin-left:auto;
+    margin-right:auto;
+  }
+  .pros-pill-row { margin-top:1.25rem; display:flex; flex-wrap:wrap; gap:.55rem; }
+  .pros-pill {
+    display:inline-flex;
+    align-items:center;
+    gap:.4rem;
+    border:1px solid rgba(255,255,255,.14);
+    border-radius:999px;
+    padding:.42rem .78rem;
+    font-size:.74rem;
+    font-weight:700;
+    letter-spacing:.03em;
+    color:rgba(255,255,255,.88);
+    background:rgba(255,255,255,.04);
+  }
+  .pros-side {
+    display:grid;
+    gap:.65rem;
+    align-content:end;
+  }
+  .pros-metric {
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:1rem;
+    background:rgba(255,255,255,.035);
+    padding:.8rem .95rem;
+  }
+  .pros-metric strong {
+    display:block;
+    font-family:"Geist",Inter,sans-serif;
+    font-size:1.1rem;
+    line-height:1.1;
+    color:#fff;
+  }
+  .pros-metric span {
+    display:block;
+    margin-top:.25rem;
+    font-size:.72rem;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:rgba(255,255,255,.55);
+    font-weight:700;
+  }
+  .pros-cta-row { margin-top:.4rem; display:flex; flex-wrap:wrap; gap:.6rem; }
+  .pros-panel .btn-primary {
+    background:#1d4ed8;
+    border-color:#1d4ed8;
+    color:#fff;
+  }
   .home-community-grid { display:grid; gap:.8rem; grid-template-columns:repeat(2,minmax(0,1fr)); }
   .home-community-card { border:1px solid rgba(255,255,255,.08); border-radius:22px; background:rgba(255,255,255,.03); padding:1rem; }
   .home-highlight-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:1rem; }
@@ -125,13 +1063,143 @@
   .store-card-premium .store-card-meta { color:rgba(255,255,255,.67); }
   .store-card-premium .store-chip { background:rgba(255,255,255,.07); color:rgba(255,255,255,.86); border-color:rgba(255,255,255,.12); }
   .store-card-premium .store-link { color:#fff; }
+  .store-card-story {
+    min-height:560px;
+    padding:0;
+    border-color:rgba(255,255,255,.14);
+  }
+  .store-story-media {
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    object-position:center;
+    z-index:0;
+  }
+  .store-card-story::after {
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(180deg,rgba(6,10,16,.24) 6%,rgba(6,10,16,.42) 38%,rgba(6,10,16,.93) 100%);
+    z-index:1;
+    pointer-events:none;
+  }
+  .store-card-story .store-card-body {
+    position:relative;
+    z-index:2;
+    max-width:100%;
+    min-height:560px;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-end;
+    align-items:center;
+    text-align:center;
+    padding:2rem;
+  }
+  .store-story-title {
+    font-family:"Geist",Inter,sans-serif;
+    font-size:clamp(2rem,3.5vw,3.3rem);
+    line-height:1.04;
+    letter-spacing:-.04em;
+    font-weight:800;
+    color:#fff;
+  }
+  .store-story-copy {
+    margin-top:.85rem;
+    max-width:72ch;
+    margin-left:auto;
+    margin-right:auto;
+    font-size:1rem;
+    line-height:1.8;
+    color:rgba(255,255,255,.94);
+  }
+  .store-story-copy + .store-story-copy { margin-top:.65rem; }
   .store-card-light { background:linear-gradient(180deg,#fbfbfd 0%,#eef1f6 100%); color:#0a0f16; }
   .store-card-light .store-card-meta { color:rgba(10,15,22,.55); }
   .store-card-light .store-chip { background:rgba(10,15,22,.06); color:rgba(10,15,22,.74); border-color:rgba(10,15,22,.08); }
   .store-card-light .store-link { color:#0a0f16; }
   .store-card-dark { background:linear-gradient(180deg,#0e1218 0%,#090c12 100%); color:#fff; }
+  .store-card-restaurant-hero {
+    min-height:300px;
+    padding:0;
+    border-color:rgba(255,255,255,.14);
+  }
+  .store-card-restaurant-hero::after {
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(180deg,rgba(7,10,16,.16) 10%,rgba(7,10,16,.44) 52%,rgba(7,10,16,.9) 100%);
+    z-index:1;
+    pointer-events:none;
+  }
+  .store-card-restaurant-hero .store-card-body {
+    position:relative;
+    z-index:2;
+    max-width:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+    padding:1.25rem;
+  }
+  .store-card-restaurant-hero .store-card-meta {
+    max-width:64ch;
+    margin-left:auto;
+    margin-right:auto;
+    line-height:1.78;
+    color:rgba(255,255,255,.93);
+  }
+  .store-restaurant-media {
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    object-position:center;
+    z-index:0;
+  }
   .store-card-muted { background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02)); color:#fff; }
-  .store-card-title { font-family:"Geist",Inter,sans-serif; font-size:clamp(1.75rem,3vw,3.45rem); line-height:1.02; letter-spacing:-.04em; font-weight:800; max-width:12ch; }
+  .store-card-community-hero {
+    min-height:300px;
+    padding:0;
+    border-color:rgba(255,255,255,.14);
+  }
+  .store-card-community-hero::after {
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(180deg,rgba(7,10,16,.14) 10%,rgba(7,10,16,.4) 50%,rgba(7,10,16,.9) 100%);
+    z-index:1;
+    pointer-events:none;
+  }
+  .store-card-community-hero .store-card-body {
+    position:relative;
+    z-index:2;
+    max-width:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+    padding:1.25rem;
+  }
+  .store-card-community-hero .store-card-meta {
+    max-width:64ch;
+    margin-left:auto;
+    margin-right:auto;
+    line-height:1.78;
+    color:rgba(255,255,255,.93);
+  }
+  .store-community-media {
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    object-position:center;
+    z-index:0;
+  }
+  .store-card-title { font-family:"Geist",Inter,sans-serif; font-size:clamp(1.75rem,3vw,3.45rem); line-height:1.02; letter-spacing:-.04em; font-weight:800; max-width:12ch; width:100%; text-align:center; }
   .store-card-body { position:relative; z-index:1; max-width:20rem; }
   .store-card-meta { margin-top:.75rem; font-size:.92rem; line-height:1.7; color:rgba(255,255,255,.62); }
   .store-card-figure { position:absolute; right:0; bottom:0; width:48%; height:88%; object-fit:cover; object-position:center; }
@@ -179,14 +1247,14 @@
 
   /* ── Points forts V2 (Apple-like highlight rail) ── */
   .hl-section { padding:5.8rem 0 4.8rem; border-top:1px solid rgba(255,255,255,.05); }
-  .hl-wrap { max-width:80rem; margin:0 auto; }
-  .hl-head { display:flex; align-items:flex-end; justify-content:space-between; gap:1rem; padding:0 1rem; margin-bottom:2.2rem; }
+  .hl-wrap { max-width:80rem; margin:0 auto; padding:0 1rem; }
+  .hl-head { display:flex; align-items:center; justify-content:center; gap:1rem; padding:0; margin-bottom:2.2rem; text-align:center; }
   .hl-kicker { display:block; font-size:.7rem; font-weight:800; letter-spacing:.22em; text-transform:uppercase; color:rgba(255,255,255,.4); }
-  .hl-title { margin-top:.55rem; font-family:"Geist",Inter,sans-serif; font-size:clamp(2.5rem,5.2vw,4.9rem); line-height:1; letter-spacing:-.058em; font-weight:800; color:#fff; }
+  .hl-title { margin-top:.55rem; font-family:"Geist",Inter,sans-serif; font-size:clamp(2rem,4vw,4rem); line-height:1.04; letter-spacing:-.045em; font-weight:800; color:#fff; }
   .hl-title span { color:rgba(255,255,255,.38); }
   .hl-link { color:rgba(255,255,255,.62); font-size:.92rem; font-weight:600; white-space:nowrap; }
   .hl-link:hover { color:#fff; }
-  .hl-rail { display:flex; gap:1rem; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; padding:0 max(1rem, calc((100vw - 80rem)/2)) 1.6rem; scroll-padding-left:max(1rem, calc((100vw - 80rem)/2)); }
+  .hl-rail { display:flex; gap:1rem; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; padding:0 0 1.6rem; scroll-padding-left:0; }
   .hl-rail::-webkit-scrollbar { display:none; }
   .hl-card { position:relative; flex:0 0 auto; width:min(76vw, 980px); min-height:620px; overflow:hidden; border-radius:34px; border:1px solid rgba(255,255,255,.08); scroll-snap-align:start; isolation:isolate; box-shadow:0 38px 90px -44px rgba(0,0,0,.92); transition:transform .65s cubic-bezier(.22,1,.36,1), border-color .35s ease; }
   .hl-card:hover { transform:translateY(-6px); border-color:rgba(255,255,255,.18); }
@@ -194,6 +1262,36 @@
   .hl-card:hover .hl-media { transform:scale(1.04); filter:saturate(1.1) contrast(1.06); }
   .hl-card::before { content:""; position:absolute; inset:0; background:radial-gradient(120% 80% at 50% -12%, rgba(255,255,255,.16), transparent 62%); pointer-events:none; z-index:1; }
   .hl-card::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(6,9,14,.04),rgba(6,9,14,.35) 52%,rgba(6,9,14,.9) 100%); pointer-events:none; z-index:1; }
+  .hl-caption {
+    position:absolute;
+    inset:0;
+    z-index:2;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:1.2rem;
+    text-align:center;
+    pointer-events:none;
+  }
+  .hl-caption > span {
+    display:inline-flex;
+    width:fit-content;
+    max-width:min(88%, 40ch);
+    align-items:center;
+    justify-content:center;
+    border:1px solid rgba(255,255,255,.18);
+    border-radius:999px;
+    padding:.62rem 1rem;
+    font-family:"Geist",Inter,sans-serif;
+    font-size:clamp(.9rem,1.8vw,1.15rem);
+    font-weight:700;
+    letter-spacing:.01em;
+    line-height:1.25;
+    color:#fff;
+    background:rgba(6,10,16,.52);
+    backdrop-filter:blur(8px);
+    box-shadow:0 10px 30px rgba(0,0,0,.35);
+  }
   .hl-card-a { background:linear-gradient(160deg,#151f30 0%,#0b121b 44%,#090f16 100%); }
   .hl-card-b { background:linear-gradient(160deg,#1b1f2d 0%,#101523 45%,#090e16 100%); }
   .hl-card-c { background:linear-gradient(160deg,#16251f 0%,#0d1814 45%,#09110f 100%); }
@@ -218,11 +1316,13 @@
   }
   @media (max-width: 640px) {
     .hl-section { padding-top:4.4rem; }
-    .hl-head { align-items:flex-start; flex-direction:column; margin-bottom:1.5rem; }
+    .hl-head { align-items:center; flex-direction:column; margin-bottom:1.5rem; text-align:center; }
     .hl-card, .hl-card-inner { min-height:520px; }
     .hl-card { width:90vw; border-radius:28px; }
+    .hl-caption { padding:1rem; }
     .hl-card-inner { padding:1.5rem; }
     .hl-figure { min-width:220px; min-height:140px; }
+    .pros-panel { padding:1.35rem; border-radius:1.5rem; }
   }
 </style>
 {% endblock %}
@@ -232,45 +1332,44 @@
 <section class="relative mx-auto max-w-7xl px-4">
   <div class="store-intro text-center">
     <h1 class="store-title store-brand-gradient mt-3">{% trans "Mooviogo" %}</h1>
-    <p class="store-leadline">{% trans "Tes sorties commencent ici." %}</p>
-    <p class="store-subtitle">{% trans "Choisis une vibe, réserve ta place, rejoins en un geste." %}</p>
-    <p class="store-copy">
-      {% trans "Sorties, restos et événements réunis au même endroit." %}
-    </p>
+    <p class="store-leadline">{% trans "Sortir n’a jamais été aussi simple." %}</p>
+    <p class="store-subtitle">{% trans "Restaurants, événements et nightlife réunis dans une expérience fluide et moderne." %}</p>
   </div>
 
   {% with featured_event=events|first featured_restaurant=restaurants|first featured_sortie=sorties|first %}
   <div class="store-hero-grid">
-    <a href="{% if featured_event %}/evenements/{{ featured_event.slug }}/{% else %}/evenements/{% endif %}" class="store-card store-card-premium block group">
-      <span class="store-chip">{% trans "L’essentiel ce soir" %}</span>
-      <div class="store-card-body mt-5">
-          <h2 class="store-card-title">{% if featured_event %}{{ featured_event.title }}{% else %}{% trans "Les événements à ouvrir en premier" %}{% endif %}</h2>
-          <p class="store-card-meta">{% if featured_event %}{{ featured_event.description|truncatechars:120 }}{% else %}{% trans "Une sélection éditoriale des sorties qui créent vraiment l’envie." %}{% endif %}</p>
-        <span class="store-hero-metric">⚡ {% trans "lecture instantanée" %}</span>
-        <span class="store-link">{% trans "Découvrir la sélection" %}</span>
+    <a href="/sorties/" class="store-card store-card-premium store-card-story block group">
+      <img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1900&q=80" alt="Sortie entre amis avec des personnes qui rient" class="store-story-media" loading="lazy" />
+      <div class="store-card-body">
+        <span class="store-chip">Sorties &amp; Expériences</span>
+        <h2 class="store-story-title mt-4">Sorties &amp; Expériences</h2>
+        <p class="store-story-copy">Créez vos propres sorties et vivez la ville autrement.</p>
+        <p class="store-story-copy">Avec Mooviogo, chacun peut organiser une sortie en quelques secondes : session karting, paintball entre amis, rooftop au coucher du soleil, balade urbaine, sortie sportive, afterwork ou activité insolite.</p>
+        <p class="store-story-copy">Que ce soit une expérience chez un partenaire ou une sortie gratuite créée par la communauté, tout devient plus simple pour rencontrer du monde, partager un moment et découvrir de nouvelles activités près de chez vous.</p>
+        <p class="store-story-copy">Ne cherchez plus quoi faire : créez, rejoignez et vivez des expériences qui donnent vraiment envie de sortir.</p>
+        <span class="store-link mt-5">Voir les sorties</span>
       </div>
-      {% if featured_event and featured_event.cover_image_url %}
-      <img src="{{ featured_event.cover_image_url }}" alt="{{ featured_event.title }}" class="store-card-figure" loading="lazy" />
-      {% else %}
-      <span class="store-card-orb" style="width:240px;height:240px;right:-20px;bottom:-30px;background:radial-gradient(circle,rgba(93,143,255,.24),transparent 70%)"></span>
-      {% endif %}
     </a>
 
     <div class="store-hero-stack">
-      <a href="{% if featured_restaurant %}/restaurants/{{ featured_restaurant.city_slug }}/{{ featured_restaurant.slug }}/{% else %}/restaurants/{% endif %}" class="store-card store-card-dark block group" style="min-height:240px;">
+      <a href="/restaurants/" class="store-card store-card-dark store-card-restaurant-hero block group">
+        <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1400&q=80" alt="Table avec plusieurs plats de cuisine" class="store-restaurant-media" loading="lazy" />
         <span class="store-chip">{% trans "Réserver" %}</span>
         <div class="store-card-body mt-5">
-          <h2 class="store-card-title text-[2.2rem] sm:text-[2.6rem]">{% if featured_restaurant %}{{ featured_restaurant.name }}{% else %}{% trans "Les tables qui donnent envie tout de suite" %}{% endif %}</h2>
-          <p class="store-card-meta">{% if featured_restaurant %}{{ featured_restaurant.description|default:_('Une fiche plus simple, plus désirable, plus claire pour réserver vite.')|truncatechars:95 }}{% else %}{% trans "Le bon cadre, le bon prix, le bon créneau: visibles immédiatement." %}{% endif %}</p>
+          <h2 class="store-card-title text-[2.2rem] sm:text-[2.6rem]">Restaurants</h2>
+          <p class="store-card-meta">Trouvez les meilleures adresses pour manger et sortir.</p>
+          <p class="store-card-meta">Explorez une sélection de restaurants, rooftops, bars à vins et lieux incontournables soigneusement choisis par la communauté Mooviogo. Découvrez des endroits uniques, réservez facilement et profitez d’expériences culinaires adaptées à chaque ambiance et chaque occasion.</p>
           <span class="store-link">{% trans "Voir les restaurants" %}</span>
         </div>
       </a>
 
-      <a href="{% if featured_sortie %}/sorties/{{ featured_sortie.id }}/{% else %}/sorties/{% endif %}" class="store-card store-card-muted block group" style="min-height:240px;">
+      <a href="/sorties/" class="store-card store-card-muted store-card-community-hero block group">
+        <img src="https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=1400&q=80" alt="Personnes qui discutent autour d'un verre" class="store-community-media" loading="lazy" />
         <span class="store-chip">{% trans "Communauté" %}</span>
         <div class="store-card-body mt-5">
-          <h2 class="store-card-title text-[2.2rem] sm:text-[2.6rem]">{% trans "Les sorties simples à rejoindre" %}</h2>
-          <p class="store-card-meta">{% if user.is_authenticated and user.city %}{% blocktrans with city=user.city %}Ce qui bouge à {{ city }} maintenant, sans devoir fouiller dans un catalogue compliqué.{% endblocktrans %}{% else %}{% trans "Le bon mix entre vibe, ville et signal social pour sortir plus vite." %}{% endif %}</p>
+          <h2 class="store-card-title text-[2.2rem] sm:text-[2.6rem]">Communauté</h2>
+          <p class="store-card-meta">Rejoignez une communauté active et locale.</p>
+          <p class="store-card-meta">Mooviogo rassemble des personnes qui aiment découvrir, partager et vivre la ville autrement. Rencontrez de nouvelles personnes, participez à des événements accessibles et échangez autour des meilleures sorties, bonnes adresses et expériences du moment.</p>
           <span class="store-link">{% trans "Voir les sorties" %}</span>
         </div>
       </a>
@@ -283,12 +1382,10 @@
 
 {# ═════════════ MOODS ═════════════ #}
 <section class="mx-auto max-w-7xl px-4 py-10 border-t border-white/[0.05]">
-  <div class="section-head">
-    <div>
-      <span class="h-eyebrow">✨ {% trans "Choisis ton mood" %}</span>
+  <div class="section-head justify-center text-center">
+    <div class="mx-auto text-center">
       <h2>{% trans "Découvre la ville par ambiance" %}</h2>
     </div>
-    <a href="/feed/">{% trans "Ouvrir le feed" %} →</a>
   </div>
 
   <div class="home-moods mt-6">
@@ -297,9 +1394,7 @@
       <span class="home-mood-orb" style="width:220px;height:220px;top:-40px;left:-30px;background:radial-gradient(circle,#A832F5 0%,transparent 70%)"></span>
       <span class="home-mood-orb" style="width:200px;height:200px;bottom:-30px;right:-20px;background:radial-gradient(circle,#F31C7F 0%,transparent 70%)"></span>
       <div class="home-mood-content">
-        <span class="chip chip-flamingo w-fit">{% trans "Ambiance club" %}</span>
         <h3 class="mt-3 font-display text-3xl font-extrabold text-white tracking-tight">{% trans "Clubbing & nightlife" %}</h3>
-        <p class="mt-2 max-w-md text-sm text-white/65">{% trans "Line-ups, clubs premium, rooftops et événements nocturnes avec une identité plus sombre et plus désirable." %}</p>
       </div>
     </a>
 
@@ -307,9 +1402,7 @@
       <img src="https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=1400&q=80" alt="Diner dans un restaurant" class="home-mood-media dining" loading="lazy" />
       <span class="home-mood-orb" style="width:180px;height:180px;top:-20px;right:-15px;background:radial-gradient(circle,#FF6A4D 0%,transparent 70%)"></span>
       <div class="home-mood-content">
-        <span class="chip chip-sunset w-fit">{% trans "Réservation facile" %}</span>
-        <h3 class="mt-3 font-display text-2xl font-extrabold text-white tracking-tight">{% trans "Dîner & réservation" %}</h3>
-        <p class="mt-2 text-sm text-white/65">{% trans "Des cartes claires, une recherche directe et une réservation sans stress." %}</p>
+        <h3 class="mt-3 font-display text-3xl font-extrabold text-white tracking-tight">{% trans "Dîner & réservation" %}</h3>
       </div>
     </a>
 
@@ -317,66 +1410,52 @@
       <img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1400&q=80" alt="Sortie entre membres" class="home-mood-media community" loading="lazy" />
       <span class="home-mood-orb" style="width:180px;height:180px;bottom:-20px;left:-20px;background:radial-gradient(circle,#21DCEE 0%,transparent 70%)"></span>
       <div class="home-mood-content">
-        <span class="chip chip-electric w-fit">{% trans "Entre membres" %}</span>
-        <h3 class="mt-3 font-display text-2xl font-extrabold text-white tracking-tight">{% trans "Sortir entre membres" %}</h3>
-        <p class="mt-2 text-sm text-white/65">{% trans "Des groupes, des vibes, et des sorties pensées pour créer du lien rapidement." %}</p>
+        <h3 class="mt-3 font-display text-3xl font-extrabold text-white tracking-tight">{% trans "Sortir entre membres" %}</h3>
       </div>
     </a>
   </div>
 </section>
 
-{# ═════════════ POINTS FORTS (Apple-style highlights rail) ═════════════ #}
-<section class="hl-section" aria-label="{% trans 'Points forts de Mooviogo' %}">
-  <div class="hl-wrap">
-    <div class="hl-head">
-      <div>
-        <span class="hl-kicker">{% trans "Points forts" %}</span>
-        <h2 class="hl-title">{% trans "Points forts." %} <span>{% trans "Grand format." %}</span></h2>
+{# ═════════════ SORTIE PARTNERS ═════════════ #}
+<section class="mx-auto max-w-7xl px-4 py-12 border-t border-white/[0.05] home-partner-section">
+  <div class="mb-6">
+    <div>
+      <h2 class="h-section text-white mt-1 text-center">{% trans "Nos partenaire" %}</h2>
+      <p class="text-center text-white/70 mt-2">{% trans "Karting, paintball, laser game et bien plus encore ..." %}</p>
+    </div>
+  </div>
+
+  <div class="home-carousel home-partner-carousel">
+    {% for partner in partners|slice:":10" %}
+    {% cycle "https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&w=1600&q=80" "https://images.unsplash.com/photo-1575223970966-76ae61ee7838?auto=format&fit=crop&w=1600&q=80" "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1600&q=80" "https://images.unsplash.com/photo-1529429617124-aee711d342e7?auto=format&fit=crop&w=1600&q=80" "https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=1600&q=80" as partner_photo_url silent %}
+    <a href="/partenaires/" class="home-photo-card home-photo-card-eq top-restaurant-card block group">
+      <img src="{{ partner_photo_url }}" alt="{{ partner.name }}" loading="lazy" class="home-photo-media" />
+      <div class="home-photo-badges">
+        <div class="home-partner-top">
+          {% if partner.category %}<span class="chip chip-sunset">{{ partner.category }}</span>{% else %}<span class="chip chip-sunset">{% trans "Activité" %}</span>{% endif %}
+        </div>
       </div>
-      <a href="/feed/" class="hl-link">{% trans "Découvrir le feed" %} →</a>
+      <div class="home-partner-top-title">{{ partner.name }}</div>
+      <div class="home-photo-content top-restaurant-content">
+        <p class="home-partner-pitch">{{ partner.short_description|default:_('Adrénaline, fun et esprit d’équipe.')|truncatechars:80 }}</p>
+        <div class="home-partner-city-block">📍 {{ partner.city|default:_('Ville') }}</div>
+      </div>
+    </a>
+    {% empty %}
+    <div class="w-full panel text-center text-white/55 py-12">
+      <div class="text-3xl mb-3">🎯</div>
+      <p>{% trans "Aucun partenaire sortie pour l'instant." %}</p>
+      <a href="/partenaires/" class="btn-secondary btn-sm mt-4">{% trans "Voir les partenaires" %}</a>
     </div>
-
-    <div class="hl-rail">
-      <article class="hl-card hl-card-a">
-        <img src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=1800&q=80" alt="Sortie nocturne entre membres" class="hl-media" loading="lazy" />
-        <div class="hl-card-inner">
-          <p class="hl-eyebrow">{% trans "Sorties membres" %}</p>
-          <h3 class="hl-headline">{% trans "Des sorties qui donnent envie." %} <span>{% trans "Tout de suite." %}</span></h3>
-          <p class="hl-sub">{% trans "Lis l’ambiance, la ville, le prix et le niveau social en un regard pour rejoindre plus vite." %}</p>
-          <div class="hl-grow"></div>
-          <div class="hl-figure"><strong>Live</strong><small>{% trans "sorties actives" %}</small></div>
-          <div class="hl-meta"><b>{% trans "Découverte sociale" %}</b> · {% trans "des cartes lisibles pour décider vite" %}</div>
-          <a href="/sorties/" class="hl-cta">{% trans "Voir les sorties" %}</a>
-        </div>
-      </article>
-
-      <article class="hl-card hl-card-b">
-        <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1800&q=80" alt="Restaurant raffine pour reservation" class="hl-media" loading="lazy" />
-        <div class="hl-card-inner">
-          <p class="hl-eyebrow">{% trans "Restaurants" %}</p>
-          <h3 class="hl-headline">{% trans "Réserver une table." %} <span>{% trans "Sans friction." %}</span></h3>
-          <p class="hl-sub">{% trans "Disponibilités, style du lieu et infos utiles sont regroupés pour réserver en quelques secondes." %}</p>
-          <div class="hl-grow"></div>
-          <div class="hl-figure"><strong>2</strong><small>{% trans "étapes" %}</small></div>
-          <div class="hl-meta"><b>{% trans "Réservation rapide" %}</b> · {% trans "du choix à la confirmation" %}</div>
-          <a href="/restaurants/" class="hl-cta">{% trans "Réserver maintenant" %}</a>
-        </div>
-      </article>
-
-      <article class="hl-card hl-card-c">
-        <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1800&q=80" alt="Partenaires et equipe evenementielle" class="hl-media" loading="lazy" />
-        <div class="hl-card-inner">
-          <p class="hl-eyebrow">{% trans "Partenaires" %}</p>
-          <h3 class="hl-headline">{% trans "Offre pro centralisée." %} <span>{% trans "Pilotage clair." %}</span></h3>
-          <p class="hl-sub">{% trans "Établissements, publications et réservations réunis dans une expérience cohérente pour les pros." %}</p>
-          <div class="hl-grow"></div>
-          <div class="hl-figure"><strong>Pro</strong><small>{% trans "espace partenaire" %}</small></div>
-          <div class="hl-meta"><b>{% trans "Visibilité locale" %}</b> · {% trans "une présence mieux structurée" %}</div>
-          <a href="/devenir-partenaire/" class="hl-cta">{% trans "Découvrir l’offre pro" %}</a>
-        </div>
-      </article>
-
-    </div>
+    {% endfor %}
+  </div>
+  <div class="home-partner-dots" aria-label="{% trans 'Navigation partenaires' %}">
+    {% for partner in partners|slice:":10" %}
+    <button type="button" class="home-partner-dot{% if forloop.first %} is-active{% endif %}" aria-label="{% blocktrans with idx=forloop.counter %}Aller à la carte {{ idx }}{% endblocktrans %}"></button>
+    {% endfor %}
+  </div>
+  <div class="mt-5 text-center">
+    <a href="/partenaires/" class="btn-secondary btn-sm">{% trans "Voir plus" %}</a>
   </div>
 </section>
 
@@ -384,169 +1463,191 @@
 
 {# ═════════════ TOP SORTIES ═════════════ #}
 <section class="mx-auto max-w-7xl px-4 py-12">
-  <div class="flex items-end justify-between mb-6 gap-4 flex-wrap">
+  <div class="mb-6">
     <div>
       <span class="h-eyebrow">🏆 {% trans "Tendance" %}</span>
-      <h2 class="h-section text-white mt-1">{% trans "Top sorties de la semaine" %}</h2>
-      <p class="text-sm text-white/55 mt-1">{% trans "Les plans qui rassemblent le plus de monde." %}</p>
+      <h2 class="h-section text-white mt-1 text-center">{% trans "Top sorties de la semaine" %}</h2>
     </div>
-    <a href="/sorties/" class="btn-secondary btn-sm">{% trans "Toutes les sorties" %}</a>
   </div>
 
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 home-mobile-rail">
-    {% for s in sorties|slice:":8" %}
-    <a href="/sorties/{{ s.id }}/" class="home-photo-card home-photo-card-eq block group">
-      <span class="rank-num z-[2]">#{{ forloop.counter }}</span>
-      <button type="button" class="save-fab" aria-label="{% trans 'Enregistrer' %}" onclick="event.preventDefault();this.classList.toggle('is-saved');">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21s-7-4.534-9.5-9C1.07 9.36 2.5 6 5.5 6c1.74 0 3.41 1 4.5 2.5C11.09 7 12.76 6 14.5 6c3 0 4.43 3.36 3 6-2.5 4.466-9.5 9-9.5 9z" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
-      </button>
-      {% if s.cover_image_url %}
-        <img src="{{ s.cover_image_url }}" alt="{{ s.title }}" loading="lazy" class="home-photo-media" />
-      {% else %}
-        <div class="absolute inset-0 bg-grad-brand"></div>
-      {% endif %}
-      <div class="home-photo-badges">
-        <span class="chip chip-dark">🎉 {% trans "Tendance" %}</span>
-        <span class="chip chip-electric">📍 {{ s.city }}</span>
-      </div>
-      <div class="home-photo-content">
-        <div class="flex items-center gap-2 mb-2 flex-wrap relative z-[1]">
-          <span class="chip chip-neon">📍 {{ s.city }}</span>
-          {% if s.is_free %}<span class="chip chip-green">{% trans "Gratuit" %}</span>{% else %}<span class="chip chip-sunset">{{ s.price|floatformat:0 }}€</span>{% endif %}
+  <div class="home-carousel">
+    {% for s in sorties|slice:":10" %}
+    <a href="/sorties/{{ s.id }}/" class="list-photo-card card-member tendance-sortie-card block group">
+      <div class="list-photo-top tendance-header">
+        <div class="tendance-top">
+          <div class="tendance-top-left">
+            <span class="tendance-rank">🔥 #{{ forloop.counter }}</span>
+          </div>
+          <button type="button" class="save-btn tendance-save-btn" aria-label="{% trans 'Enregistrer' %}" onclick="event.preventDefault();this.classList.toggle('text-flamingo-400');"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21s-7-4.534-9.5-9C1.07 9.36 2.5 6 5.5 6c1.74 0 3.41 1 4.5 2.5C11.09 7 12.76 6 14.5 6c3 0 4.43 3.36 3 6-2.5 4.466-9.5 9-9.5 9z" stroke="currentColor" stroke-width="1.5" fill="none"/></svg></button>
         </div>
-        <div class="font-display text-2xl font-extrabold tracking-tight text-white">{{ s.title }}</div>
-        <p class="home-photo-sub">{{ s.description|default:_('Une sortie pensée pour créer du lien, découvrir la ville et passer à l’action rapidement.')|truncatechars:110 }}</p>
-        <div class="mt-4 flex flex-wrap items-center gap-2 text-xs text-white/70">
-          <span class="flex items-center gap-1">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
-            {{ s.participant_count|default:0 }} {% trans "participants" %}
+        <div class="tendance-user-name">
+          <span class="tendance-user-inline">
+            {% if s.organizer_avatar_url %}
+            <img src="{{ s.organizer_avatar_url }}" alt="{{ s.organizer_display }}" class="host-avatar" loading="lazy" />
+            {% else %}
+            <span class="host-avatar-fallback">{{ s.organizer_initials|default:"MB" }}</span>
+            {% endif %}
+            <span>{% if s.creator %}{{ s.organizer_display }}{% else %}{% trans "Membre" %}{% endif %}</span>
           </span>
-          {% if s.starts_at %}<span>•</span><time>{{ s.starts_at|date:"d M, H:i" }}</time>{% endif %}
+        </div>
+        <div class="tendance-top-title">{{ s.title }}</div>
+      </div>
+      {% if s.cover_image_url %}<img src="{{ s.cover_image_url }}" alt="{{ s.title }}" loading="lazy" class="list-photo-media" />{% else %}<div class="absolute inset-0 bg-grad-brand"></div>{% endif %}
+      <div class="list-photo-bottom tendance-card-bottom">
+        <p class="sortie-card-desc">{{ s.description|default:_('Une sortie sociale pensée pour déclencher une décision rapide.')|truncatechars:145 }}</p>
+        <div class="tendance-stats">
+          <div class="tendance-stat">{% if s.starts_at %}{{ s.starts_at|date:"d M" }}{% else %}-- --{% endif %}</div>
+          <div class="tendance-stat">{% if s.starts_at %}{{ s.starts_at|date:"H:i" }}{% else %}--:--{% endif %}</div>
+          <div class="tendance-stat">{{ s.city }}</div>
+          <div class="tendance-stat">{% trans "Gratuit" %}</div>
+        </div>
+        <div class="tendance-bottom-row">
+          <div class="tendance-participants-wrap">
+            <div class="tendance-progress">
+              <span class="tendance-progress-fill" style="width:{% if s.max_participants %}{% widthratio s.participant_count|default:0 s.max_participants 100 %}{% else %}0{% endif %}%"></span>
+            </div>
+            <span class="tendance-participants">{{ s.participant_count|default:0 }} / {% if s.max_participants %}{{ s.max_participants }}{% else %}∞{% endif %}</span>
+          </div>
+          <span class="btn-primary btn-sm tendance-join-btn">{% trans "Participer" %}</span>
         </div>
       </div>
     </a>
     {% empty %}
-    <div class="col-span-full panel text-center text-white/55 py-12">
+    <div class="w-full panel text-center text-white/55 py-12">
       <div class="text-3xl mb-3">🌙</div>
       <p>{% trans "Aucune sortie en cours. Sois le premier à en créer une !" %}</p>
       <a href="/inscription/" class="btn-primary btn-sm mt-4">{% trans "Créer une sortie" %}</a>
     </div>
     {% endfor %}
   </div>
+  <div class="mt-5 text-center">
+    <a href="/sorties/" class="btn-secondary btn-sm">{% trans "Voir plus" %}</a>
+  </div>
 </section>
 
-{# ═════════════ RESTAURANTS ═════════════ #}
+{# ═════════════ TOP ACTIVITES ═════════════ #}
 <section class="mx-auto max-w-7xl px-4 py-12 border-t border-white/[0.05]">
-  <div class="flex items-end justify-between mb-6 gap-4 flex-wrap">
+  <div class="mb-6">
     <div>
-      <span class="h-eyebrow">🍽️ {% trans "À table" %}</span>
-      <h2 class="h-section text-white mt-1">{% trans "Les bons plans autour de toi" %}</h2>
-      <p class="text-sm text-white/55 mt-1">{% trans "Découvre les restaurants autour de toi" %}</p>
-    </div>
-    <div class="hidden sm:flex items-center gap-2 text-xs text-white/55">
-      <span>{% trans "Trier par" %}:</span>
-      <button class="chip chip-neutral" type="button">{% trans "Pertinence" %}</button>
+      <span class="h-eyebrow">🎯 {% trans "Activités" %}</span>
+      <h2 class="h-section text-white mt-1 text-center">{% trans "Top activités de la semaine" %}</h2>
     </div>
   </div>
 
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 home-mobile-rail">
-    {% for r in restaurants|slice:":8" %}
-    <a href="/restaurants/{{ r.city_slug }}/{{ r.slug }}/" class="home-photo-card home-photo-card-eq block group">
-      <button type="button" class="save-fab" aria-label="{% trans 'Enregistrer' %}" onclick="event.preventDefault();this.classList.toggle('is-saved');">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21s-7-4.534-9.5-9C1.07 9.36 2.5 6 5.5 6c1.74 0 3.41 1 4.5 2.5C11.09 7 12.76 6 14.5 6c3 0 4.43 3.36 3 6-2.5 4.466-9.5 9-9.5 9z" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
-      </button>
-      {% if r.cover_image_url %}
-        <img src="{{ r.cover_image_url }}" alt="{{ r.name }}" loading="lazy" class="home-photo-media" />
-      {% else %}
-        <div class="absolute inset-0 bg-grad-brand"></div>
-      {% endif %}
-      <div class="home-photo-badges">
-        <span class="chip chip-dark">🍽️ {% trans "Table choisie" %}</span>
-        {% if r.price_range %}<span class="chip chip-sunset">{{ r.price_range }}</span>{% endif %}
-      </div>
-      <div class="home-photo-content">
-        <div class="flex items-center justify-between gap-2 mb-1">
-          <div class="font-display text-2xl font-extrabold tracking-tight text-white">{{ r.name }}</div>
-          <span class="inline-flex items-center gap-0.5 text-xs font-semibold text-white">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-sunset-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-            4.{% widthratio forloop.counter 10 9 %}
+  <div class="home-carousel">
+    {% for s in activities_sorties %}
+    <a href="/sorties/{{ s.id }}/" class="list-photo-card card-member tendance-sortie-card activities-sortie-card block group">
+      <div class="list-photo-top tendance-header">
+        <div class="tendance-top">
+          <div class="tendance-top-left">
+            <span class="tendance-rank">🔥 #{{ forloop.counter }}</span>
+          </div>
+          <span class="activities-top-user">
+            {% if s.organizer_avatar_url %}
+            <img src="{{ s.organizer_avatar_url }}" alt="{{ s.organizer_display }}" class="host-avatar" loading="lazy" />
+            {% else %}
+            <span class="host-avatar-fallback">{{ s.organizer_initials|default:"MB" }}</span>
+            {% endif %}
+            <span>{% if s.creator %}{{ s.organizer_display }}{% else %}{% trans "Membre" %}{% endif %}</span>
           </span>
+          <button type="button" class="save-btn tendance-save-btn" aria-label="{% trans 'Enregistrer' %}" onclick="event.preventDefault();this.classList.toggle('text-flamingo-400');"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21s-7-4.534-9.5-9C1.07 9.36 2.5 6 5.5 6c1.74 0 3.41 1 4.5 2.5C11.09 7 12.76 6 14.5 6c3 0 4.43 3.36 3 6-2.5 4.466-9.5 9-9.5 9z" stroke="currentColor" stroke-width="1.5" fill="none"/></svg></button>
         </div>
-        <p class="home-photo-sub">{{ r.description|default:_('Une adresse plus désirable, mieux racontée, avec une lecture rapide des signaux utiles.')|truncatechars:105 }}</p>
-        <div class="mt-4 flex flex-wrap items-center gap-2 text-xs text-white/70">
-          <span>📍 {{ r.city }}</span>
-          {% if r.cuisine_type %}<span>•</span><span>{{ r.cuisine_type }}</span>{% endif %}
-          {% if r.price_range %}<span>•</span><span class="text-white/70 font-semibold">{{ r.price_range }}</span>{% endif %}
+        <div class="tendance-top-title">{{ s.partner.name|default:_('Partenaire') }}</div>
+      </div>
+      {% if s.cover_image_url %}<img src="{{ s.cover_image_url }}" alt="{{ s.title }}" loading="lazy" class="list-photo-media" />{% else %}<div class="absolute inset-0 bg-grad-brand"></div>{% endif %}
+      <div class="list-photo-bottom tendance-card-bottom">
+        <p class="sortie-card-desc">{{ s.description|default:_('Réserve une activité partenaire rapidement et retrouve ton groupe sans friction.')|truncatechars:145 }}</p>
+        <div class="activities-offer-block">{{ s.title|default:_('Offre partenaire') }}</div>
+        <div class="tendance-stats">
+          <div class="tendance-stat">{% if s.starts_at %}{{ s.starts_at|date:"d M" }}{% else %}-- --{% endif %}</div>
+          <div class="tendance-stat">{% trans "Début" %} {% if s.starts_at %}{{ s.starts_at|date:"H:i" }}{% else %}--:--{% endif %}</div>
+          <div class="tendance-stat">{% trans "Fin" %} {% if s.ends_at %}{{ s.ends_at|date:"H:i" }}{% else %}--:--{% endif %}</div>
+          <div class="tendance-stat">{% if s.is_free %}{% trans "Gratuit" %}{% else %}{{ s.price|floatformat:0 }}€{% endif %}</div>
+        </div>
+        <div class="tendance-bottom-row">
+          <div class="tendance-participants-wrap">
+            <div class="tendance-progress">
+              <span class="tendance-progress-fill" style="width:{% if s.max_participants %}{% widthratio s.participant_count|default:0 s.max_participants 100 %}{% else %}0{% endif %}%"></span>
+            </div>
+            <span class="tendance-participants">{{ s.participant_count|default:0 }} / {% if s.max_participants %}{{ s.max_participants }}{% else %}∞{% endif %}</span>
+          </div>
+          <span class="btn-primary btn-sm tendance-join-btn">{% trans "Rejoignez" %}</span>
         </div>
       </div>
     </a>
     {% empty %}
-    <div class="col-span-full panel text-center text-white/55 py-12">
+    <div class="w-full panel text-center text-white/55 py-12">
+      <div class="text-3xl mb-3">🎯</div>
+      <p>{% trans "Aucune activité partenaire pour l'instant." %}</p>
+      <a href="/activities/" class="btn-secondary btn-sm mt-4">{% trans "Voir les activités" %}</a>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="mt-5 text-center">
+    <a href="/activities/" class="btn-secondary btn-sm">{% trans "Voir plus" %}</a>
+  </div>
+</section>
+
+{# ═════════════ RESTAURANTS ═════════════ #}
+<section class="mx-auto max-w-7xl px-4 py-12 border-t border-white/[0.05]">
+  <div class="mb-6">
+    <div>
+      <span class="h-eyebrow">🍽️ {% trans "À table" %}</span>
+      <h2 class="h-section text-white mt-1 text-center">{% trans "Découvre les restaurants autour de toi" %}</h2>
+    </div>
+  </div>
+
+  <div class="home-carousel home-restaurants-carousel">
+    {% for r in restaurants|slice:":10" %}
+    <a href="/restaurants/{{ r.city_slug }}/{{ r.slug }}/" class="list-photo-card interactive-card card-tilt ambient-ring tap-bounce block group">
+      <div class="list-photo-top">
+        {% cycle "promo-chip-1" "promo-chip-2" "promo-chip-3" as promo_class silent %}
+        <span class="chip {{ promo_class }}">{% cycle "-20%" "-10%" "-30%" %}</span>
+        <span class="home-resto-rating-badge">
+          <span>{{ r.price_range|default:"€€" }}</span>
+          <span class="home-resto-rating-val">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-sunset-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+            4.{% widthratio forloop.counter 18 9 %}
+          </span>
+        </span>
+        <div class="home-resto-top-title">{{ r.name }}</div>
+      </div>
+      {% if r.cover_image_url %}
+        <img src="{{ r.cover_image_url }}" alt="{{ r.name }}" loading="lazy" class="list-photo-media" />
+      {% else %}
+        <div class="absolute inset-0 bg-grad-brand"></div>
+      {% endif %}
+      <div class="list-photo-bottom text-center">
+        <p class="mt-2 text-sm leading-6 text-white line-clamp-2">{{ r.description|default:_('Une adresse premium, mieux racontée, plus claire sur la réservation.')|truncatechars:100 }}</p>
+        <div class="home-resto-meta-blocks">
+          <div class="home-resto-meta-block">{{ r.city_label|default:r.city_slug }}</div>
+          <div class="home-resto-meta-block">{% if r.cuisine_type %}{{ r.cuisine_type }}{% else %}{% trans "Cuisine" %}{% endif %}</div>
+        </div>
+        <div class="mt-4 flex justify-center">
+          <span class="btn-dice btn-sm btn-reserver-gradient card-reserve-btn pointer-events-none">{% trans "Réserver" %}</span>
+        </div>
+      </div>
+    </a>
+    {% empty %}
+    <div class="w-full panel text-center text-white/55 py-12">
       <div class="text-3xl mb-3">🍝</div>
       <p>{% trans "Aucun resto pour l'instant." %}</p>
     </div>
     {% endfor %}
   </div>
-</section>
-
-{# ═════════════ SORTIE PARTNERS ═════════════ #}
-<section class="mx-auto max-w-7xl px-4 py-12 border-t border-white/[0.05]">
-  <div class="flex items-end justify-between mb-6 gap-4 flex-wrap">
-    <div>
-      <span class="h-eyebrow">🎯 {% trans "Partenaires de sortie" %}</span>
-      <h2 class="h-section text-white mt-1">{% trans "Karting, paintball, laser game" %}</h2>
-      <p class="text-sm text-white/55 mt-1">{% trans "Réserve une activité en quelques secondes avec nos partenaires vérifiés." %}</p>
-    </div>
-    <a href="/partenaires/" class="btn-secondary btn-sm">{% trans "Tous les partenaires" %}</a>
-  </div>
-
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 home-mobile-rail">
-    {% for partner in partners|slice:":8" %}
-    <a href="/partenaires/" class="home-photo-card home-photo-card-eq block group">
-      {% if partner.cover_image_url %}
-        <img src="{{ partner.cover_image_url }}" alt="{{ partner.name }}" loading="lazy" class="home-photo-media" />
-      {% else %}
-        <div class="absolute inset-0 bg-grad-brand"></div>
-      {% endif %}
-      <div class="home-photo-badges">
-        <span class="chip chip-dark">🤝 {% trans "Partenaire sortie" %}</span>
-        {% if partner.category %}<span class="chip chip-sunset">{{ partner.category }}</span>{% else %}<span class="chip chip-sunset">{% trans "Activité" %}</span>{% endif %}
-      </div>
-      <div class="home-photo-content">
-        <div class="flex items-center justify-between gap-2 mb-1">
-          <div class="font-display text-2xl font-extrabold tracking-tight text-white">{{ partner.name }}</div>
-          <span class="inline-flex items-center gap-0.5 text-xs font-semibold text-white">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-sunset-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-            4.{% widthratio forloop.counter 10 8 %}
-          </span>
-        </div>
-        <p class="home-photo-sub">{{ partner.short_description|default:_('Karting, paintball, laser game et activités à réserver sans friction.')|truncatechars:105 }}</p>
-        <div class="mt-4 flex flex-wrap items-center gap-2 text-xs text-white/70">
-          {% if partner.city %}<span>📍 {{ partner.city }}</span>{% endif %}
-          {% if partner.category %}<span>•</span><span>{{ partner.category }}</span>{% endif %}
-          {% if partner.is_verified %}<span>•</span><span class="text-electric-300 font-semibold">{% trans "Vérifié" %}</span>{% endif %}
-        </div>
-      </div>
-    </a>
-    {% empty %}
-    <div class="col-span-full panel text-center text-white/55 py-12">
-      <div class="text-3xl mb-3">🎯</div>
-      <p>{% trans "Aucun partenaire sortie pour l'instant." %}</p>
-      <a href="/partenaires/" class="btn-secondary btn-sm mt-4">{% trans "Voir les partenaires" %}</a>
-    </div>
-    {% endfor %}
+  <div class="mt-5 text-center">
+    <a href="/restaurants/" class="btn-secondary btn-sm">{% trans "Voir plus" %}</a>
   </div>
 </section>
 
 {# ═════════════ EVENTS ═════════════ #}
 <section class="mx-auto max-w-7xl px-4 py-12 border-t border-white/[0.05]">
-  <div class="flex items-end justify-between mb-6 gap-4 flex-wrap">
-    <div>
+  <div class="mb-6">
+    <div class="agenda-head-copy">
       <span class="h-eyebrow">🎤 {% trans "L'agenda" %}</span>
       <h2 class="h-section text-white mt-1">{% trans "Prochains événements" %}</h2>
-      <p class="text-sm text-white/55 mt-1">{% trans "Soirées, concerts, festivals — réserve avant que ça soit complet." %}</p>
+      <p class="agenda-sub text-sm text-white/55 mt-1">{% trans "Soirées, concerts, festivals — réserve avant que ça soit complet." %}</p>
     </div>
-    <a href="/evenements/" class="btn-secondary btn-sm">{% trans "Tous les events" %}</a>
   </div>
 
   <div class="home-event-grid">
@@ -558,16 +1659,34 @@
       {% else %}
       <div class="absolute inset-0 bg-grad-brand"></div>
       {% endif %}
+      <h3 class="home-feature-event-top-title font-display text-4xl font-extrabold tracking-tight text-white">{{ featured.title }}</h3>
       <div class="home-feature-event-content">
         <div class="flex flex-wrap items-center gap-2">
-          <span class="chip chip-flamingo">{% trans "À la une" %}</span>
-          {% if featured.price %}<span class="chip chip-sunset">{{ featured.price|floatformat:0 }}€</span>{% else %}<span class="chip chip-green">{% trans "Gratuit" %}</span>{% endif %}
+          <span class="chip chip-flamingo">{% trans "Rooftop" %}</span>
+          {% if featured.price %}
+          <span class="chip chip-sunset">{% trans "VIP" %}</span>
+          {% else %}
+          <span class="chip chip-green">{% trans "Gratuit" %}</span>
+          {% endif %}
+          <span class="chip chip-flamingo">{% trans "Trending" %}</span>
         </div>
-        <h3 class="mt-4 font-display text-4xl font-extrabold tracking-tight text-white">{{ featured.title }}</h3>
-        <p class="mt-3 max-w-lg text-sm text-white/70">{{ featured.description|truncatechars:150 }}</p>
-        <div class="mt-5 flex items-center gap-4 text-sm text-white/75">
-          <span>📍 {{ featured.city }}</span>
-          {% if featured.starts_at %}<time>🕒 {{ featured.starts_at|date:"d M · H:i" }}</time>{% endif %}
+        <p class="mt-3 max-w-lg text-sm text-white/70">{{ featured.description|default:_('DJ set, cocktails et coucher de soleil.')|truncatechars:120 }}</p>
+        <div class="home-event-meta-blocks">
+          <span class="home-event-meta-block">📍 {{ featured.city }}</span>
+          <span class="home-event-meta-block">{% if featured.location %}{{ featured.location }}{% else %}{% trans "Lieu secret" %}{% endif %}</span>
+          <span class="home-event-meta-block">{% if featured.starts_at %}🗓 {{ featured.starts_at|date:"l d M" }}{% else %}🗓 --{% endif %}</span>
+          <span class="home-event-meta-block">{% if featured.starts_at %}🕘 {{ featured.starts_at|date:"H:i" }}{% else %}🕘 --:--{% endif %}</span>
+          {% if featured.max_participants %}
+          <span class="home-event-meta-block">🔥 {% blocktrans with seats=featured.max_participants %}Plus que {{ seats }} places{% endblocktrans %}</span>
+          {% elif featured.price %}
+          <span class="home-event-meta-block">🎟 {% blocktrans with amount=featured.price|floatformat:0 %}Dès {{ amount }}€{% endblocktrans %}</span>
+          {% else %}
+          <span class="home-event-meta-block">🎟 {% trans "Gratuit avant minuit" %}</span>
+          {% endif %}
+          <span class="home-event-meta-block">🔥 {% trans "Événement populaire" %}</span>
+        </div>
+        <div class="mt-5 flex justify-center">
+          <span class="btn-primary btn-sm pointer-events-none">{% trans "Voir l'événement" %}</span>
         </div>
       </div>
     </a>
@@ -579,18 +1698,31 @@
       <a href="/evenements/{{ e.slug }}/" class="home-mini-event block group">
         <div class="flex items-start justify-between gap-3">
           <div>
+            <h3 class="font-display text-2xl font-extrabold text-white">{{ e.title }}</h3>
             <div class="flex flex-wrap items-center gap-2">
-              {% if e.starts_at %}<span class="chip chip-flamingo">{{ e.starts_at|date:"d M · H:i" }}</span>{% endif %}
-              {% if e.price %}<span class="chip chip-sunset">{{ e.price|floatformat:0 }}€</span>{% else %}<span class="chip chip-green">{% trans "Gratuit" %}</span>{% endif %}
+              <span class="chip chip-flamingo">{% cycle "Rooftop" "Club" "Concert" "Festival" "Afterwork" "Bar" %}</span>
+              <span class="chip chip-sunset">{% cycle "Trending" "Ce soir" "Exclusif" "VIP" "Places limitées" "Gratuit" %}</span>
             </div>
-            <h3 class="mt-3 font-display text-2xl font-extrabold text-white">{{ e.title }}</h3>
-            <p class="mt-2 text-sm text-white/58 line-clamp-2">{{ e.description|truncatechars:100 }}</p>
+            <p class="mt-2 text-sm text-white/58 line-clamp-2">{{ e.description|default:_('Le rendez-vous nightlife du week-end.')|truncatechars:88 }}</p>
           </div>
           <span class="text-white/25 group-hover:text-flamingo-300 transition-colors">→</span>
         </div>
-        <div class="mt-4 flex items-center justify-between text-xs text-white/55">
-          <span>📍 {{ e.city }}</span>
-          <span>{% trans "Réservation instantanée" %}</span>
+        <div class="home-event-meta-blocks home-event-meta-blocks-compact">
+          <span class="home-event-meta-block">📍 {{ e.city }}</span>
+          <span class="home-event-meta-block">{% if e.location %}{{ e.location }}{% else %}{% trans "Lieu secret" %}{% endif %}</span>
+          <span class="home-event-meta-block">{% if e.starts_at %}🗓 {{ e.starts_at|date:"D d M" }}{% else %}🗓 --{% endif %}</span>
+          <span class="home-event-meta-block">{% if e.starts_at %}🕘 {{ e.starts_at|date:"H:i" }}{% else %}🕘 --:--{% endif %}</span>
+          {% if e.max_participants %}
+          <span class="home-event-meta-block">🔥 {% blocktrans with seats=e.max_participants %}Plus que {{ seats }} places{% endblocktrans %}</span>
+          {% elif e.price %}
+          <span class="home-event-meta-block">🎟 {% blocktrans with amount=e.price|floatformat:0 %}Dès {{ amount }}€{% endblocktrans %}</span>
+          {% else %}
+          <span class="home-event-meta-block">🎟 {% trans "Gratuit avant minuit" %}</span>
+          {% endif %}
+          <span class="home-event-meta-block">⚡ {% trans "Très demandé ce soir" %}</span>
+        </div>
+        <div class="mt-3 flex justify-center">
+          <span class="btn-primary btn-sm pointer-events-none">{% trans "Voir l'événement" %}</span>
         </div>
       </a>
       {% empty %}
@@ -601,23 +1733,326 @@
       {% endfor %}
     </div>
   </div>
+  <div class="mt-5 text-center">
+    <a href="/evenements/" class="btn-secondary btn-sm">{% trans "Voir plus" %}</a>
+  </div>
 </section>
 
 {# ═════════════ PARTNERS CTA ═════════════ #}
 <section class="mx-auto max-w-7xl px-4 pb-16">
-  <div class="rounded-[2rem] border border-white/[0.08] bg-white/[0.025] p-8 md:p-10">
-    <div class="grid gap-6 md:grid-cols-[1.05fr_.95fr] md:items-end">
-      <div>
-        <span class="h-eyebrow">🤝 {% trans "Pros" %}</span>
-        <h2 class="h-section text-white mt-2">{% trans "Toute l’offre partenaire, dans un seul point d’entrée." %}</h2>
-        <p class="mt-4 text-white/62 max-w-xl leading-7">{% trans "Publier un événement, gérer les réservations, suivre les performances et piloter sa présence Mooviogo depuis une interface plus claire et plus durable." %}</p>
-      </div>
-      <div class="flex flex-wrap gap-2 md:justify-end">
-        <a href="/devenir-partenaire/" class="btn-primary">{% trans "Découvrir l’offre pro" %}</a>
-        <a href="/partenaires/" class="btn-secondary">{% trans "Voir les partenaires" %}</a>
+  <div class="pros-panel">
+    <div class="pros-grid text-center place-items-center">
+      <div class="max-w-3xl">
+        <span class="h-eyebrow pros-eyebrow">🤝 {% trans "Pros" %}</span>
+        <h2 class="h-section pros-title mt-2">{% trans "Votre établissement mérite mieux qu’un simple outil de réservation." %}</h2>
+        <p class="pros-copy">{% trans "Publiez vos événements, gérez vos réservations, automatisez votre communication et développez votre visibilité locale depuis une plateforme pensée pour les professionnels modernes." %}</p>
+        <div class="pros-cta-row justify-center">
+          <a href="/devenir-partenaire/" class="btn-primary">{% trans "Découvrir l’offre pro" %}</a>
+        </div>
       </div>
     </div>
   </div>
 </section>
+
+<script>
+  (function () {
+    var carousel = document.querySelector('.home-partner-carousel');
+    if (!carousel) {
+      return;
+    }
+    var prefersReducedMotion = Boolean(
+      window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    );
+
+    var timerId = null;
+    var rafId = null;
+    var motionRafId = null;
+    var isAnimating = false;
+    var isNormalizing = false;
+    var currentIndex = 0;
+    var originalCount = 0;
+    var loopSpan = 0;
+    var stopPositions = [0];
+    var dots = Array.prototype.slice.call(document.querySelectorAll('.home-partner-dot'));
+
+    function getCards() {
+      return Array.prototype.slice.call(carousel.querySelectorAll(':scope > *'));
+    }
+
+    function getOriginalCards() {
+      return getCards().filter(function (card) {
+        return !card.hasAttribute('data-loop-clone');
+      });
+    }
+
+    function setupInfiniteLoop() {
+      var originals = getOriginalCards();
+      if (!originals.length) {
+        return;
+      }
+      if (getCards().some(function (card) { return card.hasAttribute('data-loop-clone'); })) {
+        originalCount = originals.length;
+        return;
+      }
+
+      originalCount = originals.length;
+      var fragment = document.createDocumentFragment();
+      originals.forEach(function (card) {
+        var clone = card.cloneNode(true);
+        clone.setAttribute('data-loop-clone', '1');
+        clone.setAttribute('aria-hidden', 'true');
+        fragment.appendChild(clone);
+      });
+      carousel.appendChild(fragment);
+    }
+
+    function normalizeLoopPosition() {
+      if (isNormalizing || loopSpan <= 0) {
+        return;
+      }
+
+      var left = carousel.scrollLeft;
+      var normalizedLeft = left;
+      while (normalizedLeft >= loopSpan) {
+        normalizedLeft -= loopSpan;
+      }
+      while (normalizedLeft < 0) {
+        normalizedLeft += loopSpan;
+      }
+
+      if (Math.abs(normalizedLeft - left) > 0.5) {
+        isNormalizing = true;
+        carousel.scrollLeft = normalizedLeft;
+        isNormalizing = false;
+      }
+    }
+
+    function buildStopPositions() {
+      var cards = getCards();
+      if (!cards.length) {
+        stopPositions = [0];
+        currentIndex = 0;
+        originalCount = 0;
+        loopSpan = 0;
+        return;
+      }
+
+      if (!originalCount) {
+        originalCount = getOriginalCards().length || cards.length;
+      }
+
+      var originals = cards.slice(0, originalCount);
+      if (!originals.length) {
+        stopPositions = [0];
+        currentIndex = 0;
+        loopSpan = 0;
+        return;
+      }
+
+      var firstLeft = originals[0].offsetLeft;
+      var firstClone = cards[originalCount];
+      if (firstClone) {
+        // Exact loop distance from first original card to its clone.
+        loopSpan = firstClone.offsetLeft - firstLeft;
+      } else {
+        var last = originals[originals.length - 1];
+        loopSpan = (last.offsetLeft + last.offsetWidth) - firstLeft;
+      }
+      stopPositions = originals.map(function (card) {
+        return card.offsetLeft;
+      });
+
+      if (!stopPositions.length) {
+        stopPositions = [0];
+      }
+
+      normalizeLoopPosition();
+    }
+
+    function easeInOutCubic(value) {
+      if (value < 0.5) {
+        return 4 * value * value * value;
+      }
+      return 1 - Math.pow(-2 * value + 2, 3) / 2;
+    }
+
+    function animateTo(targetLeft, duration) {
+      if (prefersReducedMotion) {
+        carousel.scrollLeft = targetLeft;
+        normalizeLoopPosition();
+        isAnimating = false;
+        updateActiveCard();
+        return;
+      }
+
+      if (motionRafId !== null) {
+        window.cancelAnimationFrame(motionRafId);
+        motionRafId = null;
+      }
+
+      var startLeft = carousel.scrollLeft;
+      var delta = targetLeft - startLeft;
+      if (Math.abs(delta) < 0.5) {
+        carousel.scrollLeft = targetLeft;
+        normalizeLoopPosition();
+        isAnimating = false;
+        updateActiveCard();
+        return;
+      }
+
+      var startTime = null;
+      isAnimating = true;
+
+      function frame(timestamp) {
+        if (startTime === null) {
+          startTime = timestamp;
+        }
+        var progress = Math.min(1, (timestamp - startTime) / duration);
+        var eased = easeInOutCubic(progress);
+        carousel.scrollLeft = startLeft + (delta * eased);
+        updateActiveCard();
+
+        if (progress < 1) {
+          motionRafId = window.requestAnimationFrame(frame);
+          return;
+        }
+
+        motionRafId = null;
+        isAnimating = false;
+        carousel.scrollLeft = targetLeft;
+        normalizeLoopPosition();
+        updateActiveCard();
+      }
+
+      motionRafId = window.requestAnimationFrame(frame);
+    }
+
+    function tick() {
+      if (isAnimating || !stopPositions.length || !originalCount) {
+        return;
+      }
+
+      normalizeLoopPosition();
+      var nextIndex = (currentIndex + 1) % originalCount;
+      var targetLeft = stopPositions[nextIndex];
+      if (nextIndex <= currentIndex && loopSpan > 0) {
+        // Move forward to the cloned first card instead of jumping backward.
+        targetLeft += loopSpan;
+      }
+      currentIndex = nextIndex;
+      animateTo(targetLeft, 1100);
+    }
+
+    function updateActiveCard() {
+      var cards = getCards();
+      if (!cards.length) {
+        return;
+      }
+
+      var viewportFocus = carousel.scrollLeft + Math.min(carousel.clientWidth * 0.2, 160);
+      var active = cards[0];
+      var activeIndex = 0;
+      var activeDistance = Infinity;
+
+      cards.forEach(function (card, index) {
+        var distance = Math.abs(card.offsetLeft - viewportFocus);
+        var normalized = Math.min(1, distance / (carousel.clientWidth * 0.82));
+        var emphasis = 1 - normalized;
+        var scale = 0.92 + (emphasis * 0.08);
+        var opacity = 0.5 + (emphasis * 0.5);
+        var saturation = 0.78 + (emphasis * 0.27);
+        var brightness = 0.82 + (emphasis * 0.18);
+        var translateY = (1 - emphasis) * 10;
+        card.style.transform = 'translateY(' + translateY.toFixed(2) + 'px) scale(' + scale.toFixed(3) + ')';
+        card.style.opacity = opacity.toFixed(3);
+        card.style.filter = 'saturate(' + saturation.toFixed(3) + ') brightness(' + brightness.toFixed(3) + ')';
+
+        if (distance < activeDistance) {
+          activeDistance = distance;
+          active = card;
+          activeIndex = index;
+        }
+      });
+
+      cards.forEach(function (card) {
+        card.classList.toggle('is-active', card === active);
+      });
+
+      var normalizedIndex = originalCount ? (activeIndex % originalCount) : 0;
+      dots.forEach(function (dot, index) {
+        dot.classList.toggle('is-active', index === normalizedIndex);
+      });
+
+      if (stopPositions.length && originalCount) {
+        currentIndex = normalizedIndex;
+      }
+    }
+
+    function start() {
+      if (timerId !== null) {
+        return;
+      }
+      timerId = window.setInterval(tick, 3000);
+    }
+
+    function stop() {
+      if (timerId === null) {
+        return;
+      }
+      window.clearInterval(timerId);
+      timerId = null;
+    }
+
+    dots.forEach(function (dot, index) {
+      dot.addEventListener('click', function () {
+        if (!stopPositions.length || !originalCount) {
+          return;
+        }
+        normalizeLoopPosition();
+        currentIndex = Math.min(index, originalCount - 1);
+        animateTo(stopPositions[currentIndex], 1100);
+        stop();
+        start();
+      });
+    });
+
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) {
+        stop();
+      } else {
+        start();
+      }
+    });
+
+    setupInfiniteLoop();
+    buildStopPositions();
+    carousel.scrollTo({ left: stopPositions[currentIndex] || 0, behavior: 'auto' });
+    updateActiveCard();
+
+    carousel.addEventListener('scroll', function () {
+      if (isNormalizing) {
+        return;
+      }
+      if (rafId !== null) {
+        window.cancelAnimationFrame(rafId);
+      }
+      rafId = window.requestAnimationFrame(function () {
+        if (!isAnimating) {
+          normalizeLoopPosition();
+        }
+        updateActiveCard();
+        rafId = null;
+      });
+    }, { passive: true });
+
+    window.addEventListener('resize', function () {
+      buildStopPositions();
+      normalizeLoopPosition();
+      updateActiveCard();
+    });
+
+    start();
+  })();
+</script>
 
 {% endblock %}

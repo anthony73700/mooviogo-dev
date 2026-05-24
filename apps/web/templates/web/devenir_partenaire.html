@@ -1,136 +1,384 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n static %}
 {% block title %}{% trans "Devenir partenaire" %} | Mooviogo{% endblock %}
 {% block description %}{% trans "Rejoins Mooviogo en tant que partenaire - restaurants, lieux d'activites, organisateurs d'evenements." %}{% endblock %}
 
 {% block extra_head %}
 <style>
-  /* Page-level neutralization to keep the Apple-premium tone. */
-  .dp-hero, .dp-hero * { color: inherit; }
-  .dp-hero [style*="#FF8A66"], .dp-hero [style*="#FF6A4D"], .dp-hero [style*="#F97316"] {
-    color: #ffffff !important;
-    -webkit-text-fill-color: #ffffff !important;
-    background: transparent !important;
+  :root {
+    --help-bg: #ffffff;
+    --help-ink: #1d1d1f;
+    --help-subtle: #6e6e73;
+    --help-line: #e7e7eb;
+    --help-blue: #0071e3;
+    --help-surface: #f5f5f7;
   }
-  .dp-stats { border-color: rgba(255,255,255,0.08) !important; background: rgba(255,255,255,0.03) !important; }
-  [style*="rgba(255,106,77"] { background-color: rgba(255,255,255,0.05) !important; border-color: rgba(255,255,255,0.10) !important; }
-  [style*="rgba(255,106,77,0.12)"] svg { color: #e6ecf5 !important; }
 
-  .dp-hero {
-    background: #070A12;
-    padding: 5rem 1rem 4.5rem;
-    position: relative;
-    overflow: hidden;
+  body {
+    background: var(--help-bg) !important;
+    background-image: none !important;
+    color: var(--help-ink);
+  }
+
+  nav {
+    background: rgba(255, 255, 255, 0.92) !important;
+    border-bottom-color: var(--help-line) !important;
+    backdrop-filter: saturate(180%) blur(20px);
+  }
+
+  nav a,
+  nav button,
+  nav span,
+  nav select {
+    color: var(--help-ink) !important;
+  }
+
+  footer {
+    display: none;
+  }
+
+  .help-shell {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 3.2rem 1rem 4.8rem;
+  }
+
+  .help-head {
     text-align: center;
+    margin-bottom: 1.8rem;
   }
 
-  .dp-stats {
-    border-radius: 20px;
-    border: 1px solid rgba(255,106,77,0.15);
-    background: linear-gradient(135deg,rgba(255,106,77,0.07) 0%,rgba(20,24,33,1) 60%);
-    padding: 2.5rem;
+  .help-eyebrow {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--help-blue);
+  }
+
+  .help-title {
+    margin-top: 0.8rem;
+    font-size: clamp(2rem, 5.2vw, 3.7rem);
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+    font-weight: 800;
+  }
+
+  .help-sub {
+    max-width: 72ch;
+    margin: 0.9rem auto 0;
+    color: var(--help-subtle);
+    font-size: clamp(1rem, 2vw, 1.15rem);
+    line-height: 1.6;
+  }
+
+  .help-search {
+    margin: 1.6rem auto 0;
+    max-width: 680px;
+    border: 1px solid var(--help-line);
+    background: #fff;
+    border-radius: 14px;
+    min-height: 54px;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0 1rem;
+    box-shadow: 0 10px 26px -22px rgba(0, 0, 0, 0.35);
+  }
+
+  .help-search svg {
+    width: 18px;
+    height: 18px;
+    color: #8e8e93;
+    flex: none;
+  }
+
+  .help-search span {
+    color: #8e8e93;
+    font-size: 0.95rem;
+  }
+
+  .topic-grid,
+  .example-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: 1fr;
+    gap: 0.9rem;
+  }
+
+  .topic-card {
+    border: 1px solid var(--help-line);
+    background: #fff;
+    border-radius: 18px;
+    padding: 1.2rem;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .topic-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 30px -26px rgba(0, 0, 0, 0.35);
+  }
+
+  .topic-card h3 {
+    font-size: 1.1rem;
+    letter-spacing: -0.01em;
+    font-weight: 700;
+  }
+
+  .topic-card p {
+    margin-top: 0.45rem;
+    color: var(--help-subtle);
+    font-size: 0.92rem;
+    line-height: 1.55;
+  }
+
+  .help-section {
+    margin-top: 2.6rem;
+  }
+
+  .help-section h2 {
+    font-size: clamp(1.3rem, 3vw, 2rem);
+    letter-spacing: -0.02em;
+    font-weight: 800;
+  }
+
+  .help-section-intro {
+    margin-top: 0.45rem;
+    color: var(--help-subtle);
+    font-size: 0.95rem;
+  }
+
+  .example-card {
+    border: 1px solid var(--help-line);
+    background: #fff;
+    border-radius: 20px;
+    overflow: hidden;
+  }
+
+  .example-media {
+    background: var(--help-surface);
+    border-bottom: 1px solid var(--help-line);
+    padding: 1rem;
+  }
+
+  .example-shot {
+    width: 100%;
+    height: 210px;
+    object-fit: cover;
+    border: 1px solid #d7d7dc;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 12px 24px -22px rgba(0, 0, 0, 0.35);
+  }
+
+  .ui-window {
+    border: 1px solid #d7d7dc;
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 12px 24px -22px rgba(0, 0, 0, 0.35);
+  }
+
+  .ui-top {
+    height: 30px;
+    border-bottom: 1px solid #ececf1;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 10px;
+    background: #fafafc;
+  }
+
+  .ui-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: #d5d5db;
+  }
+
+  .ui-body {
+    padding: 10px;
+    display: grid;
+    gap: 8px;
+  }
+
+  .ui-row {
+    height: 12px;
+    border-radius: 8px;
+    background: #ececf2;
+  }
+
+  .ui-row.accent {
+    background: #cfe4fb;
+  }
+
+  .ui-split {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 8px;
+  }
+
+  .example-copy {
+    padding: 1rem;
+  }
+
+  .example-copy h3 {
+    font-size: 1.05rem;
+    font-weight: 750;
+    letter-spacing: -0.01em;
+  }
+
+  .example-copy p {
+    margin-top: 0.45rem;
+    color: var(--help-subtle);
+    font-size: 0.9rem;
+    line-height: 1.55;
+  }
+
+  .guide-list {
+    margin-top: 1rem;
+    border: 1px solid var(--help-line);
+    border-radius: 16px;
+    overflow: hidden;
+    background: #fff;
+  }
+
+  .guide-item {
+    display: flex;
+    justify-content: space-between;
     gap: 1rem;
-    text-align: center;
+    padding: 0.95rem 1rem;
+    text-decoration: none;
+    color: var(--help-ink);
+    border-bottom: 1px solid var(--help-line);
   }
 
-  .dp-stats-middle {
-    border-left: 1px solid rgba(255,255,255,0.07);
-    border-right: 1px solid rgba(255,255,255,0.07);
+  .guide-item:last-child {
+    border-bottom: none;
   }
 
-  @media (max-width: 760px) {
-    .dp-hero {
-      padding: 3.8rem 1rem 3.4rem;
-    }
+  .guide-item span {
+    color: var(--help-subtle);
+    font-size: 0.86rem;
+    white-space: nowrap;
+  }
 
-    .dp-stats {
-      grid-template-columns: 1fr;
-      padding: 1.2rem;
-      gap: 0.8rem;
-    }
+  .help-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1rem;
+    text-decoration: none;
+    border-radius: 999px;
+    padding: 0.65rem 1.1rem;
+    background: var(--help-blue);
+    color: #fff;
+    font-size: 0.86rem;
+    font-weight: 700;
+  }
 
-    .dp-stats-middle {
-      border-left: none;
-      border-right: none;
-      border-top: 1px solid rgba(255,255,255,0.07);
-      border-bottom: 1px solid rgba(255,255,255,0.07);
-      padding: 0.7rem 0;
+  @media (min-width: 820px) {
+    .topic-grid,
+    .example-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem;
     }
   }
 </style>
 {% endblock %}
 
 {% block content %}
+<section class="help-shell">
+  <header class="help-head">
+    <span class="help-eyebrow">{% trans "Support partenaires" %}</span>
+    <h1 class="help-title">{% trans "Comment pouvons-nous t'aider sur Mooviogo ?" %}</h1>
+    <p class="help-sub">{% trans "Retrouve les offres, les outils de pilotage et des exemples concrets de fonctionnalités pour les restaurants, la nightlife et les activités." %}</p>
+    <div class="help-search" aria-hidden="true">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z"/>
+      </svg>
+      <span>{% trans "Rechercher une aide partenaire (offres, reservations, agenda, analytics...)" %}</span>
+    </div>
+  </header>
 
-{# ── Hero ── #}
-<div class="dp-hero">
-  <div style="pointer-events:none;position:absolute;top:-80px;left:50%;transform:translateX(-50%);width:700px;height:400px;background:radial-gradient(ellipse,rgba(255,106,77,0.12) 0%,transparent 65%)"></div>
-  <div style="position:relative;max-width:640px;margin:0 auto">
-    <span style="display:inline-flex;align-items:center;gap:7px;background:rgba(255,106,77,0.1);border:1px solid rgba(255,106,77,0.22);border-radius:999px;padding:5px 14px;font-size:0.68rem;font-weight:800;color:#FF8A66;letter-spacing:.09em;text-transform:uppercase;margin-bottom:1.5rem">
-      {% trans "Espace professionnel" %}
-    </span>
-    <h1 style="font-size:clamp(2rem,5vw,3rem);font-weight:900;color:#fff;letter-spacing:-0.03em;line-height:1.1;margin-bottom:1rem">
-      {% trans "Rejoins Mooviogo" %}<br><span style="background:linear-gradient(135deg,#FF6A4D,#F97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">{% trans "en tant que partenaire" %}</span>
-    </h1>
-    <p style="font-size:1rem;color:rgba(255,255,255,0.5);max-width:480px;margin:0 auto 2.5rem;line-height:1.7">{% trans "Restaurateurs, organisateurs d'evenements, lieux - touche des milliers d'utilisateurs actifs et gere tout depuis un seul endroit." %}</p>
+  <section class="help-section">
+    <h2>{% trans "Acceder aux offres" %}</h2>
+    <p class="help-section-intro">{% trans "Choisis ton univers et consulte la grille Starter / Pro IA." %}</p>
+    <div class="topic-grid" style="margin-top:1rem">
+      <a href="/devenir-partenaire/offres/restaurant/" class="topic-card">
+        <h3>{% trans "Restaurant" %}</h3>
+        <p>{% trans "Agenda de reservations, gestion des tables, menus et relation client." %}</p>
+      </a>
+      <a href="/devenir-partenaire/offres/nightlife/" class="topic-card">
+        <h3>{% trans "Nightlife" %}</h3>
+        <p>{% trans "Billetterie, controle d'entree, campagnes intelligentes et sponsorisation." %}</p>
+      </a>
+      <a href="/devenir-partenaire/offres/activite/" class="topic-card">
+        <h3>{% trans "Activite" %}</h3>
+        <p>{% trans "Planning de sessions, capacite, paiements et automatisations IA." %}</p>
+      </a>
+    </div>
+  </section>
+
+  <section class="help-section">
+    <h2>{% trans "Exemples de fonctionnalites" %}</h2>
+    <p class="help-section-intro">{% trans "Un apercu visuel des outils Mooviogo utilises au quotidien par les partenaires." %}</p>
+    <div class="example-grid" style="margin-top:1rem">
+      <article class="example-card">
+        <div class="example-media">
+          <img src="{% static 'src/partner-examples/restaurant-agenda.png' %}" alt="Agenda de reservations Mooviogo" class="example-shot" loading="lazy" />
+        </div>
+        <div class="example-copy">
+          <h3>{% trans "Agenda reservations restaurant" %}</h3>
+          <p>{% trans "Le restaurateur recoit les reservations en direct, voit les horaires, les tailles de table et confirme en un clic." %}</p>
+        </div>
+      </article>
+
+      <article class="example-card">
+        <div class="example-media">
+          <img src="{% static 'src/partner-examples/nightlife-billetterie.png' %}" alt="Billetterie nightlife Mooviogo" class="example-shot" loading="lazy" />
+        </div>
+        <div class="example-copy">
+          <h3>{% trans "Billetterie et scan nightlife" %}</h3>
+          <p>{% trans "Les equipes scannent les billets, valident l'entree et suivent le remplissage evenement en temps reel." %}</p>
+        </div>
+      </article>
+
+      <article class="example-card">
+        <div class="example-media">
+          <img src="{% static 'src/partner-examples/activite-planning.png' %}" alt="Planning activites Mooviogo" class="example-shot" loading="lazy" />
+        </div>
+        <div class="example-copy">
+          <h3>{% trans "Planning activites et creneaux" %}</h3>
+          <p>{% trans "Les partenaires activites gerent les sessions, les capacites et les disponibilites depuis un tableau unique." %}</p>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="help-section">
+    <h2>{% trans "Guides populaires" %}</h2>
+    <div class="guide-list">
+      <a href="/devenir-partenaire/offres/restaurant/" class="guide-item">
+        <strong>{% trans "Configurer l'offre Restaurant" %}</strong>
+        <span>{% trans "5 min" %}</span>
+      </a>
+      <a href="/devenir-partenaire/offres/nightlife/" class="guide-item">
+        <strong>{% trans "Activer la billetterie Nightlife" %}</strong>
+        <span>{% trans "4 min" %}</span>
+      </a>
+      <a href="/devenir-partenaire/offres/activite/" class="guide-item">
+        <strong>{% trans "Lancer les reservations Activite" %}</strong>
+        <span>{% trans "6 min" %}</span>
+      </a>
+    </div>
+
+    <a href="/inscription/" class="help-primary">{% trans "Commencer gratuitement" %}</a>
+
     {% if user.is_authenticated %}
-    <a href="/partenaire/" class="btn-brand" style="font-size:1rem;padding:1rem 2.75rem;border-radius:14px;font-weight:800">{% trans "Deposer ma candidature" %}</a>
-    {% else %}
-    <a href="/inscription/?next=/partenaire/" class="btn-brand" style="font-size:1rem;padding:1rem 2.75rem;border-radius:14px;font-weight:800">{% trans "Commencer gratuitement" %}</a>
-    <p style="margin-top:0.75rem;font-size:0.78rem;color:rgba(255,255,255,0.25)">{% trans "Pas encore de compte ? L'inscription est gratuite." %}</p>
+    <a href="/partenaire/" class="help-primary">{% trans "Acceder a mon espace partenaire" %}</a>
     {% endif %}
-  </div>
-</div>
-
-{# ── Avantages ── #}
-<div class="mx-auto max-w-5xl px-4" style="padding-top:4rem;padding-bottom:5rem">
-  <p style="font-size:0.65rem;font-weight:900;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,0.22);text-align:center;margin-bottom:2.5rem">{% trans "Pourquoi Mooviogo" %}</p>
-
-  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.25rem;margin-bottom:4rem">
-
-    <div class="pk" style="padding:1.75rem">
-      <div style="width:44px;height:44px;border-radius:12px;background:rgba(255,106,77,0.12);display:flex;align-items:center;justify-content:center;margin-bottom:1.1rem">
-        <svg xmlns="http://www.w3.org/2000/svg" style="width:1.3rem;height:1.3rem;color:#FF8A66" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-      </div>
-      <h3 style="font-size:1rem;font-weight:800;color:#fff;margin-bottom:0.5rem">{% trans "Visibilite maximale" %}</h3>
-      <p style="font-size:0.83rem;color:rgba(255,255,255,0.45);line-height:1.65">{% trans "Apparais dans le feed de milliers d'utilisateurs qui cherchent quoi faire ce soir." %}</p>
-    </div>
-
-    <div class="pk" style="padding:1.75rem">
-      <div style="width:44px;height:44px;border-radius:12px;background:rgba(99,202,183,0.12);display:flex;align-items:center;justify-content:center;margin-bottom:1.1rem">
-        <svg xmlns="http://www.w3.org/2000/svg" style="width:1.3rem;height:1.3rem;color:#6CC4A4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-      </div>
-      <h3 style="font-size:1rem;font-weight:800;color:#fff;margin-bottom:0.5rem">{% trans "Tableau de bord puissant" %}</h3>
-      <p style="font-size:0.83rem;color:rgba(255,255,255,0.45);line-height:1.65">{% trans "Gere tes evenements, creneaux, reservations et revenus depuis un seul endroit." %}</p>
-    </div>
-
-    <div class="pk" style="padding:1.75rem">
-      <div style="width:44px;height:44px;border-radius:12px;background:rgba(96,165,250,0.12);display:flex;align-items:center;justify-content:center;margin-bottom:1.1rem">
-        <svg xmlns="http://www.w3.org/2000/svg" style="width:1.3rem;height:1.3rem;color:#60A5FA" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
-      </div>
-      <h3 style="font-size:1rem;font-weight:800;color:#fff;margin-bottom:0.5rem">{% trans "Paiements automatises" %}</h3>
-      <p style="font-size:0.83rem;color:rgba(255,255,255,0.45);line-height:1.65">{% trans "Encaisse directement via Stripe. Zero paperasse, tout est automatise." %}</p>
-    </div>
-
-  </div>
-
-  {# Stats #}
-  <div class="dp-stats">
-    <div>
-      <p style="font-size:2rem;font-weight:900;color:#fff;letter-spacing:-0.03em">15 000</p>
-      <p style="font-size:0.72rem;color:rgba(255,255,255,0.38);margin-top:0.2rem">{% trans "membres actifs" %}</p>
-    </div>
-    <div class="dp-stats-middle">
-      <p style="font-size:2rem;font-weight:900;color:#fff;letter-spacing:-0.03em">180+</p>
-      <p style="font-size:0.72rem;color:rgba(255,255,255,0.38);margin-top:0.2rem">{% trans "etablissements" %}</p>
-    </div>
-    <div>
-      <p style="font-size:2rem;font-weight:900;color:#FF8A66;letter-spacing:-0.03em">0 €</p>
-      <p style="font-size:0.72rem;color:rgba(255,255,255,0.38);margin-top:0.2rem">{% trans "pour commencer" %}</p>
-    </div>
-  </div>
-
-</div>
+  </section>
+</section>
 {% endblock %}

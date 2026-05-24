@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
 {% block title %}{% trans "Sorties" %} | Mooviogo{% endblock %}
-{% block description %}{% trans "Sorties entre membres et experiences partenaires dans un format guide d'attractions." %}{% endblock %}
+{% block description %}{% trans "Sorties entre membres gratuites dans un format guide d'attractions." %}{% endblock %}
 
 {% block extra_head %}
 <style>
@@ -742,7 +742,7 @@
       <div class="ta-sections">
         <div class="ta-sec"><b>{{ total_count }} {% trans "sortie" %}{{ total_count|pluralize }}</b><span>{% trans "Resultats disponibles maintenant" %}</span></div>
         <div class="ta-sec"><b>{% trans "Sorties entre membres" %}</b><span>{% trans "Toujours gratuites" %}</span></div>
-        <div class="ta-sec"><b>{% trans "Sorties partenaires" %}</b><span>{% trans "Prix et infos verifies" %}</span></div>
+        <div class="ta-sec"><b>{% trans "Sorties membres" %}</b><span>{% trans "Communautaire uniquement" %}</span></div>
         <div class="ta-sec"><b>{% trans "Nightlife separee" %}</b><span>{% trans "Accessible via la section events" %}</span></div>
       </div>
 
@@ -760,7 +760,7 @@
               {% if sortie.cover_image_url %}
               <img src="{{ sortie.cover_image_url }}" alt="{{ sortie.title }}" loading="lazy" />
               {% else %}
-              <div class="ta-f-ph">{% if sortie.type == 'PARTENAIRE' %}🎯{% else %}👥{% endif %}</div>
+              <div class="ta-f-ph">👥</div>
               {% endif %}
             </div>
             <div class="ta-f-body">
@@ -777,7 +777,6 @@
         <div class="ta-tabs">
           <button type="button" class="ta-tab {% if not request.GET.type and not request.GET.free %}active{% endif %}" onclick="setFilter('type','');setFilter('free','')" aria-pressed="{% if not request.GET.type and not request.GET.free %}true{% else %}false{% endif %}">{% trans "Toutes" %}</button>
           <button type="button" class="ta-tab {% if request.GET.type == 'COMMUNAUTAIRE' %}active{% endif %}" onclick="setFilter('type','COMMUNAUTAIRE');setFilter('free','')" aria-pressed="{% if request.GET.type == 'COMMUNAUTAIRE' %}true{% else %}false{% endif %}">{% trans "Entre membres" %}</button>
-          <button type="button" class="ta-tab {% if request.GET.type == 'PARTENAIRE' %}active{% endif %}" onclick="setFilter('type','PARTENAIRE');setFilter('free','')" aria-pressed="{% if request.GET.type == 'PARTENAIRE' %}true{% else %}false{% endif %}">{% trans "Partenaires" %}</button>
           <button type="button" class="ta-tab {% if request.GET.free == '1' %}active{% endif %}" onclick="setFilter('free','{% if request.GET.free == '1' %}{% else %}1{% endif %}')" aria-pressed="{% if request.GET.free == '1' %}true{% else %}false{% endif %}">{% trans "Gratuit" %}</button>
           <button type="button" class="ta-tab" onclick="window.location.href='/evenements/'" aria-pressed="false">{% trans "Events nightlife" %}</button>
         </div>
@@ -805,7 +804,7 @@
 
           <div class="ta-box">
             <h3>{% trans "Type de sortie" %}</h3>
-            <p>{% trans "Entre membres pour les sorties gratuites, partenaires pour les experiences reservees." %}</p>
+            <p>{% trans "Entre membres uniquement pour conserver une ambiance communautaire." %}</p>
           </div>
         </aside>
 
@@ -822,9 +821,9 @@
                 {% if sortie.cover_image_url %}
                 <img src="{{ sortie.cover_image_url }}" alt="{{ sortie.title }}" loading="{% if forloop.first %}eager{% else %}lazy{% endif %}" />
                 {% else %}
-                <div class="ta-ph">{% if sortie.type == 'PARTENAIRE' %}🎯{% else %}👥{% endif %}</div>
+                <div class="ta-ph">👥</div>
                 {% endif %}
-                <span class="ta-badge">{% if sortie.type == 'PARTENAIRE' %}{% trans "Partenaire" %}{% else %}{% trans "Membres" %}{% endif %}</span>
+                <span class="ta-badge">{% trans "Membres" %}</span>
               </div>
 
               <div class="ta-body">
@@ -865,7 +864,7 @@
                     {% endif %}
                   </div>
 
-                  <span class="ta-cta">{% if sortie.type == 'PARTENAIRE' %}{% trans "Reserver" %}{% else %}{% trans "Rejoindre" %}{% endif %}</span>
+                  <span class="ta-cta">{% trans "Rejoindre" %}</span>
                 </div>
               </div>
             </a>
@@ -887,11 +886,11 @@
           <div class="ta-join">
             {% if user.is_authenticated %}
             <h3>{% trans "Tu veux aussi organiser une sortie ?" %}</h3>
-            <p>{% trans "Creer une sortie prend deux minutes. Les sorties entre membres restent gratuites, les sorties partenaires s'organisent en mode reservation." %}</p>
+            <p>{% trans "Creer une sortie prend deux minutes. Les sorties entre membres restent gratuites." %}</p>
             <a href="/sorties/creer/">{% trans "Creer ma sortie" %}</a>
             {% else %}
             <h3>{% trans "Rejoins Mooviogo" %}</h3>
-            <p>{% trans "Inscris-toi pour participer aux sorties entre membres et reserver les experiences partenaires de ta ville." %}</p>
+            <p>{% trans "Inscris-toi pour participer aux sorties entre membres de ta ville." %}</p>
             <a href="/inscription/">{% trans "Creer un compte gratuit" %}</a>
             {% endif %}
           </div>

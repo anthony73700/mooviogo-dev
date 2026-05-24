@@ -3,226 +3,364 @@
 {% block title %}{% trans "Creer une sortie" %} | Mooviogo{% endblock %}
 
 {% block extra_head %}
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<style>
+  .create-shell {
+    min-height: 100vh;
+    background:
+      radial-gradient(1000px 520px at 10% -12%, rgba(99, 102, 241, 0.16), rgba(99, 102, 241, 0)),
+      radial-gradient(960px 520px at 90% -10%, rgba(16, 185, 129, 0.14), rgba(16, 185, 129, 0)),
+      linear-gradient(180deg, #0d1119 0%, #090d14 100%);
+    padding: 1.25rem 1rem 4rem;
+  }
+  .create-wrap {
+    max-width: 760px;
+    margin: 0 auto;
+  }
+  .create-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+  .live-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: .36rem;
+    border-radius: 999px;
+    border: 1px solid rgba(16,185,129,.42);
+    background: rgba(16,185,129,.16);
+    color: #d1fae5;
+    font-size: .66rem;
+    font-weight: 800;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    padding: .3rem .58rem;
+  }
+  .create-head {
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 22px;
+    background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+    backdrop-filter: blur(10px);
+    padding: 1.25rem 1.15rem;
+    box-shadow: 0 26px 60px -40px rgba(0,0,0,.9);
+  }
+  .create-title {
+    margin: .45rem 0 0;
+    font-size: clamp(1.65rem, 3vw, 2.25rem);
+    line-height: 1.06;
+    letter-spacing: -.03em;
+    font-weight: 900;
+    color: #fff;
+  }
+  .create-sub {
+    margin: .52rem 0 0;
+    font-size: .95rem;
+    line-height: 1.65;
+    color: rgba(255,255,255,.72);
+  }
+  .mode-pill {
+    margin-top: .88rem;
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    border-radius: 999px;
+    border: 1px solid rgba(119,231,198,.34);
+    background: rgba(119,231,198,.12);
+    color: #d1fae5;
+    font-size: .74rem;
+    font-weight: 800;
+    letter-spacing: .02em;
+    padding: .42rem .72rem;
+  }
+  .form-card {
+    margin-top: 1rem;
+    border: 1px solid rgba(255,255,255,.14);
+    border-radius: 24px;
+    background: linear-gradient(180deg, #f7f9fc 0%, #eef2f8 100%);
+    box-shadow: 0 30px 70px -44px rgba(0,0,0,.9);
+    padding: 1.1rem;
+  }
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: .86rem;
+  }
+  .f-field { display: grid; gap: .42rem; }
+  .f-label {
+    font-size: .73rem;
+    font-weight: 800;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: rgba(16,24,40,.58);
+  }
+  .f-control {
+    width: 100%;
+    border: 1px solid rgba(14, 24, 38, .13);
+    border-radius: 14px;
+    background: #fff;
+    color: #0d1726;
+    font-size: .94rem;
+    padding: .78rem .88rem;
+    outline: none;
+    transition: border-color .16s ease, box-shadow .16s ease;
+  }
+  .f-control:focus {
+    border-color: rgba(99, 102, 241, .55);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, .16);
+  }
+  .f-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .75rem;
+  }
+  .dt-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .75rem;
+  }
+  .dt-card {
+    border: 1px solid rgba(14, 24, 38, .12);
+    border-radius: 16px;
+    background: linear-gradient(180deg, #ffffff 0%, #f4f7fc 100%);
+    padding: .72rem;
+    display: grid;
+    gap: .55rem;
+  }
+  .dt-card-title {
+    font-size: .72rem;
+    font-weight: 900;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: rgba(15, 23, 39, .62);
+    display: inline-flex;
+    align-items: center;
+    gap: .38rem;
+  }
+  .dt-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .55rem;
+  }
+  .dt-input-wrap {
+    border: 1px solid rgba(14, 24, 38, .14);
+    border-radius: 12px;
+    background: #fff;
+    padding: .5rem .58rem;
+    display: grid;
+    gap: .2rem;
+  }
+  .dt-mini-label {
+    font-size: .64rem;
+    font-weight: 800;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: rgba(15,23,39,.48);
+  }
+  .dt-input {
+    width: 100%;
+    border: 0;
+    outline: none;
+    background: transparent;
+    color: #0d1726;
+    font-size: .92rem;
+    font-weight: 700;
+    padding: 0;
+  }
+  .dt-input::-webkit-calendar-picker-indicator {
+    opacity: .85;
+    cursor: pointer;
+  }
+  .free-box {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    border-radius: 13px;
+    border: 1px solid rgba(16,185,129,.38);
+    background: rgba(16,185,129,.12);
+    padding: .74rem .82rem;
+    color: #065f46;
+    font-size: .88rem;
+    font-weight: 800;
+  }
+  .submit-btn {
+    width: 100%;
+    margin-top: .2rem;
+    min-height: 49px;
+    border-radius: 14px;
+    border: 1px solid transparent;
+    background: linear-gradient(90deg,#0f172a 0%, #1f2937 100%);
+    color: #fff;
+    font-size: .94rem;
+    font-weight: 800;
+    letter-spacing: .01em;
+  }
+  .back-link-inline {
+    color: rgba(255,255,255,.82);
+    font-size: .82rem;
+    text-decoration: none;
+    font-weight: 700;
+  }
+  .back-link-inline:hover { color: #fff; }
+  .field-error {
+    margin-top: .2rem;
+    color: #dc2626;
+    font-size: .74rem;
+    font-weight: 600;
+  }
+  @media (max-width: 680px) {
+    .f-row { grid-template-columns: 1fr; }
+    .dt-grid { grid-template-columns: 1fr; }
+  }
+</style>
 {% endblock %}
 
 {% block content %}
-<div class="pg-hdr">
-  <div class="mx-auto max-w-xl px-4">
-    <a href="/sorties/" class="back-link">← {% trans "Retour aux sorties" %}</a>
-    <h1 style="font-size:2rem;font-weight:900;color:#fff;letter-spacing:-0.025em">{% trans "Creer une sortie" %}</h1>
-    <p style="margin-top:0.4rem;font-size:0.88rem;color:rgba(255,255,255,0.38)">{% trans "Invite la communaute a te rejoindre" %}</p>
-  </div>
-</div>
+<section class="create-shell">
+  <div class="create-wrap">
+    <div class="create-topbar">
+      <a href="/sorties/" class="back-link-inline">← {% trans "Retour aux sorties" %}</a>
+      <span class="live-pill">✅ {{ ui_revision|default:'LIVE' }}</span>
+    </div>
 
-<div class="mx-auto max-w-xl px-4" style="padding-top:2.5rem;padding-bottom:5rem">
-  <div class="pk" style="padding:2rem">
-    <form method="post">
-      {% csrf_token %}
-      <div style="display:flex;flex-direction:column;gap:1.25rem">
-
-        <div>
-          <label style="display:block;font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.45);margin-bottom:0.5rem">{% trans "Titre" %} *</label>
-          <input type="text" name="title" value="{{ form.title|default:'' }}" required class="fi-input" placeholder="Ex: Balade au Parc" />
-          {% if form.title.errors %}<p style="margin-top:0.3rem;font-size:0.72rem;color:#F87171">{{ form.title.errors.0 }}</p>{% endif %}
-        </div>
-
-        <div>
-          <label style="display:block;font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.45);margin-bottom:0.5rem">{% trans "Description" %}</label>
-          <textarea name="description" rows="4" class="fi-input" style="height:auto;padding:0.75rem 1rem;resize:none" placeholder="{% trans "Decris ta sortie" %}">{{ form.description|default:'' }}</textarea>
-        </div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
-          <div>
-            <label style="display:block;font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.45);margin-bottom:0.5rem">{% trans "Ville" %} *</label>
-            <input type="text" id="city-input" name="city" value="{{ form.city|default:'' }}" required class="fi-input" placeholder="Lyon" />
-          </div>
-          <div>
-            <label style="display:block;font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.45);margin-bottom:0.5rem">{% trans "Type" %} *</label>
-            <select id="type" name="type" class="fi-input">
-              <option value="COMMUNAUTAIRE" {% if form.type == "COMMUNAUTAIRE" or not form.type %}selected{% endif %}>{% trans "Entre membres" %}</option>
-              <option value="PARTENAIRE" {% if form.type == "PARTENAIRE" %}selected{% endif %}>{% trans "Chez un partenaire" %}</option>
-            </select>
-            {% if errors.type %}<p style="margin-top:0.3rem;font-size:0.72rem;color:#F87171">{{ errors.type }}</p>{% endif %}
-          </div>
-        </div>
-
-        <div id="partner-field" style="display:none">
-          <label style="display:block;font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.45);margin-bottom:0.5rem">{% trans "Partenaire référencé" %} *</label>
-          <select name="partner_id" class="fi-input">
-            <option value="">{% trans "Sélectionner un partenaire" %}</option>
-            {% for p in partners %}
-            <option value="{{ p.id }}" {% if form.partner_id == p.id|stringformat:"s" %}selected{% endif %}>{{ p.name }} · {{ p.city }}</option>
-            {% endfor %}
-          </select>
-          {% if errors.partner_id %}<p style="margin-top:0.3rem;font-size:0.72rem;color:#F87171">{{ errors.partner_id }}</p>{% endif %}
-        </div>
-
-        <div>
-          <label style="display:block;font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.45);margin-bottom:0.5rem">{% trans "Adresse / lieu" %}</label>
-          <div style="display:grid;grid-template-columns:1fr auto;gap:0.6rem;align-items:center">
-            <input type="text" id="location-input" name="location" value="{{ form.location|default:'' }}" class="fi-input" placeholder="{% trans "Ex: 12 Rue de la Republique" %}" />
-            <button type="button" id="geocode-btn" class="btn-ghost" style="padding:0.7rem 1rem;border-radius:12px;font-size:0.78rem;white-space:nowrap">{% trans "Trouver" %}</button>
-          </div>
-          <p id="geocode-feedback" style="margin-top:0.45rem;font-size:0.72rem;color:rgba(255,255,255,0.5)"></p>
-          <div id="geocode-results" style="margin-top:0.6rem;display:flex;flex-direction:column;gap:0.35rem"></div>
-        </div>
-
-        <input type="hidden" id="latitude" name="latitude" value="{{ form.latitude|default:'' }}" />
-        <input type="hidden" id="longitude" name="longitude" value="{{ form.longitude|default:'' }}" />
-
-        <div id="map" style="height:280px;border-radius:14px;border:1px solid rgba(255,255,255,0.1);overflow:hidden"></div>
-        {% if errors.latitude %}<p style="margin-top:0.3rem;font-size:0.72rem;color:#F87171">{{ errors.latitude }}</p>{% endif %}
-        {% if errors.longitude %}<p style="margin-top:0.3rem;font-size:0.72rem;color:#F87171">{{ errors.longitude }}</p>{% endif %}
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
-          <div>
-            <label style="display:block;font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.45);margin-bottom:0.5rem">{% trans "Date et heure" %}</label>
-            <input type="datetime-local" name="starts_at" value="{{ form.starts_at|default:'' }}" class="fi-input" />
-          </div>
-          <div>
-            <label style="display:block;font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.45);margin-bottom:0.5rem">{% trans "Participants max" %}</label>
-            <input type="number" name="max_participants" value="{{ form.max_participants|default:'' }}" min="2" class="fi-input" placeholder="10" />
-          </div>
-        </div>
-
-        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:0.85rem 1rem;border-radius:12px;border:1px solid rgba(255,255,255,0.07);background:rgba(255,255,255,0.03)">
-          <input type="checkbox" name="is_free" id="is_free" {% if form.is_free %}checked{% endif %} style="width:16px;height:16px;accent-color:#FF6A4D;cursor:pointer" />
-          <span style="font-size:0.88rem;color:rgba(255,255,255,0.65)">{% trans "Sortie gratuite" %}</span>
-        </label>
-
-        <div id="price-field">
-          <label style="display:block;font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.45);margin-bottom:0.5rem">{% trans "Prix" %} (€)</label>
-          <input type="number" name="price" value="{{ form.price|default:'0' }}" min="0" step="0.01" class="fi-input" placeholder="0.00" />
-          {% if errors.price %}<p style="margin-top:0.3rem;font-size:0.72rem;color:#F87171">{{ errors.price }}</p>{% endif %}
-        </div>
+    <header class="create-head">
+      <h1 class="create-title">{% trans "Creer une sortie" %}</h1>
+      <p class="create-sub">{% trans "Invite la communaute a te rejoindre" %}</p>
+      <div class="mode-pill">
+        <span>👥</span>
+        <span>{% trans "Page entre membres uniquement" %}</span>
+        <span>•</span>
+        <span>{% trans "Toujours gratuit" %}</span>
       </div>
+    </header>
 
-      <button type="submit" class="btn-brand" style="margin-top:2rem;width:100%;padding:0.95rem;font-size:0.95rem;border-radius:14px;justify-content:center;font-weight:800">
-        {% trans "Creer la sortie" %}
-      </button>
+    <div class="form-card">
+      <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <input type="hidden" name="type" value="COMMUNAUTAIRE" />
+      <input type="hidden" name="is_free" value="on" />
+      <input type="hidden" name="price" value="0" />
+      <div class="form-grid">
+
+        <div class="f-field">
+          <label class="f-label">{% trans "Titre" %} *</label>
+          <input type="text" name="title" value="{{ form.title|default:'' }}" required class="f-control" placeholder="Ex: Balade au Parc" />
+          {% if form.title.errors %}<p class="field-error">{{ form.title.errors.0 }}</p>{% endif %}
+        </div>
+
+        <div class="f-field">
+          <label class="f-label">{% trans "Description" %}</label>
+          <textarea name="description" rows="4" class="f-control" style="height:auto;resize:vertical" placeholder="{% trans "Decris ta sortie" %}">{{ form.description|default:'' }}</textarea>
+        </div>
+
+        <div class="f-field">
+          <label class="f-label">{% trans "Ville" %} *</label>
+          <input type="text" id="city-input" name="city" value="{{ form.city|default:'' }}" required class="f-control" placeholder="Lyon" />
+        </div>
+
+        <div class="f-field">
+          <label class="f-label">{% trans "Adresse / lieu" %}</label>
+          <input type="text" name="location" value="{{ form.location|default:'' }}" class="f-control" placeholder="{% trans "Ex: 12 Rue de la Republique" %}" />
+        </div>
+
+        <div class="f-field">
+          <label class="f-label">{% trans "Photo (URL)" %}</label>
+          <input type="url" name="cover_image_url" value="{{ form.cover_image_url|default:'' }}" class="f-control" placeholder="https://..." />
+          {% if errors.cover_image_url %}<p class="field-error">{{ errors.cover_image_url }}</p>{% endif %}
+        </div>
+
+        <div class="f-field">
+          <label class="f-label">{% trans "Ou ajoute une photo" %}</label>
+          <input type="file" name="cover_image_file" accept="image/*" class="f-control" />
+        </div>
+
+        <div class="f-field">
+          <label class="f-label">{% trans "Planning" %}</label>
+          <div class="dt-grid">
+            <div class="dt-card">
+              <div class="dt-card-title">🟢 {% trans "Debut" %}</div>
+              <div class="dt-row">
+                <div class="dt-input-wrap">
+                  <span class="dt-mini-label">{% trans "Date" %}</span>
+                  <input type="date" id="start-date" class="dt-input" value="{{ form.starts_at|default:''|slice:':10' }}" />
+                </div>
+                <div class="dt-input-wrap">
+                  <span class="dt-mini-label">{% trans "Heure" %}</span>
+                  <input type="time" id="start-time" class="dt-input" value="{{ form.starts_at|default:''|slice:'11:16' }}" />
+                </div>
+              </div>
+            </div>
+            <div class="dt-card">
+              <div class="dt-card-title">🏁 {% trans "Fin" %}</div>
+              <div class="dt-row">
+                <div class="dt-input-wrap">
+                  <span class="dt-mini-label">{% trans "Date" %}</span>
+                  <input type="date" id="end-date" class="dt-input" value="{{ form.ends_at|default:''|slice:':10' }}" />
+                </div>
+                <div class="dt-input-wrap">
+                  <span class="dt-mini-label">{% trans "Heure" %}</span>
+                  <input type="time" id="end-time" class="dt-input" value="{{ form.ends_at|default:''|slice:'11:16' }}" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <input type="hidden" id="starts-at-hidden" name="starts_at" value="{{ form.starts_at|default:'' }}" />
+          <input type="hidden" id="ends-at-hidden" name="ends_at" value="{{ form.ends_at|default:'' }}" />
+          {% if errors.starts_at %}<p class="field-error">{{ errors.starts_at }}</p>{% endif %}
+          {% if errors.ends_at %}<p class="field-error">{{ errors.ends_at }}</p>{% endif %}
+        </div>
+
+        <div class="f-field">
+          <label class="f-label">{% trans "Participants max" %}</label>
+          <input type="number" name="max_participants" value="{{ form.max_participants|default:'' }}" min="2" class="f-control" placeholder="10" />
+        </div>
+
+        <div class="free-box">
+          <span>✨</span>
+          <span>{% trans "Sortie gratuite confirmée (0 €)" %}</span>
+        </div>
+
+        <button type="submit" class="submit-btn">{% trans "Creer la sortie" %}</button>
+      </div>
     </form>
+    </div>
   </div>
-</div>
+</section>
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
 (function () {
-  const typeSelect = document.getElementById('type');
-  const checkbox = document.getElementById('is_free');
-  const priceField = document.getElementById('price-field');
-  const geocodeBtn = document.getElementById('geocode-btn');
-  const locationInput = document.getElementById('location-input');
-  const cityInput = document.getElementById('city-input');
-  const feedback = document.getElementById('geocode-feedback');
-  const resultsEl = document.getElementById('geocode-results');
-  const latInput = document.getElementById('latitude');
-  const lngInput = document.getElementById('longitude');
+  const form = document.querySelector('.form-card form');
+  const startDate = document.getElementById('start-date');
+  const startTime = document.getElementById('start-time');
+  const endDate = document.getElementById('end-date');
+  const endTime = document.getElementById('end-time');
+  const startsAtHidden = document.getElementById('starts-at-hidden');
+  const endsAtHidden = document.getElementById('ends-at-hidden');
 
-  const map = L.map('map').setView([48.8566, 2.3522], 5);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '&copy; OpenStreetMap'
-  }).addTo(map);
-
-  let marker = null;
-  function setMarker(lat, lng, label) {
-    if (marker) {
-      map.removeLayer(marker);
-    }
-    marker = L.marker([lat, lng], { draggable: true }).addTo(map);
-    marker.bindPopup(label || 'Point selectionne').openPopup();
-    map.setView([lat, lng], 15);
-    latInput.value = Number(lat).toFixed(6);
-    lngInput.value = Number(lng).toFixed(6);
-    marker.on('dragend', function (event) {
-      const p = event.target.getLatLng();
-      latInput.value = Number(p.lat).toFixed(6);
-      lngInput.value = Number(p.lng).toFixed(6);
-    });
+  if (!form || !startDate || !startTime || !endDate || !endTime || !startsAtHidden || !endsAtHidden) {
+    return;
   }
 
-  if (latInput.value && lngInput.value) {
-    setMarker(parseFloat(latInput.value), parseFloat(lngInput.value), 'Point sauvegarde');
+  function combine(dateValue, timeValue) {
+    if (!dateValue || !timeValue) {
+      return '';
+    }
+    return dateValue + 'T' + timeValue;
   }
 
-  function syncTypeRules() {
-    if (typeSelect.value === 'COMMUNAUTAIRE') {
-      checkbox.checked = true;
-      checkbox.disabled = true;
-      document.getElementById('partner-field').style.display = 'none';
-      priceField.style.display = 'none';
-      return;
-    }
-    checkbox.disabled = false;
-    document.getElementById('partner-field').style.display = 'block';
-    priceField.style.display = checkbox.checked ? 'none' : 'block';
+  function syncHiddenFields() {
+    startsAtHidden.value = combine(startDate.value, startTime.value);
+    endsAtHidden.value = combine(endDate.value, endTime.value);
   }
 
-  function renderResults(items) {
-    resultsEl.innerHTML = '';
-    if (!items.length) {
-      feedback.textContent = 'Aucun resultat.';
-      feedback.style.color = '#F87171';
-      return;
-    }
-    feedback.textContent = 'Selectionne une adresse proposee.';
-    feedback.style.color = 'rgba(255,255,255,0.75)';
+  startDate.addEventListener('change', syncHiddenFields);
+  startTime.addEventListener('change', syncHiddenFields);
+  endDate.addEventListener('change', syncHiddenFields);
+  endTime.addEventListener('change', syncHiddenFields);
+  form.addEventListener('submit', syncHiddenFields);
 
-    items.forEach(function (item) {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'btn-ghost';
-      btn.style.fontSize = '0.74rem';
-      btn.style.textAlign = 'left';
-      btn.style.justifyContent = 'flex-start';
-      btn.style.padding = '0.55rem 0.75rem';
-      btn.style.borderRadius = '10px';
-      btn.textContent = item.display_name;
-      btn.addEventListener('click', function () {
-        locationInput.value = item.display_name;
-        if (item.city && !cityInput.value) {
-          cityInput.value = item.city;
-        }
-        setMarker(item.latitude, item.longitude, item.display_name);
-      });
-      resultsEl.appendChild(btn);
-    });
-  }
-
-  geocodeBtn.addEventListener('click', async function () {
-    const q = (locationInput.value || '').trim();
-    if (!q) {
-      feedback.textContent = 'Saisis un lieu avant la recherche.';
-      feedback.style.color = '#F87171';
-      return;
-    }
-
-    feedback.textContent = 'Recherche geographique en cours...';
-    feedback.style.color = 'rgba(255,255,255,0.65)';
-    resultsEl.innerHTML = '';
-
-    try {
-      const params = new URLSearchParams({ q: q, city: (cityInput.value || '').trim() });
-      const response = await fetch('/api/v1/city-feed/geocode/?' + params.toString());
-      const payload = await response.json();
-      if (!response.ok) {
-        feedback.textContent = payload.detail || 'Erreur geocoding.';
-        feedback.style.color = '#F87171';
-        return;
-      }
-      renderResults(payload.results || []);
-    } catch (_err) {
-      feedback.textContent = 'Erreur reseau geocoding.';
-      feedback.style.color = '#F87171';
-    }
-  });
-
-  typeSelect.addEventListener('change', syncTypeRules);
-  checkbox.addEventListener('change', syncTypeRules);
-  syncTypeRules();
+  syncHiddenFields();
 })();
 </script>
 {% endblock %}

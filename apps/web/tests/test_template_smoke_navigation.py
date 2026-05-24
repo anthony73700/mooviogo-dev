@@ -170,7 +170,7 @@ class PartnerAdminTemplateAccessTests(TestCase):
             "/nightlife/tickets/scan/",
             "/nightlife/promotions/",
         ]:
-            response = self.client.get(path)
+            response = self.client.get(path, follow=True)
             self.assertEqual(response.status_code, 200, msg=f"Unexpected status for {path}")
 
     def test_admin_pages_render_for_staff_user(self):

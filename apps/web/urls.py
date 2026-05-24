@@ -6,7 +6,6 @@ urlpatterns = [
     # Home
     path("", views.home, name="home"),
     path("explore/", views.explore, name="explore"),
-    path("feed/", views.feed_page, name="feed"),
     path("events/", views.events_alias, name="events-en"),
     path("nightlife/", views.nightlife, name="nightlife"),
     path("activities/", views.activities, name="activities"),
@@ -50,7 +49,9 @@ urlpatterns = [
 
     # Partners
     path("partenaires/", views.partenaires_list, name="partenaires-list"),
+    path("partenaires/public/<slug:slug>/", views.partenaire_public_page, name="partenaire-public-page"),
     path("devenir-partenaire/", views.devenir_partenaire, name="devenir-partenaire"),
+    path("devenir-partenaire/offres/<slug:offre_slug>/", views.devenir_partenaire_offre, name="devenir-partenaire-offre"),
     path("become-partner/", views.devenir_partenaire, name="become-partner"),
 
     # Profil
@@ -67,15 +68,33 @@ urlpatterns = [
 
     # Partenaire dashboard
     path("partenaire/", views.partenaire_dashboard, name="partenaire-dashboard"),
+    path("partenaire/restaurant/", views.partenaire_dashboard_section, {"section": "restaurant"}, name="partenaire-dashboard-restaurant"),
+    path("partenaire/nightlife/", views.partenaire_dashboard_section, {"section": "nightlife"}, name="partenaire-dashboard-nightlife"),
+    path("partenaire/activite/", views.partenaire_dashboard_section, {"section": "activity"}, name="partenaire-dashboard-activity"),
+    path("partenaire/activity/", views.partenaire_dashboard_section, {"section": "activity"}, name="partenaire-dashboard-activity-en"),
+    path("partenaire/events/", views.partner_events_page, name="partenaire-events"),
+    path("partenaire/events/create/", views.partner_events_create_page, name="partenaire-events-create"),
+    path("partenaire/bookings/", views.partner_bookings_page, name="partenaire-bookings"),
+    path("partenaire/bookings/restaurants/<int:booking_id>/decision/", views.partner_restaurant_booking_decision, name="partenaire-restaurant-booking-decision"),
+    path("partenaire/agenda/", views.partner_agenda_page, name="partenaire-agenda"),
+    path("partenaire/agenda/<int:entry_id>/decision/", views.partner_agenda_decision, name="partenaire-agenda-decision"),
+    path("partenaire/requests/", views.partner_requests_page, name="partenaire-requests"),
+    path("partenaire/analytics/", views.partner_analytics_page, name="partenaire-analytics"),
+    path("partenaire/payments/", views.partner_payments_page, name="partenaire-payments"),
+    path("partenaire/settings/", views.partner_settings_page, name="partenaire-settings"),
+    path("partenaire/etablissement/", views.partner_establishment_redirect, name="partenaire-establishment"),
     path("partner/dashboard/", views.partenaire_dashboard, name="partner-dashboard"),
     path("partner/events/", views.partner_events_page, name="partner-events"),
     path("partner/events/create/", views.partner_events_create_page, name="partner-events-create"),
     path("partner/bookings/", views.partner_bookings_page, name="partner-bookings"),
     path("partner/bookings/restaurants/<int:booking_id>/decision/", views.partner_restaurant_booking_decision, name="partner-restaurant-booking-decision"),
+    path("partner/agenda/", views.partner_agenda_page, name="partner-agenda"),
+    path("partner/agenda/<int:entry_id>/decision/", views.partner_agenda_decision, name="partner-agenda-decision"),
     path("partner/requests/", views.partner_requests_page, name="partner-requests"),
     path("partner/analytics/", views.partner_analytics_page, name="partner-analytics"),
     path("partner/payments/", views.partner_payments_page, name="partner-payments"),
     path("partner/settings/", views.partner_settings_page, name="partner-settings"),
+    path("partner/establishment/", views.partner_establishment_redirect, name="partner-establishment"),
 
     # Nightlife dashboard
     path("nightlife/dashboard/", views.nightlife_dashboard, name="nightlife-dashboard"),

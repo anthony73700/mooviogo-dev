@@ -93,9 +93,121 @@
     html.page-ready .page-shell { opacity: 1 !important; transform: none !important; filter: none !important; }
     html.page-leaving .page-shell { opacity: 1 !important; transform: none !important; filter: none !important; }
     @media (min-width: 640px) { .mobile-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+    /* Global pro area white background theme */
+    body.pro-white {
+      background-color: #ffffff !important;
+      background-image: none !important;
+      color: #3B82F6;
+    }
+
+    body.pro-white nav {
+      background: rgba(255, 255, 255, 0.92) !important;
+      border-bottom-color: #e5e7eb !important;
+      backdrop-filter: saturate(170%) blur(20px);
+    }
+
+    body.pro-white nav a,
+    body.pro-white nav button,
+    body.pro-white nav span,
+    body.pro-white nav select {
+      color: #3B82F6 !important;
+    }
+
+    body.pro-white main {
+      background: #ffffff;
+      color: #3B82F6;
+    }
+
+    /* Global readability override for all pro dashboard pages. */
+    body.pro-white main h1,
+    body.pro-white main h2,
+    body.pro-white main h3,
+    body.pro-white main h4,
+    body.pro-white main h5,
+    body.pro-white main h6,
+    body.pro-white main p,
+    body.pro-white main li,
+    body.pro-white main span,
+    body.pro-white main strong,
+    body.pro-white main small,
+    body.pro-white main label,
+    body.pro-white main a {
+      color: #1d4ed8 !important;
+    }
+
+    body.pro-white main .slabel,
+    body.pro-white main [class*="meta"],
+    body.pro-white main [class*="muted"] {
+      color: #64748b !important;
+    }
+
+    body.pro-white main .btn-brand,
+    body.pro-white main button,
+    body.pro-white main input,
+    body.pro-white main select,
+    body.pro-white main textarea {
+      color: #0f172a !important;
+    }
+
+    body.pro-white footer {
+      display: none;
+    }
+
+    body.pro-white .bg-grad-aurora,
+    body.pro-white .bg-neon-500\/25,
+    body.pro-white [class*="bg-neon-500/"] {
+      display: none !important;
+    }
+
+    body.pro-white .panel-soft,
+    body.pro-white .glass-strong,
+    body.pro-white .card,
+    body.pro-white .kpi-card,
+    body.pro-white .dashboard-link,
+    body.pro-white .pk,
+    body.pro-white [class*="bg-white/[0.03]"],
+    body.pro-white [class*="bg-white/[0.04]"],
+    body.pro-white [class*="bg-white/[0.05]"] {
+      background: #ffffff !important;
+      border-color: #e5e7eb !important;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06) !important;
+    }
+
+    body.pro-white .text-white,
+    body.pro-white .text-white\/85,
+    body.pro-white .text-white\/80,
+    body.pro-white .text-white\/72,
+    body.pro-white .text-white\/70,
+    body.pro-white .text-white\/60,
+    body.pro-white .text-white\/58,
+    body.pro-white .text-white\/55,
+    body.pro-white .text-white\/50,
+    body.pro-white .text-white\/45,
+    body.pro-white .text-white\/40,
+    body.pro-white .text-white\/35,
+    body.pro-white .text-white\/32,
+    body.pro-white .text-white\/30,
+    body.pro-white .text-white\/22 {
+      color: #3B82F6 !important;
+    }
+
+    body.pro-white .border-white\/10,
+    body.pro-white .border-white\/08,
+    body.pro-white .border-white\/\[0\.06\],
+    body.pro-white .border-white\/\[0\.08\],
+    body.pro-white .border-white\/\[0\.07\] {
+      border-color: #e5e7eb !important;
+    }
+
+    body.pro-white .chip-dark {
+      background: #f3f4f6 !important;
+      color: #374151 !important;
+      border-color: #e5e7eb !important;
+    }
   </style>
 </head>
-<body class="min-h-screen font-sans antialiased">
+<body class="min-h-screen font-sans antialiased{% if IS_PRO_ACCOUNT %} pro-white{% endif %}">
   <a href="#main-content" class="skip-link">{% trans "Aller au contenu principal" %}</a>
 
   {# ── Navbar (Airbnb-inspired, nightlife palette) ── #}
@@ -111,14 +223,16 @@
       <div class="hidden md:flex items-center gap-5 mx-auto text-[0.83rem] text-white/72">
         {% if IS_PRO_ACCOUNT %}
         <a href="{{ PRO_DASHBOARD_URL }}" class="nav-link px-1.5 py-1.5 hover:text-white">{% trans "Tableau de bord" %}</a>
+        <a href="/partner/agenda/" class="nav-link px-1.5 py-1.5 hover:text-white">{% trans "Agenda" %}</a>
         <a href="/partner/bookings/" class="nav-link px-1.5 py-1.5 hover:text-white">{% trans "Réservations" %}</a>
         <a href="/partner/analytics/" class="nav-link px-1.5 py-1.5 hover:text-white">{% trans "Analytics" %}</a>
-        <a href="/partner/settings/" class="nav-link px-1.5 py-1.5 hover:text-white">{% trans "Établissement" %}</a>
+        <a href="/activities/" class="nav-link px-1.5 py-1.5 hover:text-white">{% trans "Activités" %}</a>
+        <a href="/partner/establishment/" class="nav-link px-1.5 py-1.5 hover:text-white">{% trans "Établissement" %}</a>
         {% else %}
         <a href="/sorties/" class="nav-link px-1.5 py-1.5 hover:text-white">{% trans "Sorties" %}</a>
         <a href="/restaurants/" class="nav-link px-1.5 py-1.5 hover:text-white">{% trans "Restaurants" %}</a>
+        <a href="/activities/" class="nav-link px-1.5 py-1.5 hover:text-white">{% trans "Activités" %}</a>
         <a href="/evenements/" class="nav-link px-1.5 py-1.5 hover:text-white">{% trans "Événements" %}</a>
-        <a href="/feed/" class="nav-link px-1.5 py-1.5 hover:text-white">{% trans "Feed" %}</a>
         <a href="/villes/" class="nav-link px-1.5 py-1.5 hover:text-white">{% trans "Villes" %}</a>
         {% endif %}
       </div>
@@ -152,9 +266,10 @@
               </div>
               {% if IS_PRO_ACCOUNT %}
               <a href="{{ PRO_DASHBOARD_URL }}" class="block px-4 py-2.5 text-sm font-semibold text-flamingo-300 hover:bg-white/5" role="menuitem">{% trans "Tableau de bord" %}</a>
+              <a href="/partner/agenda/" class="block px-4 py-2.5 text-sm text-white/85 hover:bg-white/5 hover:text-white" role="menuitem">{% trans "Agenda" %}</a>
               <a href="/partner/bookings/" class="block px-4 py-2.5 text-sm text-white/85 hover:bg-white/5 hover:text-white" role="menuitem">{% trans "Réservations" %}</a>
               <a href="/partner/analytics/" class="block px-4 py-2.5 text-sm text-white/85 hover:bg-white/5 hover:text-white" role="menuitem">{% trans "Analytics" %}</a>
-              <a href="/partner/settings/" class="block px-4 py-2.5 text-sm text-white/85 hover:bg-white/5 hover:text-white" role="menuitem">{% trans "Infos établissement" %}</a>
+              <a href="/partner/establishment/" class="block px-4 py-2.5 text-sm text-white/85 hover:bg-white/5 hover:text-white" role="menuitem">{% trans "Infos établissement" %}</a>
               {% else %}
               <a href="/profil/" class="block px-4 py-2.5 text-sm text-white/85 hover:bg-white/5 hover:text-white" role="menuitem">{% trans "Mon profil" %}</a>
               <a href="/profil/reservations/" class="block px-4 py-2.5 text-sm text-white/85 hover:bg-white/5 hover:text-white" role="menuitem">{% trans "Mes réservations" %}</a>
@@ -187,14 +302,16 @@
           <div class="mt-2">
             {% if IS_PRO_ACCOUNT %}
             <a href="{{ PRO_DASHBOARD_URL }}" class="mobile-link"><span>{% trans "Tableau de bord" %}</span><span aria-hidden="true">→</span></a>
+            <a href="/partner/agenda/" class="mobile-link"><span>{% trans "Agenda" %}</span><span aria-hidden="true">→</span></a>
             <a href="/partner/bookings/" class="mobile-link"><span>{% trans "Réservations" %}</span><span aria-hidden="true">→</span></a>
             <a href="/partner/analytics/" class="mobile-link"><span>{% trans "Analytics" %}</span><span aria-hidden="true">→</span></a>
-            <a href="/partner/settings/" class="mobile-link"><span>{% trans "Infos établissement" %}</span><span aria-hidden="true">→</span></a>
+            <a href="/activities/" class="mobile-link"><span>{% trans "Activités" %}</span><span aria-hidden="true">→</span></a>
+            <a href="/partner/establishment/" class="mobile-link"><span>{% trans "Infos établissement" %}</span><span aria-hidden="true">→</span></a>
             {% else %}
             <a href="/sorties/" class="mobile-link"><span>{% trans "Sorties" %}</span><span aria-hidden="true">→</span></a>
             <a href="/restaurants/" class="mobile-link"><span>{% trans "Restaurants" %}</span><span aria-hidden="true">→</span></a>
+            <a href="/activities/" class="mobile-link"><span>{% trans "Activités" %}</span><span aria-hidden="true">→</span></a>
             <a href="/evenements/" class="mobile-link"><span>{% trans "Événements" %}</span><span aria-hidden="true">→</span></a>
-            <a href="/feed/" class="mobile-link"><span>{% trans "Feed" %}</span><span aria-hidden="true">→</span></a>
             <a href="/villes/" class="mobile-link"><span>{% trans "Villes" %}</span><span aria-hidden="true">→</span></a>
             <a href="/partenaires/" class="mobile-link"><span>{% trans "Partenaires" %}</span><span aria-hidden="true">→</span></a>
             {% endif %}
@@ -246,42 +363,9 @@
   </main>
 
   {# ── Footer ── #}
+  {% if not IS_PRO_ACCOUNT %}
   <footer class="relative overflow-hidden border-t border-white/[0.06] bg-[#030508]">
     <div class="relative mx-auto max-w-7xl px-4 pt-16 pb-8">
-      {% if not user.is_authenticated %}
-      <section class="overflow-hidden rounded-[2rem] border border-white/[0.08] bg-white/[0.025] p-5 sm:p-8 lg:p-10">
-        <div class="grid gap-7 sm:gap-8 lg:grid-cols-[1.2fr_.8fr] lg:items-end">
-          <div class="text-center lg:text-left">
-            <span class="chip chip-dark">{% trans "Mooviogo" %}</span>
-            <h2 class="mx-auto mt-4 max-w-[18ch] font-display text-2xl font-extrabold tracking-tight text-white sm:max-w-2xl sm:text-4xl lg:mx-0">{% trans "Découvrir, comparer, réserver, sortir." %}</h2>
-            <p class="mx-auto mt-3 max-w-xl text-sm leading-6 text-white/60 sm:leading-7 lg:mx-0">{% trans "Un point de sortie plus simple: exploration, réservation et offre partenaire réunies dans un même système." %}</p>
-            <div class="mt-5 flex flex-col gap-2 sm:mt-6 sm:flex-row sm:flex-wrap sm:justify-center lg:justify-start">
-              <a href="/sorties/" class="btn-primary btn-sm w-full text-center sm:w-auto">{% trans "Explorer" %}</a>
-              <a href="/devenir-partenaire/" class="btn-secondary btn-sm w-full text-center sm:w-auto">{% trans "Découvrir l’offre pro" %}</a>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div class="panel-soft p-4">
-              <div class="text-2xl font-display font-extrabold text-white">24/7</div>
-              <div class="mt-2 text-[0.68rem] font-bold uppercase tracking-[0.18em] text-white/40">{% trans "Réservation" %}</div>
-              <p class="mt-2 text-[0.78rem] leading-5 text-white/58 sm:text-xs sm:leading-6">{% trans "Réserver plus vite, sans friction." %}</p>
-            </div>
-            <div class="panel-soft p-4">
-              <div class="text-2xl font-display font-extrabold text-white">Live</div>
-              <div class="mt-2 text-[0.68rem] font-bold uppercase tracking-[0.18em] text-white/40">{% trans "Découverte" %}</div>
-              <p class="mt-2 text-[0.78rem] leading-5 text-white/58 sm:text-xs sm:leading-6">{% trans "Des cartes claires qui donnent envie de sortir." %}</p>
-            </div>
-            <div class="panel-soft p-4">
-              <div class="text-2xl font-display font-extrabold text-white">Pro</div>
-              <div class="mt-2 text-[0.68rem] font-bold uppercase tracking-[0.18em] text-white/40">{% trans "Communauté" %}</div>
-              <p class="mt-2 text-[0.78rem] leading-5 text-white/58 sm:text-xs sm:leading-6">{% trans "Une offre partenaire simple et lisible." %}</p>
-            </div>
-          </div>
-        </div>
-      </section>
-      {% endif %}
-
       <div class="mt-10 grid gap-8 border-b border-white/[0.06] pb-10 md:grid-cols-2 xl:grid-cols-5">
         <div class="xl:col-span-2">
           <a href="/" class="inline-flex items-center gap-3 text-decoration-none">
@@ -302,10 +386,12 @@
             <a href="{{ PRO_DASHBOARD_URL }}" class="nav-link">{% trans "Tableau de bord" %}</a>
             <a href="/partner/bookings/" class="nav-link">{% trans "Réservations" %}</a>
             <a href="/partner/analytics/" class="nav-link">{% trans "Analytics" %}</a>
+            <a href="/activities/" class="nav-link">{% trans "Activités" %}</a>
             <a href="/partner/settings/" class="nav-link">{% trans "Infos établissement" %}</a>
             {% else %}
             <a href="/sorties/" class="nav-link">{% trans "Sorties" %}</a>
             <a href="/restaurants/" class="nav-link">{% trans "Restaurants" %}</a>
+            <a href="/activities/" class="nav-link">{% trans "Activités" %}</a>
             <a href="/evenements/" class="nav-link">{% trans "Événements" %}</a>
             <a href="/villes/" class="nav-link">{% trans "Villes" %}</a>
             {% endif %}
@@ -343,6 +429,7 @@
       </div>
     </div>
   </footer>
+  {% endif %}
 
   {% if ENABLE_ANALYTICS %}
   <div id="cookie-consent" style="position:fixed;left:1rem;right:1rem;bottom:1rem;z-index:1200;display:none">

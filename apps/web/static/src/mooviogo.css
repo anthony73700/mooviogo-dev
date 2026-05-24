@@ -555,7 +555,7 @@
     .dashboard-kpi-grid { grid-template-columns: 1fr; }
   }
 
-  /* ── Vertical feed (TikTok-inspired) ─────────────────────── */
+  /* ── Vertical stories layout (TikTok-inspired) ───────────── */
   .vfeed {
     @apply fixed inset-0 z-40 overflow-y-scroll snap-y snap-mandatory bg-black;
     scrollbar-width: none;

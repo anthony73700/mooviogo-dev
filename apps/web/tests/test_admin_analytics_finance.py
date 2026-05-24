@@ -3,6 +3,7 @@ from django.test import TestCase
 
 from apps.bookings.models import Booking
 from apps.events.models import Event
+from apps.partners.models import Partner
 from apps.payments.models import Payment
 from apps.restaurants.models import RestaurantTimeSlot, RestaurantVenue
 from apps.sorties.models import Sortie
@@ -26,8 +27,17 @@ class AdminAnalyticsFinanceTests(TestCase):
             city="Paris",
         )
 
+        self.partner = Partner.objects.create(
+            owner=self.customer,
+            name="Partner Finance",
+            slug="partner-finance",
+            city="Paris",
+            status=Partner.Status.ACTIVE,
+        )
+
         self.sortie = Sortie.objects.create(
             creator=self.customer,
+            partner=self.partner,
             title="Sortie Test",
             slug="sortie-test-finance",
             city="Paris",

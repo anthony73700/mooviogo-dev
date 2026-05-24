@@ -9,6 +9,16 @@ class Partner(models.Model):
         SUSPENDED = "SUSPENDED", "Suspendu"
         INACTIVE = "INACTIVE", "Inactif"
 
+    class ProSection(models.TextChoices):
+        RESTAURANT = "restaurant", "Restaurant"
+        NIGHTLIFE = "nightlife", "Nightlife"
+        ACTIVITY = "activity", "Activite"
+
+    class OfferTier(models.TextChoices):
+        LOW = "low", "Offre basse"
+        MID = "mid", "Offre moyenne"
+        HIGH = "high", "Offre haute"
+
     owner = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -24,9 +34,18 @@ class Partner(models.Model):
     address = models.CharField(max_length=255, blank=True)
     phone = models.CharField(max_length=30, blank=True)
     email = models.EmailField(blank=True)
-    website = models.URLField(blank=True)
     cover_image_url = models.URLField(blank=True)
     category = models.CharField(max_length=100, blank=True)
+    pro_section = models.CharField(
+        max_length=20,
+        choices=ProSection.choices,
+        default=ProSection.ACTIVITY,
+    )
+    pro_offer_tier = models.CharField(
+        max_length=10,
+        choices=OfferTier.choices,
+        default=OfferTier.MID,
+    )
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
     is_verified = models.BooleanField(default=False)
     stripe_connect_account_id = models.CharField(max_length=120, blank=True)

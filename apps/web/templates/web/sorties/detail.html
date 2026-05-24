@@ -30,8 +30,8 @@
   .detail-hero-panel { border:1px solid rgba(255,255,255,.1); border-radius:1.5rem; background:rgba(8,7,18,.46); padding:1rem; backdrop-filter:blur(18px); }
   .detail-meta-grid { display:grid; gap:.75rem; grid-template-columns:repeat(3,minmax(0,1fr)); }
   .booking-sticky { position:sticky; top:140px; }
-  .ring-avatar { display:inline-grid; place-items:center; height:2.5rem; width:2.5rem; border-radius:9999px; background:linear-gradient(135deg,#A832F5,#F31C7F); color:#fff; font-weight:700; box-shadow:0 0 0 2px rgba(255,255,255,0.06); }
-  .star-row svg { color:#FF6A4D; }
+  .ring-avatar { display:inline-grid; place-items:center; height:2.5rem; width:2.5rem; border-radius:9999px; background:linear-gradient(135deg,#6C63FF,#7B61FF); color:#fff; font-weight:700; box-shadow:0 0 0 2px rgba(255,255,255,0.06); }
+  .star-row svg { color:#7B61FF; }
   @media (max-width:1024px){ .detail-store-grid, .detail-store-meta { grid-template-columns:1fr; } .detail-store-figure { min-height:360px; } }
   @media (max-width:768px){ .detail-hero, .detail-hero-content { min-height:460px; } .detail-meta-grid { grid-template-columns:1fr; } }
 </style>
@@ -106,10 +106,23 @@
       {# Host card #}
       <section class="card p-6 flex items-center justify-between gap-4">
         <div>
-          <h2 class="font-display text-xl font-bold text-white">{% trans "Organisé par" %} {{ sortie.creator.display_name|default:sortie.creator.username }}</h2>
+          <h2 class="font-display text-xl font-bold text-white">
+            {% trans "Organisé par" %}
+            {% if sortie.creator %}
+              {{ sortie.creator.display_name|default:sortie.creator.username }}
+            {% else %}
+              {% trans "La communauté" %}
+            {% endif %}
+          </h2>
           <p class="text-sm text-white/55 mt-1">{{ participant_count }} {% trans "participants" %}{% if sortie.max_participants %} / {{ sortie.max_participants }} {% trans "max" %}{% endif %} • {% trans "Créée le" %} {{ sortie.created_at|date:"d M Y" }}</p>
         </div>
-        <span class="ring-avatar h-12 w-12 text-lg">{{ sortie.creator.display_name|default:sortie.creator.username|slice:":1"|upper }}</span>
+        <span class="ring-avatar h-12 w-12 text-lg">
+          {% if sortie.creator %}
+            {{ sortie.creator.display_name|default:sortie.creator.username|slice:":1"|upper }}
+          {% else %}
+            M
+          {% endif %}
+        </span>
       </section>
 
       {# Highlights #}

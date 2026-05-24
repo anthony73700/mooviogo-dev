@@ -4,6 +4,36 @@
 
 {% block extra_head %}
 <style>
+  .dl-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 0.9rem;
+  }
+  .dl-kpi {
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    background: rgba(255,255,255,0.03);
+    padding: 0.72rem;
+  }
+  .dl-kpi-label {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255,255,255,0.45);
+    font-weight: 700;
+  }
+  .dl-kpi-value {
+    margin-top: 0.28rem;
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: #fff;
+  }
+  .dl-kpi-meta {
+    margin-top: 0.18rem;
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.5);
+  }
   .dl-row {
     display: flex;
     align-items: center;
@@ -22,7 +52,59 @@
     color: rgba(255,255,255,0.4);
     text-align: right;
   }
+  .dl-public {
+    margin-bottom: 0.9rem;
+    border: 1px solid rgba(59, 130, 246, 0.28);
+    border-radius: 12px;
+    background: rgba(59, 130, 246, 0.08);
+    padding: 0.75rem;
+  }
+  .dl-public-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 800;
+    color: #93c5fd;
+  }
+  .dl-public-link {
+    margin-top: 0.4rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    border: 1px solid rgba(147, 197, 253, 0.7);
+    padding: 0.48rem 0.82rem;
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: #dbeafe;
+    text-decoration: none;
+  }
+
+  body.pro-white .dl-kpi-label,
+  body.pro-white .dl-kpi-meta,
+  body.pro-white .dl-row-meta {
+    color: #64748b;
+  }
+
+  body.pro-white .dl-kpi-value,
+  body.pro-white .dl-row-title {
+    color: #1d4ed8;
+  }
+  body.pro-white .dl-public {
+    border-color: #bae6fd;
+    background: #f0f9ff;
+  }
+  body.pro-white .dl-public-label {
+    color: #0369a1;
+  }
+  body.pro-white .dl-public-link {
+    border-color: #0ea5e9;
+    color: #075985;
+  }
   @media (max-width: 640px) {
+    .dl-kpi-grid {
+      grid-template-columns: 1fr;
+    }
     .dl-row {
       flex-direction: column;
       align-items: flex-start;
@@ -44,6 +126,28 @@
 </div>
 
 <div class="mx-auto max-w-5xl px-4" style="padding-top:2rem;padding-bottom:4rem">
+  {% if public_page_url %}
+  <div class="dl-public">
+    <p class="dl-public-label">Page publique visible par les utilisateurs</p>
+    <a href="{{ public_page_url }}" target="_blank" rel="noopener" class="dl-public-link">{{ public_page_label|default:"Voir ma page publique" }}</a>
+  </div>
+  {% endif %}
+
+  {% if highlight_blocks %}
+  <div style="display:flex;align-items:center;justify-content:space-between;margin:0 0 0.45rem 0.1rem">
+    <p style="font-size:0.74rem;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.52);font-weight:800">Resume rapide</p>
+  </div>
+  <div class="dl-kpi-grid">
+    {% for block in highlight_blocks %}
+    <div class="dl-kpi">
+      <p class="dl-kpi-label">{{ block.label }}</p>
+      <p class="dl-kpi-value">{{ block.value }}</p>
+      <p class="dl-kpi-meta">{{ block.meta }}</p>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
   <div class="pk" style="padding:1rem">
     {% for row in rows_data %}
     <div class="dl-row">

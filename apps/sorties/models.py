@@ -46,6 +46,7 @@ class Sortie(models.Model):
     currency = models.CharField(max_length=3, default="EUR")
     max_participants = models.PositiveIntegerField(null=True, blank=True)
     starts_at = models.DateTimeField(null=True, blank=True)
+    ends_at = models.DateTimeField(null=True, blank=True)
     cover_image_url = models.URLField(blank=True)
     is_free = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)

@@ -8,6 +8,7 @@ from django.core.cache import cache
 from django.core.mail import send_mail
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
+from django.core.files.storage import default_storage
 from django.db.models import Count, Q
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -21,9 +22,10 @@ from xml.sax.saxutils import escape as xml_escape
 
 from collections import defaultdict
 from decimal import Decimal, InvalidOperation
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
+from uuid import uuid4
 
-from apps.bookings.models import Booking
+from apps.bookings.models import Booking, PartnerAgendaEntry
 from apps.chats.models import Chat
 from apps.chats.models import ChatParticipant
 from apps.ads.models import SponsoredEvent
@@ -137,6 +139,492 @@ def _is_rate_limited(key, limit):
     return int(value) >= int(limit)
 
 
+def _reservation_kind_from_partner(partner):
+    category = (getattr(partner, "category", "") or "").lower()
+    if "night" in category:
+        return PartnerAgendaEntry.ReservationKind.NIGHTLIFE
+    if any(token in category for token in ["activ", "kart", "laser", "escape", "bowling", "paintball"]):
+        return PartnerAgendaEntry.ReservationKind.ACTIVITY
+    return PartnerAgendaEntry.ReservationKind.RESTAURANT
+
+
+def _professional_section(user, partner_profile=None, owned_venues=None):
+    if partner_profile is None:
+        partner_profile = Partner.objects.filter(owner=user).first()
+    if owned_venues is None:
+        owned_venues = RestaurantVenue.objects.filter(owner=user, is_active=True)
+
+    explicit_section = (getattr(partner_profile, "pro_section", "") or "").strip().lower()
+    if explicit_section in {"restaurant", "nightlife", "activity"}:
+        return explicit_section
+
+    category = (getattr(partner_profile, "category", "") or "").lower()
+    if "night" in category:
+        return "nightlife"
+    if any(token in category for token in ["sort", "activ", "kart", "laser", "escape", "bowling", "paintball"]):
+        return "sortie"
+    if "rest" in category:
+        return "restaurant"
+
+    if owned_venues.exists():
+        return "restaurant"
+    return "sortie"
+
+
+def _professional_public_page_payload(user):
+    partner_profile = Partner.objects.filter(owner=user).first()
+
+    if partner_profile and partner_profile.slug:
+        return {
+            "url": f"/partenaires/public/{partner_profile.slug}/",
+            "label": "Voir ma page partenaire publique",
+        }
+
+    owned_venue = RestaurantVenue.objects.filter(owner=user, is_active=True).order_by("id").first()
+    if owned_venue:
+        return {
+            "url": f"/restaurants/{owned_venue.city_slug}/{owned_venue.slug}/?as_public=1",
+            "label": "Voir ma fiche restaurant publique",
+        }
+
+    return {"url": "", "label": ""}
+
+
+def _section_allowed_kinds(section):
+    if section == "restaurant":
+        return {PartnerAgendaEntry.ReservationKind.RESTAURANT}
+    if section == "nightlife":
+        return {PartnerAgendaEntry.ReservationKind.NIGHTLIFE}
+    return {PartnerAgendaEntry.ReservationKind.ACTIVITY, PartnerAgendaEntry.ReservationKind.OTHER}
+
+
+def _section_default_kind(section):
+    if section == "restaurant":
+        return PartnerAgendaEntry.ReservationKind.RESTAURANT
+    if section == "nightlife":
+        return PartnerAgendaEntry.ReservationKind.NIGHTLIFE
+    return PartnerAgendaEntry.ReservationKind.ACTIVITY
+
+
+def _ui_revision_tag():
+    # Visible runtime tag used to confirm the browser is rendering the latest backend/template version.
+    return timezone.localtime().strftime("LIVE %d/%m %H:%M:%S")
+
+
+def _build_organizer_identity(user):
+    if not user:
+        return {
+            "display": "Membre",
+            "initials": "MB",
+            "avatar_url": "",
+        }
+
+    first_name = (getattr(user, "first_name", "") or "").strip()
+    last_name = (getattr(user, "last_name", "") or "").strip()
+    display_name = (getattr(user, "display_name", "") or "").strip()
+    username = (getattr(user, "username", "") or "").strip()
+    avatar_url = (getattr(user, "avatar_url", "") or "").strip()
+
+    if first_name:
+        display = f"{first_name} {last_name[:1].upper()}." if last_name else first_name
+    elif last_name:
+        display = f"{last_name[:1].upper()}."
+    elif display_name:
+        name_tokens = [token for token in display_name.replace(".", " ").split() if token]
+        if len(name_tokens) >= 2:
+            display = f"{name_tokens[0].capitalize()} {name_tokens[1][:1].upper()}."
+        elif len(name_tokens) == 1:
+            display = name_tokens[0].capitalize()
+        else:
+            display = "Membre"
+    else:
+        # Fallback: turn usernames like "sophie_m" or "sophie-martin" into "Sophie M."
+        normalized = username.replace("_", " ").replace("-", " ").replace(".", " ").strip()
+        tokens = [token for token in normalized.split() if token]
+        if tokens:
+            first_guess = tokens[0].capitalize()
+            if len(first_guess) <= 2 and any(ch.isdigit() for ch in first_guess):
+                display = "Membre"
+            elif len(tokens) > 1:
+                display = f"{first_guess} {tokens[1][:1].upper()}."
+            else:
+                display = first_guess if len(first_guess) > 2 else "Membre"
+        else:
+            display = "Membre"
+
+    display_tokens = [token for token in display.replace(".", "").split() if token]
+    if len(display_tokens) >= 2:
+        initials = f"{display_tokens[0][:1].upper()}{display_tokens[1][:1].upper()}"
+    elif len(display_tokens) == 1:
+        token = display_tokens[0]
+        initials = (token[:2] if len(token) >= 2 else f"{token[:1]}X").upper()
+    else:
+        initials = "MB"
+
+    return {
+        "display": display,
+        "initials": initials,
+        "avatar_url": avatar_url,
+    }
+
+
+def _attach_sorties_organizer_identity(sorties):
+    for sortie in sorties:
+        identity = _build_organizer_identity(getattr(sortie, "creator", None))
+        sortie.organizer_display = identity["display"]
+        sortie.organizer_initials = identity["initials"]
+        sortie.organizer_avatar_url = identity["avatar_url"]
+
+
+def _activity_offer_two_details():
+    return {
+        "name": "Offre Activite 2 - Pro IA",
+        "price": "79 EUR / mois HT",
+        "features": [
+            "Tout Starter inclus",
+            "IA Marketing: posts Instagram, hashtags, descriptions et textes promotionnels",
+            "IA Campagnes: relance clients absents, promotions heures creuses, campagnes automatiques",
+            "Analytics avancees: frequentation, conversion, remplissage, heures rentables, clients recurrents",
+            "Notifications avancees: push, SMS, WhatsApp",
+            "Mise en avant partenaire sur la plateforme",
+            "Support prioritaire et onboarding accelere",
+            "Billetterie QR code et validation participants",
+        ],
+        "examples": [
+            "Session karting entreprise 18h30, 12 participants, paiement confirme",
+            "Pack laser game anniversaire en attente de validation",
+            "Campagne automatique heure creuse activee pour mardi 15h",
+        ],
+    }
+
+
+def _partner_demo_rows(kind):
+    now = timezone.localtime()
+    if kind == "events":
+        return [
+            {"title": "Soiree Karting Corporate", "meta": f"Marseille - {(now + timedelta(days=1)).strftime('%a %d/%m')} 18:30 - PUBLIE"},
+            {"title": "Session Laser Game Etudiant", "meta": f"Aix-en-Provence - {(now + timedelta(days=2)).strftime('%a %d/%m')} 21:00 - PUBLIE"},
+            {"title": "Escape Game Team Building", "meta": f"Marseille - {(now + timedelta(days=3)).strftime('%a %d/%m')} 19:15 - BROUILLON"},
+            {"title": "Challenge Bowling Inter-entreprises", "meta": f"Vitrolles - {(now + timedelta(days=4)).strftime('%a %d/%m')} 20:00 - EN VALIDATION"},
+            {"title": "Tournoi Karting Nocturne", "meta": f"Marseille - {(now + timedelta(days=5)).strftime('%a %d/%m')} 22:00 - COMPLET"},
+        ]
+    if kind == "payments":
+        return [
+            {"title": "pi_demo_confirm_001", "meta": f"Confirme - 189.00 EUR - Karting corporate - {(now - timedelta(days=1)).strftime('%d/%m')}"},
+            {"title": "pi_demo_pending_002", "meta": f"En attente - 72.00 EUR - Laser game groupe - {now.strftime('%d/%m')}"},
+            {"title": "pi_demo_confirm_003", "meta": f"Confirme - 129.00 EUR - Escape game famille - {(now + timedelta(days=1)).strftime('%d/%m')}"},
+            {"title": "pi_demo_refund_004", "meta": f"Rembourse - 45.00 EUR - Annulation client - {(now + timedelta(days=2)).strftime('%d/%m')}"},
+            {"title": "pi_demo_capture_005", "meta": f"Capture programmee - 210.00 EUR - EVG karting - {(now + timedelta(days=3)).strftime('%d/%m')}"},
+        ]
+    if kind == "requests":
+        return [
+            {"title": "Demande anniversaire 14 personnes", "meta": f"Marseille - EN ATTENTE - {(now + timedelta(days=1)).strftime('%a %d/%m')} 16:00"},
+            {"title": "Demande EVG karting", "meta": f"Marseille - CONFIRMEE - Acompte 90 EUR recu - {(now + timedelta(days=2)).strftime('%a %d/%m')}"},
+            {"title": "Demande groupe scolaire", "meta": f"Aix-en-Provence - EN REVUE - Devis 240 EUR - {(now + timedelta(days=3)).strftime('%a %d/%m')}"},
+            {"title": "Demande afterwork startup", "meta": f"Marseille - EN ATTENTE CLIENT - {(now + timedelta(days=4)).strftime('%a %d/%m')} 19:30"},
+            {"title": "Demande team building 22 pers.", "meta": f"Vitrolles - CONFIRMEE - Paiement total recu - {(now + timedelta(days=5)).strftime('%a %d/%m')}"},
+        ]
+    return []
+
+
+def _normalize_dashboard_section(section):
+    section_key = (section or "").strip().lower()
+    if section_key == "sortie":
+        return "activity"
+    if section_key in {"restaurant", "nightlife", "activity"}:
+        return section_key
+    return "activity"
+
+
+def _dashboard_section_config(section):
+    configs = {
+        "restaurant": {
+            "label": "Restaurant",
+            "headline": "Dashboard Restaurant",
+            "description": "Pilotage service, tables, reservations et satisfaction client.",
+            "hero_points": ["Service fluide", "Remplissage intelligent", "Equipe synchronisee"],
+            "offers": [
+                {
+                    "key": "starter",
+                    "name": "Restaurant Starter",
+                    "price": "39 EUR / mois HT",
+                    "tagline": "Lancer et structurer le service",
+                    "features": [
+                        "Fiche etablissement complete",
+                        "Calendrier de services (midi/soir)",
+                        "Reservations manuelles et Mooviogo",
+                        "Notifications email",
+                        "Journal de reservation 30 jours",
+                    ],
+                },
+                {
+                    "key": "pro",
+                    "name": "Restaurant Pro",
+                    "price": "79 EUR / mois HT",
+                    "tagline": "Monter en conversion et productivite",
+                    "features": [
+                        "Tout Starter inclus",
+                        "Automatisations confirmation / relance",
+                        "SMS + WhatsApp + push",
+                        "Statistiques service et no-show",
+                        "Promotions heures creuses",
+                        "API caisse / PMS",
+                    ],
+                },
+                {
+                    "key": "elite",
+                    "name": "Restaurant Elite IA",
+                    "price": "149 EUR / mois HT",
+                    "tagline": "Operation premium multi-etablissements",
+                    "features": [
+                        "Tout Pro inclus",
+                        "Prevision IA affluence et staffing",
+                        "Segmentation clients et campagnes IA",
+                        "A/B testing offres et menus",
+                        "Support prioritaire + onboarding dedie",
+                        "Multi-sites et gouvernance equipe",
+                    ],
+                },
+            ],
+        },
+        "nightlife": {
+            "label": "Nightlife",
+            "headline": "Dashboard Nightlife",
+            "description": "Billetterie, controle d'acces, line-up et revenus evenementiels.",
+            "hero_points": ["Billetterie performante", "Entree securisee", "Nuits rentables"],
+            "offers": [
+                {
+                    "key": "starter",
+                    "name": "Nightlife Starter",
+                    "price": "49 EUR / mois HT",
+                    "tagline": "Publier et vendre ses premieres soirees",
+                    "features": [
+                        "Creation evenements illimitee",
+                        "Billetterie standard",
+                        "QR code de base",
+                        "Suivi ventes temps reel",
+                        "Notifications email",
+                    ],
+                },
+                {
+                    "key": "pro",
+                    "name": "Nightlife Pro",
+                    "price": "99 EUR / mois HT",
+                    "tagline": "Accelerer ventes et fluidite d'entree",
+                    "features": [
+                        "Tout Starter inclus",
+                        "QR scan rapide multi-terminaux",
+                        "Listes VIP et pre-ventes",
+                        "Relances automatiques paniers",
+                        "Segmentation audience",
+                        "Rapports revenu par event",
+                    ],
+                },
+                {
+                    "key": "elite",
+                    "name": "Nightlife Elite IA",
+                    "price": "179 EUR / mois HT",
+                    "tagline": "Stack complet pour clubs et festivals",
+                    "features": [
+                        "Tout Pro inclus",
+                        "Pricing dynamique par IA",
+                        "Detection fraude avanc ee",
+                        "Attribution marketing omnicanale",
+                        "CRM promoters et commissions",
+                        "Customer success dedie",
+                    ],
+                },
+            ],
+        },
+        "activity": {
+            "label": "Activite",
+            "headline": "Dashboard Activite",
+            "description": "Reservations, sessions, groupes et performance commerciale en continu.",
+            "hero_points": ["Planning net", "Conversion groupe", "Operations precises"],
+            "offers": [
+                {
+                    "key": "starter",
+                    "name": "Activite Starter",
+                    "price": "35 EUR / mois HT",
+                    "tagline": "Demarrer avec un pilotage simple",
+                    "features": [
+                        "Fiche activite et disponibilites",
+                        "Reservations directes + Mooviogo",
+                        "Agenda operationnel",
+                        "Notifications email",
+                        "Rapport hebdomadaire",
+                    ],
+                },
+                {
+                    "key": "pro",
+                    "name": "Activite 2 - Pro IA",
+                    "price": "79 EUR / mois HT",
+                    "tagline": "Automatiser marketing et operations",
+                    "features": [
+                        "Tout Starter inclus",
+                        "IA Marketing (posts, descriptions, hashtags)",
+                        "IA Campagnes (relances et heures creuses)",
+                        "Analytics avancees (conversion, remplissage)",
+                        "Notifications push/SMS/WhatsApp",
+                        "Billetterie QR code",
+                    ],
+                },
+                {
+                    "key": "elite",
+                    "name": "Activite Elite",
+                    "price": "139 EUR / mois HT",
+                    "tagline": "Scale multi-sites et optimisation predictive",
+                    "features": [
+                        "Tout Pro inclus",
+                        "Forecast IA demande et capacite",
+                        "Tarification intelligente par session",
+                        "Scenarios de remplissage auto",
+                        "Multi-sites et roles avances",
+                        "Support prioritaire 7j/7",
+                    ],
+                },
+            ],
+        },
+    }
+    return configs.get(section, configs["activity"])
+
+
+def _resolve_active_offer_key(partner_profile, section):
+    tier_to_offer = {
+        "low": "starter",
+        "mid": "pro",
+        "high": "elite",
+    }
+    explicit_tier = (getattr(partner_profile, "pro_offer_tier", "") or "").strip().lower()
+    if explicit_tier in tier_to_offer:
+        return tier_to_offer[explicit_tier]
+
+    text = ""
+    if partner_profile:
+        text = " ".join([
+            getattr(partner_profile, "category", "") or "",
+            getattr(partner_profile, "short_description", "") or "",
+            getattr(partner_profile, "description", "") or "",
+        ]).lower()
+
+    if any(token in text for token in ["elite", "premium", "enterprise"]):
+        return "elite"
+    if any(token in text for token in ["pro", "activite 2", "business"]):
+        return "pro"
+    if any(token in text for token in ["starter", "basic", "essentiel"]):
+        return "starter"
+
+    defaults = {
+        "restaurant": "starter",
+        "nightlife": "starter",
+        "activity": "pro",
+    }
+    return defaults.get(section, "pro")
+
+
+def _offer_rank_for_user(user):
+    partner_profile = Partner.objects.filter(owner=user).first()
+    rank = {
+        "low": 0,
+        "mid": 1,
+        "high": 2,
+    }
+    tier = (getattr(partner_profile, "pro_offer_tier", "mid") or "mid").lower()
+    return rank.get(tier, 1)
+
+
+def _require_offer_tier(request, minimum_tier, feature_label, fallback_url="/partner/settings/"):
+    required_rank = {"low": 0, "mid": 1, "high": 2}.get(minimum_tier, 0)
+    current_rank = _offer_rank_for_user(request.user)
+    if current_rank >= required_rank:
+        return None
+
+    tier_label = {
+        "low": "offre basse",
+        "mid": "offre moyenne",
+        "high": "offre haute",
+    }.get(minimum_tier, minimum_tier)
+    messages.error(request, f"Option non disponible: {feature_label} requiert au minimum {tier_label}.")
+    return redirect(fallback_url)
+
+
+def _build_offers_with_lock(config, active_offer_key):
+    offers = config["offers"]
+    order = [offer["key"] for offer in offers]
+    active_index = order.index(active_offer_key) if active_offer_key in order else 0
+
+    cards = []
+    for index, offer in enumerate(offers):
+        is_active = index == active_index
+        is_locked = index > active_index
+        cards.append({
+            **offer,
+            "is_active": is_active,
+            "is_locked": is_locked,
+            "state_label": "Active" if is_active else ("Bloquee" if is_locked else "Incluse"),
+        })
+    return cards
+
+
+def _dashboard_kpis_for_section(section, user, partner_profile):
+    if section == "restaurant":
+        venue_count = RestaurantVenue.objects.filter(owner=user, is_active=True).count() or 1
+        pending = Booking.objects.filter(booking_type=Booking.BookingType.RESTAURANT, status=Booking.Status.PENDING).count() or 6
+        confirmed = Booking.objects.filter(booking_type=Booking.BookingType.RESTAURANT, status=Booking.Status.CONFIRMED).count() or 28
+        return [
+            {"label": "Tables actives", "value": str(venue_count), "meta": "etablissement(s) en service"},
+            {"label": "Reservations", "value": str(pending), "meta": "en attente de validation"},
+            {"label": "Confirmees", "value": str(confirmed), "meta": "sur les 7 derniers jours"},
+            {"label": "No-show", "value": "3.1%", "meta": "controle via relance auto"},
+        ]
+
+    if section == "nightlife":
+        tickets = Booking.objects.filter(booking_type=Booking.BookingType.ACTIVITY, status=Booking.Status.CONFIRMED).count() or 412
+        pending_events = Event.objects.filter(is_partner_event=True, status=Event.Status.DRAFT).count() or 4
+        return [
+            {"label": "Billets vendus", "value": str(tickets), "meta": "periode glissante 30 jours"},
+            {"label": "Events a publier", "value": str(pending_events), "meta": "drafts prets a lancer"},
+            {"label": "Scan entree", "value": "98.4%", "meta": "tickets valides sans incident"},
+            {"label": "Panier moyen", "value": "34 EUR", "meta": "hors extras"},
+        ]
+
+    activity_entries = PartnerAgendaEntry.objects.filter(
+        owner=user,
+        reservation_kind__in={
+            PartnerAgendaEntry.ReservationKind.ACTIVITY,
+            PartnerAgendaEntry.ReservationKind.OTHER,
+        },
+    )
+    pending = activity_entries.filter(status=PartnerAgendaEntry.Status.PENDING).count() or 5
+    confirmed = activity_entries.filter(status=PartnerAgendaEntry.Status.CONFIRMED).count() or 18
+    return [
+        {"label": "Sessions", "value": str(activity_entries.count() or 24), "meta": "planifiees cette semaine"},
+        {"label": "Demandes", "value": str(pending), "meta": "en attente"},
+        {"label": "Confirmees", "value": str(confirmed), "meta": "validations effectuees"},
+        {"label": "Conversion", "value": "31%", "meta": "demandes vers confirmation"},
+    ]
+
+
+def _dashboard_live_examples(section, now):
+    if section == "restaurant":
+        return [
+            f"{(now + timedelta(days=1)).strftime('%a %d/%m')} · Reservation table 6 pers. - 20:15 · CONFIRMEE",
+            f"{(now + timedelta(days=2)).strftime('%a %d/%m')} · Relance no-show envoyee a 3 clients",
+            f"{(now + timedelta(days=3)).strftime('%a %d/%m')} · Encaissement service soir: 1 240 EUR",
+        ]
+    if section == "nightlife":
+        return [
+            f"{(now + timedelta(days=1)).strftime('%a %d/%m')} · Event rooftop 350 billets publie",
+            f"{(now + timedelta(days=2)).strftime('%a %d/%m')} · Scan QR entree: file d'attente < 4 min",
+            f"{(now + timedelta(days=3)).strftime('%a %d/%m')} · Campagne aftermovie envoyee aux participants",
+        ]
+    return [
+        f"{(now + timedelta(days=1)).strftime('%a %d/%m')} · Demande recue: Anniversaire 10 pers. - EN ATTENTE",
+        f"{(now + timedelta(days=2)).strftime('%a %d/%m')} · Reservation confirmee: Laser game 6 pers. - 20:30",
+        f"{(now + timedelta(days=3)).strftime('%a %d/%m')} · Paiement confirme: 149.00 EUR - Stripe",
+    ]
+
+
 @require_POST
 def set_language_and_preference(request):
     response = django_set_language(request)
@@ -169,33 +657,30 @@ def home(request):
     )
     restaurants = RestaurantVenue.objects.filter(is_active=True).order_by("-updated_at")
     partners = Partner.objects.filter(status=Partner.Status.ACTIVE, is_verified=True).order_by("name")
+    activities_sorties = (
+        Sortie.objects.filter(status=Sortie.Status.OPEN, type=Sortie.Type.PARTENAIRE)
+        .select_related("creator", "partner")
+        .annotate(participant_count=Count("participants"))
+        .order_by("-created_at")
+    )
 
-    return render(request, "web/home.html", {
-        "sorties": sorties[:8],
-        "events": Event.objects.filter(status=Event.Status.PUBLISHED).order_by("starts_at")[:8],
-        "restaurants": restaurants[:8],
-        "partners": partners[:8],
+    sorties_items = list(sorties[:10])
+    _attach_sorties_organizer_identity(sorties_items)
+    activities_items = list(activities_sorties[:10])
+    _attach_sorties_organizer_identity(activities_items)
+
+    response = render(request, "web/home.html", {
+        "sorties": sorties_items,
+        "activities_sorties": activities_items,
+        "events": Event.objects.filter(status=Event.Status.PUBLISHED).order_by("starts_at")[:10],
+        "restaurants": restaurants[:10],
+        "partners": partners[:10],
         "total_count": sorties.count(),
     })
-
-
-def feed_page(request):
-    """TikTok-style vertical feed combining sorties and events."""
-    professional_redirect = _redirect_professional_account(request)
-    if professional_redirect:
-        return professional_redirect
-
-    sorties = (
-        Sortie.objects.filter(status=Sortie.Status.OPEN)
-        .select_related("creator")
-        .annotate(participant_count=Count("participants"))
-        .order_by("-created_at")[:20]
-    )
-    events = Event.objects.filter(status=Event.Status.PUBLISHED).order_by("starts_at")[:10]
-    return render(request, "web/feed.html", {
-        "sorties": sorties,
-        "events": events,
-    })
+    response["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response["Pragma"] = "no-cache"
+    response["Expires"] = "0"
+    return response
 
 
 def explore(request):
@@ -256,22 +741,99 @@ def activities(request):
     if professional_redirect:
         return professional_redirect
 
+    q = request.GET.get("q", "").strip()
     city = request.GET.get("city", "").strip()
-    category = request.GET.get("category", "").strip()
-    partners = Partner.objects.filter(status=Partner.Status.ACTIVE, is_verified=True).order_by("name")
+    free = request.GET.get("free", "")
+
+    qs = (
+        Sortie.objects.all()
+        .select_related("creator", "partner")
+        .annotate(participant_count=Count("participants"))
+        .filter(type=Sortie.Type.PARTENAIRE)
+        .order_by("-created_at")
+    )
+
+    if q:
+        qs = qs.filter(Q(title__icontains=q) | Q(description__icontains=q))
     if city:
-        partners = partners.filter(city__icontains=city)
-    if category:
-        partners = partners.filter(category__icontains=category)
-    return render(request, "web/platform/hub.html", {
-        "page_title": "Activities",
-        "page_kicker": "Sorties partenaires",
-        "page_description": "Karting, bowling, escape game, paintball et experiences sportives reservees en ligne.",
-        "partners": partners[:30],
-        "sorties": Sortie.objects.none(),
-        "events": Event.objects.none(),
-        "city": city,
-        "category": category,
+        qs = qs.filter(city__icontains=city)
+    if free == "1":
+        qs = qs.filter(is_free=True)
+    elif free == "0":
+        qs = qs.filter(is_free=False)
+
+    hero_sortie = qs.exclude(cover_image_url="").first() or qs.first()
+
+    total_count = qs.count()
+    member_count = 0
+    partner_count = total_count
+
+    partner_ids_in_activities = list(
+        qs.exclude(partner__isnull=True)
+        .values_list("partner_id", flat=True)
+        .distinct()
+    )
+    activity_partners = list(
+        Partner.objects.filter(
+            id__in=partner_ids_in_activities,
+            status=Partner.Status.ACTIVE,
+            is_verified=True,
+            pro_section=Partner.ProSection.ACTIVITY,
+        ).order_by("name")
+    )
+    if not activity_partners:
+        activity_partners = list(
+            Partner.objects.filter(
+                status=Partner.Status.ACTIVE,
+                is_verified=True,
+                pro_section=Partner.ProSection.ACTIVITY,
+            ).order_by("name")
+        )
+
+    activity_partners_carousel = []
+    if activity_partners:
+        target_cards = 50
+        repeat_count = (target_cards + len(activity_partners) - 1) // len(activity_partners)
+        activity_partners_carousel = (activity_partners * repeat_count)[:target_cards]
+
+    member_sorties = []
+    partner_sorties = []
+    is_all_types = False
+    partner_choices = Partner.objects.filter(
+        status=Partner.Status.ACTIVE,
+        is_verified=True,
+    ).order_by("name")
+
+    paginator = Paginator(qs, 18)
+    page_obj = paginator.get_page(request.GET.get("page"))
+    _attach_sorties_organizer_identity(page_obj.object_list)
+    sorties = page_obj
+    is_paginated = paginator.num_pages > 1
+
+    return render(request, "web/sorties/list.html", {
+        "sorties": sorties,
+        "member_sorties": member_sorties,
+        "partner_sorties": partner_sorties,
+        "is_all_types": is_all_types,
+        "hero_sortie": hero_sortie,
+        "page_obj": page_obj,
+        "is_paginated": is_paginated,
+        "total_count": total_count,
+        "member_count": member_count,
+        "partner_count": partner_count,
+        "page_title": "Activités",
+        "page_kicker": "Activités partenaires",
+        "page_heading": "Les activités à rejoindre ce soir.",
+        "page_description": "Une lecture plus simple et plus éditoriale des activités partenaires, pour comprendre l’ambiance et décider plus vite.",
+        "is_activities_page": True,
+        "is_partner_only_page": True,
+        "activity_partners": activity_partners,
+        "activity_partners_carousel": activity_partners_carousel,
+        "partner_choices": partner_choices,
+        "list_base_path": "/activities/",
+        "sortie_detail_base_path": "/sorties/",
+        "create_sortie_base_path": "/sorties/creer/",
+        "ui_revision": _ui_revision_tag(),
     })
 
 
@@ -669,44 +1231,34 @@ def sorties_list(request):
         Sortie.objects.all()
         .select_related("creator")
         .annotate(participant_count=Count("participants"))
+        .filter(type=Sortie.Type.COMMUNAUTAIRE)
+        .filter(is_free=True)
         .order_by("-created_at")
     )
     q = request.GET.get("q", "")
     city = request.GET.get("city", "")
-    type_ = request.GET.get("type", "")
-    free = request.GET.get("free", "")
+    type_ = Sortie.Type.COMMUNAUTAIRE
+    free = "1"
     if q:
         qs = qs.filter(Q(title__icontains=q) | Q(description__icontains=q))
     if city:
         qs = qs.filter(city__icontains=city)
-    if free == "1":
-        qs = qs.filter(is_free=True)
-    elif free == "0":
-        qs = qs.filter(is_free=False)
 
     hero_sortie = qs.exclude(cover_image_url="").first() or qs.first()
 
     total_count = qs.count()
     member_count = qs.filter(type=Sortie.Type.COMMUNAUTAIRE).count()
-    partner_count = qs.filter(type=Sortie.Type.PARTENAIRE).count()
+    partner_count = 0
 
     member_sorties = []
     partner_sorties = []
-    is_all_types = not type_
+    is_all_types = False
 
-    if type_:
-        qs = qs.filter(type=type_)
-        paginator = Paginator(qs, 18)
-        page_obj = paginator.get_page(request.GET.get("page"))
-        sorties = page_obj
-        is_paginated = paginator.num_pages > 1
-    else:
-        # In "Tous" mode, separate the feed to avoid mixing member and partner outings.
-        member_sorties = list(qs.filter(type=Sortie.Type.COMMUNAUTAIRE)[:12])
-        partner_sorties = list(qs.filter(type=Sortie.Type.PARTENAIRE)[:12])
-        sorties = []
-        page_obj = None
-        is_paginated = False
+    paginator = Paginator(qs, 18)
+    page_obj = paginator.get_page(request.GET.get("page"))
+    _attach_sorties_organizer_identity(page_obj.object_list)
+    sorties = page_obj
+    is_paginated = paginator.num_pages > 1
 
     return render(request, "web/sorties/list.html", {
         "sorties": sorties,
@@ -719,6 +1271,16 @@ def sorties_list(request):
         "total_count": total_count,
         "member_count": member_count,
         "partner_count": partner_count,
+        "page_title": "Sorties",
+        "page_kicker": "Sorties curatées",
+        "page_heading": "Les sorties à rejoindre ce soir.",
+        "page_description": "Une lecture plus simple et plus éditoriale des sorties entre membres gratuites, pour comprendre l’ambiance et décider plus vite.",
+        "is_activities_page": False,
+        "is_partner_only_page": False,
+        "is_member_only_page": True,
+        "list_base_path": "/sorties/",
+        "sortie_detail_base_path": "/sorties/",
+        "create_sortie_base_path": "/sorties/creer/",
     })
 
 
@@ -757,11 +1319,26 @@ def sortie_create(request):
             return "invalid"
         return parsed
 
+    def _parse_datetime(raw_value):
+        value = (raw_value or "").strip()
+        if not value:
+            return None
+        try:
+            parsed = datetime.fromisoformat(value)
+        except ValueError:
+            return "invalid"
+        if timezone.is_naive(parsed):
+            parsed = timezone.make_aware(parsed, timezone.get_current_timezone())
+        return parsed
+
     errors = {}
     form_data = {
         "title": (request.GET.get("title") or "").strip(),
         "city": (request.GET.get("city") or "").strip(),
         "location": (request.GET.get("location") or "").strip(),
+        "cover_image_url": (request.GET.get("cover_image_url") or "").strip(),
+        "starts_at": (request.GET.get("starts_at") or "").strip(),
+        "ends_at": (request.GET.get("ends_at") or "").strip(),
         "type": (request.GET.get("type") or Sortie.Type.COMMUNAUTAIRE).strip(),
         "is_free": True,
         "price": "0",
@@ -771,8 +1348,12 @@ def sortie_create(request):
         title = request.POST.get("title", "").strip()
         city = request.POST.get("city", "").strip()
         location = request.POST.get("location", "").strip()
+        cover_image_url = request.POST.get("cover_image_url", "").strip()
+        cover_image_file = request.FILES.get("cover_image_file")
         latitude = _parse_coord(request.POST.get("latitude"), -90.0, 90.0)
         longitude = _parse_coord(request.POST.get("longitude"), -180.0, 180.0)
+        starts_at = _parse_datetime(request.POST.get("starts_at"))
+        ends_at = _parse_datetime(request.POST.get("ends_at"))
         type_ = request.POST.get("type", Sortie.Type.COMMUNAUTAIRE)
         partner_id = (request.POST.get("partner_id") or "").strip()
         is_free_raw = bool(request.POST.get("is_free"))
@@ -786,8 +1367,18 @@ def sortie_create(request):
             errors["latitude"] = "Latitude invalide."
         if longitude == "invalid":
             errors["longitude"] = "Longitude invalide."
+        if starts_at == "invalid":
+            errors["starts_at"] = "Heure de début invalide."
+        if ends_at == "invalid":
+            errors["ends_at"] = "Heure de fin invalide."
+        if starts_at not in (None, "invalid") and ends_at not in (None, "invalid") and ends_at <= starts_at:
+            errors["ends_at"] = "L'heure de fin doit être après l'heure de début."
         if type_ not in (Sortie.Type.COMMUNAUTAIRE, Sortie.Type.PARTENAIRE):
             errors["type"] = "Seuls les types entre membres et partenaire sont autorisés."
+        if cover_image_file:
+            content_type = (getattr(cover_image_file, "content_type", "") or "").lower()
+            if not content_type.startswith("image/"):
+                errors["cover_image_url"] = "Le fichier photo doit être une image."
 
         selected_partner = None
         if type_ == Sortie.Type.PARTENAIRE:
@@ -818,6 +1409,19 @@ def sortie_create(request):
         if not errors:
             import re
             slug = re.sub(r"[^\w-]", "-", title.lower())[:80]
+            if cover_image_file:
+                file_name = (cover_image_file.name or "photo.jpg").strip()
+                extension = file_name.rsplit(".", 1)[-1].lower() if "." in file_name else "jpg"
+                if extension not in {"jpg", "jpeg", "png", "webp", "gif"}:
+                    extension = "jpg"
+                media_path = f"sorties/covers/{timezone.now():%Y/%m}/{uuid4().hex}.{extension}"
+                stored_path = default_storage.save(media_path, cover_image_file)
+                media_url = f"{settings.MEDIA_URL}{stored_path}"
+                app_base_url = (getattr(settings, "APP_BASE_URL", "") or "").rstrip("/")
+                if app_base_url:
+                    cover_image_url = f"{app_base_url}{media_url}"
+                else:
+                    cover_image_url = request.build_absolute_uri(media_url)
             try:
                 sortie = Sortie.objects.create(
                     title=title,
@@ -831,19 +1435,54 @@ def sortie_create(request):
                     partner=selected_partner,
                     is_free=is_free,
                     price=price_cents,
+                    cover_image_url=cover_image_url,
                     max_participants=request.POST.get("max_participants") or None,
+                    starts_at=starts_at if starts_at != "invalid" else None,
+                    ends_at=ends_at if ends_at != "invalid" else None,
                     creator=request.user,
                 )
             except ValidationError as exc:
                 for field, field_errors in exc.message_dict.items():
                     errors[field] = " ".join(field_errors)
             else:
+                if selected_partner and selected_partner.owner_id:
+                    starts_at = sortie.starts_at or timezone.now()
+                    PartnerAgendaEntry.objects.create(
+                        owner=selected_partner.owner,
+                        partner=selected_partner,
+                        source=PartnerAgendaEntry.Source.MOOVIOGO,
+                        reservation_kind=_reservation_kind_from_partner(selected_partner),
+                        status=PartnerAgendaEntry.Status.PENDING,
+                        title=f"Sortie Mooviogo - {sortie.title}",
+                        customer_name=request.user.display_name or request.user.username,
+                        customer_contact=request.user.email,
+                        party_size=sortie.max_participants,
+                        starts_at=starts_at,
+                        linked_sortie=sortie,
+                        created_by_user=request.user,
+                        notes="Demande creee depuis Mooviogo. En attente de validation partenaire.",
+                    )
+                    if selected_partner.owner.email:
+                        try:
+                            send_notification_task.delay(
+                                "email",
+                                selected_partner.owner.email,
+                                (
+                                    "Nouvelle demande Mooviogo en attente: "
+                                    f"{sortie.title}. Ouvre /partner/agenda/ pour valider la reservation."
+                                ),
+                                subject="Nouvelle reservation Mooviogo a valider",
+                            )
+                        except Exception:
+                            # Keep sortie creation non-blocking if async broker is unavailable in dev.
+                            pass
                 messages.success(request, "Sortie créée avec succès !")
                 return redirect(f"/sorties/{sortie.pk}/")
     return render(request, "web/sorties/create.html", {
         "form": type("F", (), form_data)(),
         "errors": errors,
         "partners": partners,
+        "ui_revision": _ui_revision_tag(),
     })
 
 
@@ -939,11 +1578,14 @@ def restaurants_list(request):
 
 
 def restaurant_detail(request, city_slug, slug):
-    professional_redirect = _redirect_professional_account(request)
-    if professional_redirect:
-        return professional_redirect
+    preview_public = request.GET.get("as_public") == "1"
+    if not preview_public:
+        professional_redirect = _redirect_professional_account(request)
+        if professional_redirect:
+            return professional_redirect
 
     venue = get_object_or_404(RestaurantVenue, city_slug=city_slug, slug=slug)
+    is_owner_preview = request.user.is_authenticated and venue.owner_id == request.user.id
     _ensure_upcoming_slots_for_venue(venue)
     today = timezone.localdate()
     slots = RestaurantTimeSlot.objects.filter(
@@ -996,6 +1638,7 @@ def restaurant_detail(request, city_slug, slug):
         "highlight_photos": preview_photos,
         "gallery_photos_count": len(gallery_photos),
         "city_venues": city_venues,
+        "is_owner_preview": is_owner_preview,
     })
 
 
@@ -1147,13 +1790,72 @@ def villes_list(request):
     if professional_redirect:
         return professional_redirect
 
-    cities_qs = (
+    city_map = {}
+
+    def ensure_city(slug, name):
+        if not slug:
+            return None
+        key = slug.strip().lower()
+        if key not in city_map:
+            city_map[key] = {
+                "name": name,
+                "slug": key,
+                "sortie_count": 0,
+                "event_count": 0,
+                "restaurant_count": 0,
+            }
+        elif name and not city_map[key]["name"]:
+            city_map[key]["name"] = name
+        return city_map[key]
+
+    sortie_counts = (
         Sortie.objects.filter(status=Sortie.Status.OPEN)
         .values("city")
-        .annotate(sortie_count=Count("id"))
-        .order_by("-sortie_count")
+        .annotate(count=Count("id"))
     )
-    cities = [{"name": c["city"], "slug": c["city"].lower().replace(" ", "-"), "sortie_count": c["sortie_count"]} for c in cities_qs]
+    for row in sortie_counts:
+        city_name = (row.get("city") or "").strip()
+        if not city_name:
+            continue
+        slug = city_name.lower().replace(" ", "-")
+        city_entry = ensure_city(slug, city_name)
+        if city_entry:
+            city_entry["sortie_count"] = row.get("count", 0)
+
+    event_counts = (
+        Event.objects.filter(status=Event.Status.PUBLISHED)
+        .values("city")
+        .annotate(count=Count("id"))
+    )
+    for row in event_counts:
+        city_name = (row.get("city") or "").strip()
+        if not city_name:
+            continue
+        slug = city_name.lower().replace(" ", "-")
+        city_entry = ensure_city(slug, city_name)
+        if city_entry:
+            city_entry["event_count"] = row.get("count", 0)
+
+    restaurant_counts = (
+        RestaurantVenue.objects.filter(is_active=True)
+        .values("city_slug", "city_label")
+        .annotate(count=Count("id"))
+    )
+    for row in restaurant_counts:
+        slug = (row.get("city_slug") or "").strip().lower()
+        city_name = (row.get("city_label") or slug.replace("-", " ").title()).strip()
+        city_entry = ensure_city(slug, city_name)
+        if city_entry:
+            city_entry["restaurant_count"] = row.get("count", 0)
+
+    cities = sorted(
+        city_map.values(),
+        key=lambda item: (
+            item["sortie_count"] + item["event_count"] + item["restaurant_count"],
+            item["name"],
+        ),
+        reverse=True,
+    )
     return render(request, "web/villes/list.html", {"cities": cities})
 
 
@@ -1199,8 +1901,144 @@ def partenaires_list(request):
     return render(request, "web/partenaires/list.html", {"partners": qs, "categories": categories})
 
 
+def partenaire_public_page(request, slug):
+    partner = Partner.objects.filter(slug=slug).select_related("owner").first()
+    if not partner:
+        return render(request, "web/platform/simple_page.html", {
+            "title": "Page publique partenaire",
+            "subtitle": "Introuvable",
+            "description": "Cette page partenaire n'existe pas.",
+        }, status=404)
+
+    is_owner = request.user.is_authenticated and partner.owner_id == request.user.id
+    if partner.status != Partner.Status.ACTIVE and not is_owner:
+        return render(request, "web/platform/simple_page.html", {
+            "title": "Page publique partenaire",
+            "subtitle": "Indisponible",
+            "description": "Cette page partenaire n'est pas disponible publiquement.",
+        }, status=404)
+
+    return render(request, "web/partenaires/public_detail.html", {
+        "partner": partner,
+        "is_owner_preview": is_owner,
+    })
+
+
 def devenir_partenaire(request):
     return render(request, "web/devenir_partenaire.html")
+
+
+def devenir_partenaire_offre(request, offre_slug):
+    offres = {
+        "restaurant": {
+            "label": "Restaurant",
+            "subtitle": "Tout ce que couvre l'offre restaurant, detaille par niveau",
+            "plans": [
+                {
+                    "name": "Offre 1 - Starter",
+                    "price": "Gratuit",
+                    "items": [
+                        "Commission: 3 EUR HT par reservation",
+                        "Reservation: systeme reservation, gestion tables, disponibilites, confirmations",
+                        "Dashboard: reservations, statistiques simples, historique clients",
+                        "Menus: QR code, menu digital, photos",
+                        "Notifications: email, push reservation",
+                        "Visibilite plateforme: referencement local, geolocalisation",
+                    ],
+                },
+                {
+                    "name": "Offre 2 - Pro IA",
+                    "price": "149 EUR / mois HT",
+                    "items": [
+                        "Commission: 2 EUR HT par reservation",
+                        "Inclus: IA no-show",
+                        "Inclus: IA marketing",
+                        "Inclus: CRM",
+                        "Inclus: WhatsApp",
+                        "Inclus: analytics",
+                        "Inclus: menus IA",
+                        "Inclus: automatisations",
+                    ],
+                },
+            ],
+        },
+        "nightlife": {
+            "label": "Nightlife",
+            "subtitle": "Tout ce que couvre l'offre nightlife, detaille par niveau",
+            "plans": [
+                {
+                    "name": "Offre 1 - Starter",
+                    "price": "49 EUR / mois HT",
+                    "items": [
+                        "Cibles: discotheques, bars, rooftops, concerts, festivals, pubs",
+                        "Commission: 1 EUR a 2 EUR par billet vendu",
+                        "Publication evenements: creation de soirees, affiches, galerie photos, videos",
+                        "Billetterie: QR codes, scan entree, validation mobile",
+                        "Gestion participants: liste invites, statistiques simples, capacite evenements",
+                        "Paiements: Stripe, Apple Pay, Google Pay",
+                        "Dashboard nightlife: ventes, remplissage, participants",
+                    ],
+                },
+                {
+                    "name": "Offre 2 - Pro IA",
+                    "price": "149 EUR / mois HT",
+                    "items": [
+                        "Commission: 2 EUR par billet vendu",
+                        "Inclus tout BASIC +",
+                        "IA Nightlife: generation automatique d'affiches evenements, posts Instagram, stories, videos TikTok, hashtags",
+                        "IA Marketing: relance participants, campagnes ciblees, notifications intelligentes, push geolocalisees",
+                        "Sponsorisation automatique: mise en avant plateforme, visibilite homepage, boost decouverte",
+                        "Analytics avancees (KPIs): frequentation, revenus, taux conversion, evenements performants, engagement utilisateurs",
+                        "WhatsApp Business: confirmations, billets, assistance participants",
+                        "Support VIP: support prioritaire, onboarding personnalise",
+                    ],
+                },
+            ],
+        },
+        "activite": {
+            "label": "Activite",
+            "subtitle": "Tout ce que couvre l'offre activite, detaille par niveau",
+            "plans": [
+                {
+                    "name": "Offre 1 - Starter",
+                    "price": "29 EUR / mois HT",
+                    "items": [
+                        "Cibles: karting, paintball, bowling, escape game, laser game, activites sportives, loisirs",
+                        "Commission: 10% par reservation payante",
+                        "Profil partenaire: fiche etablissement, logo, photos, description, horaires, coordonnees",
+                        "Gestion reservations: reception des demandes, accepter/refuser, gestion participants, historique",
+                        "Paiements: Stripe integre, paiements securises, acomptes possibles",
+                        "Dashboard simple: reservations du jour, revenus, statistiques basiques",
+                        "Billetterie: QR codes, validation entree, liste participants",
+                        "Support: support email standard",
+                    ],
+                },
+                {
+                    "name": "Offre 2 - Pro IA",
+                    "price": "79 EUR / mois HT",
+                    "items": [
+                        "Commission: 12% par reservation payante",
+                        "Inclus tout Starter +",
+                        "IA Marketing: generation automatique de posts Instagram, hashtags, descriptions evenements, textes promotionnels",
+                        "IA Campagnes: relance clients absents, promotions heures creuses, campagnes automatiques, notifications intelligentes",
+                        "Analytics avancees (KPIs): frequentation, conversion, taux de remplissage, heures rentables, clients recurrents",
+                        "Notifications avancees: push, SMS, WhatsApp",
+                        "Mise en avant partenaire: meilleure visibilite plateforme, boost decouverte locale",
+                        "Support prioritaire: reponse acceleree, assistance onboarding",
+                    ],
+                },
+            ],
+        },
+    }
+
+    offre = offres.get(offre_slug)
+    if not offre:
+        return redirect("devenir-partenaire")
+
+    return render(request, "web/devenir_partenaire_offre.html", {
+        "offre": offre,
+        "offre_slug": offre_slug,
+    })
 
 
 @login_required
@@ -1391,9 +2229,81 @@ def partenaire_dashboard(request):
     if not _is_professional_account(request.user):
         messages.error(request, "Accès réservé aux partenaires.")
         return redirect("/devenir-partenaire/")
+
+    partner_profile = Partner.objects.filter(owner=request.user).first()
+    detected_section = _normalize_dashboard_section(
+        _professional_section(
+            request.user,
+            partner_profile=partner_profile,
+            owned_venues=RestaurantVenue.objects.filter(owner=request.user, is_active=True),
+        )
+    )
+    return redirect(f"/partenaire/{detected_section}/")
+
+
+@login_required
+def partenaire_dashboard_section(request, section):
+    if not _is_professional_account(request.user):
+        messages.error(request, "Accès réservé aux partenaires.")
+        return redirect("/devenir-partenaire/")
+
+    partner_profile = Partner.objects.filter(owner=request.user).first()
+    public_page = _professional_public_page_payload(request.user)
+    assigned_section = _normalize_dashboard_section(
+        _professional_section(
+            request.user,
+            partner_profile=partner_profile,
+            owned_venues=RestaurantVenue.objects.filter(owner=request.user, is_active=True),
+        )
+    )
+    requested_section = _normalize_dashboard_section(section)
+    if requested_section != assigned_section:
+        messages.info(request, "Section verrouillee sur ton type de compte.")
+        return redirect(f"/partenaire/{assigned_section}/")
+
+    section_key = assigned_section
+    config = _dashboard_section_config(section_key)
+    active_offer_key = _resolve_active_offer_key(partner_profile, section_key)
+    offers = _build_offers_with_lock(config, active_offer_key)
+    now = timezone.localtime()
+
+    establishment_href = "/partner/establishment/"
+    establishment_meta = "Page publique visible par les utilisateurs"
+    if not public_page["url"]:
+        establishment_meta = "Parametres, equipe, branding"
+
+    quick_links = [
+        {"href": "/partner/events/", "title": "Evenements", "meta": "Programmation, publication, suivi"},
+        {"href": "/partner/agenda/", "title": "Agenda", "meta": "Planning et confirmations"},
+        {"href": "/partner/requests/", "title": "Demandes", "meta": "Pipeline entrant"},
+        {"href": "/partner/analytics/", "title": "Analytiques", "meta": "KPI, conversion, performance"},
+        {"href": "/partner/payments/", "title": "Paiements", "meta": "Encaissements et remboursements"},
+        {"href": establishment_href, "title": "Etablissement", "meta": establishment_meta},
+    ]
+
+    if public_page["url"]:
+        quick_links.append(
+            {
+                "href": public_page["url"],
+                "title": "Page publique",
+                "meta": "Voir le profil visible par les clients",
+            }
+        )
+
     return render(request, "web/partenaire/dashboard.html", {
-        "partner_profile": Partner.objects.filter(owner=request.user).first(),
-        "owned_restaurants": RestaurantVenue.objects.filter(owner=request.user, is_active=True).order_by("name"),
+        "partner_profile": partner_profile,
+        "section_key": section_key,
+        "section_label": config["label"],
+        "section_headline": config["headline"],
+        "section_description": config["description"],
+        "section_points": config["hero_points"],
+        "offers": offers,
+        "active_offer_key": active_offer_key,
+        "kpis": _dashboard_kpis_for_section(section_key, request.user, partner_profile),
+        "live_examples": _dashboard_live_examples(section_key, now),
+        "quick_links": quick_links,
+        "public_page_url": public_page["url"],
+        "public_page_label": public_page["label"],
     })
 
 
@@ -1403,10 +2313,23 @@ def partner_events_page(request):
         return redirect("/devenir-partenaire/")
     partner_events = Event.objects.filter(is_partner_event=True).order_by("-created_at")[:20]
     rows_data = [{"title": e.title, "meta": e.city} for e in partner_events]
+    if not rows_data:
+        rows_data = _partner_demo_rows("events")
+
+    highlight_blocks = [
+        {"label": "Publies", "value": "12", "meta": "visibles cette semaine"},
+        {"label": "Brouillons", "value": "4", "meta": "a finaliser"},
+        {"label": "Complets", "value": "3", "meta": "taux de remplissage > 95%"},
+    ]
+    public_page = _professional_public_page_payload(request.user)
+
     return render(request, "web/platform/dashboard_list.html", {
         "title": "Partner events",
-        "subtitle": "Gestion des evenements partenaires",
+        "subtitle": "Gestion des evenements partenaires (compte actif)",
         "rows_data": rows_data,
+        "highlight_blocks": highlight_blocks,
+        "public_page_url": public_page["url"],
+        "public_page_label": public_page["label"],
     })
 
 
@@ -1414,42 +2337,424 @@ def partner_events_page(request):
 def partner_bookings_page(request):
     if not _is_professional_account(request.user):
         return redirect("/devenir-partenaire/")
-    owned_venues = RestaurantVenue.objects.filter(owner=request.user, is_active=True).order_by("name")
-    slot_ids = RestaurantTimeSlot.objects.filter(venue_id__in=owned_venues.values_list("id", flat=True)).values_list("id", flat=True)
-    rows = Booking.objects.filter(
-        booking_type=Booking.BookingType.RESTAURANT,
-        restaurant_slot_id__in=slot_ids,
-    ).order_by("-created_at")[:80]
-    slot_by_id = {
-        s.id: s
-        for s in RestaurantTimeSlot.objects.filter(id__in=rows.values_list("restaurant_slot_id", flat=True)).select_related("venue")
-    }
-    booking_rows = [{"booking": b, "slot": slot_by_id.get(b.restaurant_slot_id)} for b in rows]
-    return render(request, "web/partenaire/restaurant_bookings.html", {
-        "title": "Réservations restaurants",
-        "subtitle": "Validation manuelle ou confirmation auto selon la formule de chaque restaurant",
-        "booking_rows": booking_rows,
-        "owned_venues": owned_venues,
+    rows = (
+        PartnerAgendaEntry.objects.filter(
+            owner=request.user,
+            reservation_kind__in={
+                PartnerAgendaEntry.ReservationKind.ACTIVITY,
+                PartnerAgendaEntry.ReservationKind.OTHER,
+            },
+        )
+        .order_by("-starts_at", "-created_at")[:80]
+    )
+    rows_data = [
+        {
+            "title": row.title,
+            "meta": f"{timezone.localtime(row.starts_at).strftime('%d/%m %H:%M')} - {row.get_status_display()} - {row.customer_name or 'Client'}",
+        }
+        for row in rows
+    ]
+    if not rows_data:
+        now = timezone.localtime()
+        rows_data = [
+            {"title": "Session karting 8 pers.", "meta": f"{(now + timedelta(days=1)).strftime('%d/%m')} 18:30 - En attente - M. Dupont"},
+            {"title": "Escape game famille", "meta": f"{(now + timedelta(days=2)).strftime('%d/%m')} 20:00 - Confirmee - Mme Leroy"},
+            {"title": "Laser game afterwork", "meta": f"{(now + timedelta(days=3)).strftime('%d/%m')} 19:30 - Confirmee - Team Nova"},
+            {"title": "Pack bowling et diner 12 pers.", "meta": f"{(now + timedelta(days=4)).strftime('%d/%m')} 21:00 - En attente - Agence Mistral"},
+            {"title": "Session karting junior", "meta": f"{(now + timedelta(days=5)).strftime('%d/%m')} 15:00 - Refusee - Capacite atteinte"},
+        ]
+
+    highlight_blocks = [
+        {"label": "En attente", "value": "5", "meta": "demandes a traiter"},
+        {"label": "Confirmees", "value": "18", "meta": "sur 7 jours"},
+        {"label": "Refusees", "value": "2", "meta": "capacite ou indisponibilite"},
+    ]
+    public_page = _professional_public_page_payload(request.user)
+
+    return render(request, "web/platform/dashboard_list.html", {
+        "title": "Reservations activite",
+        "subtitle": "Suivi des demandes et confirmations (compte actif)",
+        "rows_data": rows_data,
+        "highlight_blocks": highlight_blocks,
+        "public_page_url": public_page["url"],
+        "public_page_label": public_page["label"],
     })
+
+
+@login_required
+def partner_agenda_page(request):
+    if not _is_professional_account(request.user):
+        return redirect("/devenir-partenaire/")
+
+    partner_profile = Partner.objects.filter(owner=request.user).first()
+    activity_offer = _activity_offer_two_details()
+    account_section = "activity"
+    allowed_kinds = {
+        PartnerAgendaEntry.ReservationKind.ACTIVITY,
+        PartnerAgendaEntry.ReservationKind.OTHER,
+    }
+    default_kind = PartnerAgendaEntry.ReservationKind.ACTIVITY
+
+    if request.method == "POST":
+        title = (request.POST.get("title") or "").strip()
+        starts_at_raw = (request.POST.get("starts_at") or "").strip()
+        reservation_kind = (request.POST.get("reservation_kind") or default_kind).strip()
+        customer_name = (request.POST.get("customer_name") or "").strip()
+        customer_contact = (request.POST.get("customer_contact") or "").strip()
+        notes = (request.POST.get("notes") or "").strip()
+        party_size_raw = (request.POST.get("party_size") or "").strip()
+
+        if not title:
+            messages.error(request, "Le titre de reservation est requis.")
+            return redirect("/partner/agenda/")
+        if not starts_at_raw:
+            messages.error(request, "La date et l'heure sont requises.")
+            return redirect("/partner/agenda/")
+
+        try:
+            starts_at = datetime.fromisoformat(starts_at_raw)
+            if timezone.is_naive(starts_at):
+                starts_at = timezone.make_aware(starts_at, timezone.get_current_timezone())
+        except ValueError:
+            messages.error(request, "Format de date invalide.")
+            return redirect("/partner/agenda/")
+
+        party_size = None
+        if party_size_raw:
+            try:
+                party_size = max(1, int(party_size_raw))
+            except ValueError:
+                messages.error(request, "Le nombre de participants est invalide.")
+                return redirect("/partner/agenda/")
+
+        if reservation_kind not in allowed_kinds:
+            reservation_kind = default_kind
+
+        PartnerAgendaEntry.objects.create(
+            owner=request.user,
+            partner=partner_profile,
+            source=PartnerAgendaEntry.Source.DIRECT,
+            reservation_kind=reservation_kind,
+            status=PartnerAgendaEntry.Status.CONFIRMED,
+            title=title,
+            customer_name=customer_name,
+            customer_contact=customer_contact,
+            party_size=party_size,
+            starts_at=starts_at,
+            notes=notes,
+            created_by_user=request.user,
+        )
+        messages.success(request, "Réservation ajoutée à l'agenda.")
+        return redirect("/partner/agenda/")
+
+    agenda_entries = list(
+        PartnerAgendaEntry.objects.filter(owner=request.user, reservation_kind__in=allowed_kinds)
+        .select_related("linked_sortie", "created_by_user", "partner")
+        .order_by("starts_at", "-created_at")[:120]
+    )
+
+    booking_rows = []
+
+    combined_items = []
+    for entry in agenda_entries:
+        combined_items.append({
+            "kind": "entry",
+            "starts_at": entry.starts_at,
+            "status": entry.status,
+            "source": entry.source,
+            "entry": entry,
+        })
+
+    for booking in booking_rows:
+        slot = slot_by_id.get(booking.restaurant_slot_id)
+        starts_at = timezone.now()
+        if slot:
+            starts_at = timezone.make_aware(
+                datetime.combine(slot.date, slot.time),
+                timezone.get_current_timezone(),
+            )
+        combined_items.append({
+            "kind": "booking",
+            "starts_at": starts_at,
+            "status": booking.status,
+            "source": "MOOVIOGO",
+            "booking": booking,
+            "slot": slot,
+        })
+
+    combined_items.sort(key=lambda row: row["starts_at"])
+
+    def _section_from_row(row):
+        return "activity"
+
+    today = timezone.localdate()
+    try:
+        week_offset = int((request.GET.get("week_offset") or "0").strip())
+    except ValueError:
+        week_offset = 0
+
+    anchor_day = today + timedelta(days=week_offset * 7)
+    week_start = anchor_day - timedelta(days=anchor_day.weekday())
+    week_end = week_start + timedelta(days=6)
+
+    def _row_to_example(row):
+        local_dt = timezone.localtime(row["starts_at"])
+        section = _section_from_row(row)
+        if row["kind"] == "booking":
+            slot = row.get("slot")
+            title = slot.venue.name if slot else f"Réservation Mooviogo #{row['booking'].id}"
+            customer = row["booking"].user.display_name or row["booking"].user.username
+            source = "MOOVIOGO"
+        else:
+            title = row["entry"].title
+            customer = row["entry"].customer_name or "Client"
+            source = row["entry"].get_source_display().upper()
+        return {
+            "title": title,
+            "customer": customer,
+            "time": local_dt.strftime("%a %d/%m • %H:%M"),
+            "status": row["status"],
+            "source": source,
+            "section": section,
+            "starts_at_local": local_dt,
+        }
+
+    direct_confirmed = next(
+        (
+            row for row in combined_items
+            if row["kind"] == "entry"
+            and row["status"] == PartnerAgendaEntry.Status.CONFIRMED
+            and row["source"] == PartnerAgendaEntry.Source.DIRECT
+        ),
+        None,
+    )
+    mooviogo_confirmed = next(
+        (
+            row for row in combined_items
+            if row["source"] == "MOOVIOGO"
+            and row["status"] == Booking.Status.CONFIRMED
+        ),
+        None,
+    )
+    mooviogo_pending = next(
+        (
+            row for row in combined_items
+            if row["source"] == "MOOVIOGO"
+            and row["status"] == Booking.Status.PENDING
+        ),
+        None,
+    )
+
+    section_title_by_key = {
+        "activity": "Activite",
+    }
+
+    example_items = [
+        {
+            "label": "Réservation directe saisie par le pro",
+            "badge": "DIRECT",
+            "from_real": bool(direct_confirmed),
+            "data": _row_to_example(direct_confirmed) if direct_confirmed else {
+                "title": "Session karting entreprise",
+                "customer": "Mme Martin",
+                "time": (week_start + timedelta(days=3)).strftime("%a %d/%m") + " • 20:30",
+                "status": PartnerAgendaEntry.Status.CONFIRMED,
+                "source": "DIRECT",
+                "section": account_section,
+                "starts_at_local": timezone.make_aware(
+                    datetime.combine(week_start + timedelta(days=3), datetime.min.time().replace(hour=20, minute=30)),
+                    timezone.get_current_timezone(),
+                ),
+            },
+        },
+        {
+            "label": "Réservation Mooviogo validée par le pro",
+            "badge": "MOOVIOGO",
+            "from_real": bool(mooviogo_confirmed),
+            "data": _row_to_example(mooviogo_confirmed) if mooviogo_confirmed else {
+                "title": "Pack laser game groupe",
+                "customer": "Lucas Perrin",
+                "time": (week_start + timedelta(days=4)).strftime("%a %d/%m") + " • 21:00",
+                "status": Booking.Status.CONFIRMED,
+                "source": "MOOVIOGO",
+                "section": account_section,
+                "starts_at_local": timezone.make_aware(
+                    datetime.combine(week_start + timedelta(days=4), datetime.min.time().replace(hour=21, minute=0)),
+                    timezone.get_current_timezone(),
+                ),
+            },
+        },
+        {
+            "label": "Réservation Mooviogo en attente de validation",
+            "badge": "PENDING",
+            "from_real": bool(mooviogo_pending),
+            "data": _row_to_example(mooviogo_pending) if mooviogo_pending else {
+                "title": "Escape game anniversaire",
+                "customer": "Sarah T.",
+                "time": (week_start + timedelta(days=5)).strftime("%a %d/%m") + " • 12:00",
+                "status": Booking.Status.PENDING,
+                "source": "MOOVIOGO",
+                "section": account_section,
+                "starts_at_local": timezone.make_aware(
+                    datetime.combine(week_start + timedelta(days=5), datetime.min.time().replace(hour=12, minute=0)),
+                    timezone.get_current_timezone(),
+                ),
+            },
+        },
+    ]
+    week_days = []
+    for offset in range(7):
+        current_day = week_start + timedelta(days=offset)
+        week_days.append({
+            "date": current_day,
+            "key": current_day.isoformat(),
+            "weekday_label": current_day.strftime("%a"),
+            "day_label": current_day.strftime("%d/%m"),
+            "is_today": current_day == today,
+        })
+
+    hour_slots = list(range(8, 24))
+    events_by_slot = defaultdict(list)
+
+    for row in combined_items:
+        local_dt = timezone.localtime(row["starts_at"])
+        event_day = local_dt.date()
+        if event_day < week_start or event_day > week_end:
+            continue
+        if local_dt.hour < hour_slots[0] or local_dt.hour > hour_slots[-1]:
+            continue
+
+        if row["kind"] == "booking":
+            slot = row.get("slot")
+            title = slot.venue.name if slot else f"Réservation Mooviogo #{row['booking'].id}"
+            subtitle = row["booking"].user.display_name or row["booking"].user.username
+        else:
+            title = row["entry"].title
+            subtitle = row["entry"].customer_name or "Client"
+
+        section = _section_from_row(row)
+
+        events_by_slot[(event_day.isoformat(), local_dt.hour)].append({
+            "title": title,
+            "time": local_dt.strftime("%H:%M"),
+            "subtitle": subtitle,
+            "status": row["status"],
+            "section": section,
+        })
+
+    # Ensure sample scenarios are visible in the weekly grid when real data is missing.
+    for sample in example_items:
+        if sample["from_real"]:
+            continue
+        local_dt = sample["data"]["starts_at_local"]
+        event_day = local_dt.date()
+        if event_day < week_start or event_day > week_end:
+            continue
+        if local_dt.hour < hour_slots[0] or local_dt.hour > hour_slots[-1]:
+            continue
+        events_by_slot[(event_day.isoformat(), local_dt.hour)].append({
+            "title": sample["data"]["title"],
+            "time": local_dt.strftime("%H:%M"),
+            "subtitle": sample["data"]["customer"],
+            "status": sample["data"]["status"],
+            "section": sample["data"]["section"],
+        })
+
+    for row in combined_items:
+        row["section"] = _section_from_row(row)
+
+    week_rows = []
+    for hour in hour_slots:
+        cells = []
+        for day in week_days:
+            cells.append({
+                "events": events_by_slot.get((day["key"], hour), []),
+            })
+        week_rows.append({
+            "hour_label": f"{hour:02d}:00",
+            "cells": cells,
+        })
+
+    pending_count = sum(1 for row in combined_items if row["status"] == "PENDING")
+    public_page = _professional_public_page_payload(request.user)
+
+    return render(request, "web/partenaire/agenda.html", {
+        "title": "Agenda partenaire",
+        "subtitle": "Réservations Mooviogo et réservations directes au même endroit.",
+        "items": combined_items,
+        "week_days": week_days,
+        "week_rows": week_rows,
+        "week_offset": week_offset,
+        "previous_week_offset": week_offset - 1,
+        "next_week_offset": week_offset + 1,
+        "week_range_label": f"{week_start.strftime('%d/%m')} - {week_end.strftime('%d/%m')}",
+        "example_items": example_items,
+        "activity_offer": activity_offer,
+        "account_section": account_section,
+        "account_section_label": section_title_by_key.get(account_section, "Activite"),
+        "pending_count": pending_count,
+        "public_page_url": public_page["url"],
+        "public_page_label": public_page["label"],
+    })
+
+
+@login_required
+@require_POST
+def partner_agenda_decision(request, entry_id):
+    if not _is_professional_account(request.user):
+        return redirect("/devenir-partenaire/")
+
+    entry = get_object_or_404(PartnerAgendaEntry, pk=entry_id, owner=request.user)
+    action = (request.POST.get("action") or "").strip().lower()
+
+    if action == "confirm":
+        entry.status = PartnerAgendaEntry.Status.CONFIRMED
+        entry.save(update_fields=["status", "updated_at"])
+        messages.success(request, "Réservation validée.")
+    elif action in {"reject", "cancel"}:
+        entry.status = PartnerAgendaEntry.Status.CANCELLED
+        entry.save(update_fields=["status", "updated_at"])
+        messages.success(request, "Réservation annulée.")
+    else:
+        messages.error(request, "Action invalide.")
+
+    return redirect("/partner/agenda/")
 
 
 @login_required
 def partner_analytics_page(request):
     if not _is_professional_account(request.user):
         return redirect("/devenir-partenaire/")
-    partner = Partner.objects.filter(owner=request.user).first()
-    if not partner:
-        messages.error(request, "Profil partenaire introuvable.")
-        return redirect("/devenir-partenaire/")
+    denied = _require_offer_tier(
+        request,
+        minimum_tier="mid",
+        feature_label="Analytics avancees",
+        fallback_url="/partner/settings/",
+    )
+    if denied:
+        return denied
 
-    partner_events = Event.objects.filter(Q(partner_id=partner.id) | Q(city__iexact=partner.city))
+    partner = Partner.objects.filter(owner=request.user).first()
+    analytics_note = ""
+    if not partner:
+        partner = {
+            "name": "Compte Activite Pro",
+            "city": request.user.city or "Marseille",
+            "id": None,
+        }
+        analytics_note = "Profil partenaire introuvable: affichage du mode compte actif (demonstration)."
+
+    partner_id = partner.get("id") if isinstance(partner, dict) else partner.id
+    partner_city = partner.get("city") if isinstance(partner, dict) else partner.city
+
+    partner_events = Event.objects.filter(Q(partner_id=partner_id) | Q(city__iexact=partner_city))
     published_events = partner_events.filter(status=Event.Status.PUBLISHED)
 
     total_events = partner_events.count()
     active_events = published_events.count()
     upcoming_events = published_events.filter(starts_at__gte=timezone.now()).count()
 
-    city_sorties = Sortie.objects.filter(city__iexact=partner.city)
+    city_sorties = Sortie.objects.filter(city__iexact=partner_city)
     city_bookings = Booking.objects.filter(sortie_id__in=city_sorties.values_list("id", flat=True))
     confirmed_city_bookings = city_bookings.filter(status=Booking.Status.CONFIRMED).count()
     conversion_rate = round((confirmed_city_bookings / city_bookings.count()) * 100, 2) if city_bookings.count() else 0
@@ -1463,22 +2768,60 @@ def partner_analytics_page(request):
     )
 
     active_promotions = SponsoredEvent.objects.filter(
-        city__iexact=partner.city,
+        city__iexact=partner_city,
         status=SponsoredEvent.Status.ACTIVE,
         ends_at__gte=timezone.now(),
     ).count()
 
+    kpis = {
+        "total_events": total_events,
+        "active_events": active_events,
+        "upcoming_events": upcoming_events,
+        "conversion_rate": conversion_rate,
+        "city_revenue": city_revenue,
+        "active_promotions": active_promotions,
+    }
+
+    if not any([
+        kpis["total_events"],
+        kpis["active_events"],
+        kpis["upcoming_events"],
+        kpis["conversion_rate"],
+        kpis["city_revenue"],
+        kpis["active_promotions"],
+    ]):
+        kpis = {
+            "total_events": 14,
+            "active_events": 6,
+            "upcoming_events": 4,
+            "conversion_rate": 31.5,
+            "city_revenue": 428500,
+            "active_promotions": 3,
+        }
+        analytics_note = "Affichage en mode compte actif (exemples de demonstration)."
+
+    events = list(published_events.order_by("starts_at")[:20])
+    if not events:
+        events = [
+            {"title": "Karting Sunset Cup", "city": partner_city or "Marseille", "starts_at": timezone.now() + timedelta(days=1, hours=2)},
+            {"title": "Laser Night Challenge", "city": partner_city or "Marseille", "starts_at": timezone.now() + timedelta(days=2, hours=1)},
+            {"title": "Escape Duo Mission", "city": partner_city or "Marseille", "starts_at": timezone.now() + timedelta(days=3, hours=3)},
+        ]
+
+    public_page = _professional_public_page_payload(request.user)
+
     return render(request, "web/platform/partner_analytics.html", {
         "partner": partner,
-        "kpis": {
-            "total_events": total_events,
-            "active_events": active_events,
-            "upcoming_events": upcoming_events,
-            "conversion_rate": conversion_rate,
-            "city_revenue": city_revenue,
-            "active_promotions": active_promotions,
-        },
-        "events": published_events.order_by("starts_at")[:20],
+        "kpis": kpis,
+        "events": events,
+        "analytics_note": analytics_note,
+        "public_page_url": public_page["url"],
+        "public_page_label": public_page["label"],
+        "highlight_blocks": [
+            {"label": "Panier moyen", "value": "96 EUR", "meta": "sur activites confirmees"},
+            {"label": "No-show", "value": "4.2%", "meta": "en baisse de 1.1 pt"},
+            {"label": "Heure forte", "value": "20:00", "meta": "pic de reservation"},
+        ],
     })
 
 
@@ -1488,10 +2831,23 @@ def partner_payments_page(request):
         return redirect("/devenir-partenaire/")
     rows = Payment.objects.order_by("-created_at")[:25]
     rows_data = [{"title": p.stripe_payment_intent_id, "meta": p.get_status_display()} for p in rows]
+    if not rows_data:
+        rows_data = _partner_demo_rows("payments")
+
+    highlight_blocks = [
+        {"label": "Encaisse", "value": "1 248 EUR", "meta": "semaine en cours"},
+        {"label": "En attente", "value": "282 EUR", "meta": "captures programmees"},
+        {"label": "Rembourse", "value": "45 EUR", "meta": "1 transaction"},
+    ]
+    public_page = _professional_public_page_payload(request.user)
+
     return render(request, "web/platform/dashboard_list.html", {
         "title": "Partner payments",
-        "subtitle": "Paiements Stripe et statuts",
+        "subtitle": "Paiements Stripe et statuts (compte actif)",
         "rows_data": rows_data,
+        "highlight_blocks": highlight_blocks,
+        "public_page_url": public_page["url"],
+        "public_page_label": public_page["label"],
     })
 
 
@@ -1504,10 +2860,23 @@ def partner_requests_page(request):
     if partner and partner.city:
         opportunities = opportunities.filter(city__iexact=partner.city)
     rows_data = [{"title": o.title, "meta": f"{o.city} - {o.get_status_display()}"} for o in opportunities[:30]]
+    if not rows_data:
+        rows_data = _partner_demo_rows("requests")
+
+    highlight_blocks = [
+        {"label": "Nouvelles", "value": "4", "meta": "depuis ce matin"},
+        {"label": "A valider", "value": "7", "meta": "action requise"},
+        {"label": "Confirmees", "value": "11", "meta": "avec acompte recu"},
+    ]
+    public_page = _professional_public_page_payload(request.user)
+
     return render(request, "web/platform/dashboard_list.html", {
         "title": "Partner requests",
-        "subtitle": "Demandes d'activites a traiter",
+        "subtitle": "Demandes d'activites a traiter (compte actif)",
         "rows_data": rows_data,
+        "highlight_blocks": highlight_blocks,
+        "public_page_url": public_page["url"],
+        "public_page_label": public_page["label"],
     })
 
 
@@ -1515,21 +2884,118 @@ def partner_requests_page(request):
 def partner_settings_page(request):
     if not _is_professional_account(request.user):
         return redirect("/devenir-partenaire/")
-    return render(request, "web/platform/simple_page.html", {
-        "title": "Partner settings",
-        "subtitle": "Parametres compte partenaire",
-        "description": "Configure ton profil public, tes preferences de notifications et tes parametres de paiement.",
-        "actions": [
-            {"href": "/profil/modifier/", "label": "Modifier mon profil"},
-            {"href": "/api/v1/payments/connect/account/", "label": "Configurer Stripe Connect"},
+
+    if request.method == "GET" and request.GET.get("edit") != "1":
+        public_page = _professional_public_page_payload(request.user)
+        if public_page["url"]:
+            return redirect(public_page["url"])
+
+    partner = Partner.objects.filter(owner=request.user).first()
+    public_page = _professional_public_page_payload(request.user)
+    public_page_url = public_page["url"]
+
+    if not partner:
+        actions = [{"href": "/devenir-partenaire/", "label": "Creer mon profil partenaire"}]
+        if public_page_url:
+            actions.insert(0, {"href": public_page_url, "label": "Voir ma page publique"})
+
+        return render(request, "web/platform/simple_page.html", {
+            "title": "Partner settings",
+            "subtitle": "Parametres compte partenaire",
+            "description": "Profil partenaire introuvable. Cree ou rattache un profil partenaire pour gerer l'offre.",
+            "items": [
+                "Aucun profil partenaire detecte pour ce compte.",
+                "La section et l'offre ne peuvent pas etre modifiees sans profil.",
+            ],
+            "actions": actions,
+        })
+
+    if request.method == "POST":
+        tier = (request.POST.get("pro_offer_tier") or "").strip().lower()
+        allowed_tiers = {"low", "mid", "high"}
+
+        if tier not in allowed_tiers:
+            messages.error(request, "Selection d'offre invalide.")
+            return redirect("/partner/settings/")
+
+        updates = []
+        if partner.pro_offer_tier != tier:
+            partner.pro_offer_tier = tier
+            updates.append("pro_offer_tier")
+
+        if updates:
+            updates.append("updated_at")
+            partner.save(update_fields=updates)
+            messages.success(request, "Parametres d'offre mis a jour.")
+        else:
+            messages.info(request, "Aucun changement detecte.")
+
+        return redirect("/partner/settings/")
+
+    return render(request, "web/platform/partner_settings.html", {
+        "partner": partner,
+        "public_page_url": public_page_url,
+        "offer_options": [
+            {
+                "value": "low",
+                "label": "Offre basse",
+                "meta": "Starter",
+                "features": [
+                    "Fonctions fondamentales",
+                    "Sans analytics avancees",
+                    "Sans creation premium",
+                ],
+            },
+            {
+                "value": "mid",
+                "label": "Offre moyenne",
+                "meta": "Pro",
+                "features": [
+                    "Analytics avancees",
+                    "Creation d'evenements premium",
+                    "Automatisations business",
+                ],
+            },
+            {
+                "value": "high",
+                "label": "Offre haute",
+                "meta": "Elite",
+                "features": [
+                    "Toutes options Pro",
+                    "Scan QR avance nightlife",
+                    "Priorite support et optimisation",
+                ],
+            },
         ],
     })
+
+
+@login_required
+def partner_establishment_redirect(request):
+    if not _is_professional_account(request.user):
+        return redirect("/devenir-partenaire/")
+
+    public_page = _professional_public_page_payload(request.user)
+    if public_page["url"]:
+        return redirect(public_page["url"])
+
+    messages.info(request, "Aucune page publique disponible pour ce compte.")
+    return redirect("/partner/settings/")
 
 
 @login_required
 def partner_events_create_page(request):
     if not _is_professional_account(request.user):
         return redirect("/devenir-partenaire/")
+    denied = _require_offer_tier(
+        request,
+        minimum_tier="mid",
+        feature_label="Creation d'evenements premium",
+        fallback_url="/partner/events/",
+    )
+    if denied:
+        return denied
+
     return create_activity_request(request)
 
 
@@ -1581,6 +3047,15 @@ def nightlife_tickets_page(request):
 @login_required
 def nightlife_ticket_scan_page(request):
     denied = _ensure_operator_access(request)
+    if denied:
+        return denied
+
+    denied = _require_offer_tier(
+        request,
+        minimum_tier="high",
+        feature_label="Scan QR avance",
+        fallback_url="/nightlife/tickets/",
+    )
     if denied:
         return denied
 

@@ -253,7 +253,6 @@ PARTNERS = [
         "short_description": "Terrain indoor de paintball au cœur de Paris. Équipement pro, scénarios variés.",
         "description": "Zone Paintball Paris propose 6 terrains indoor thématisés — forêt, urbain, zombie… Idéal pour enterrements de vie, team-buildings et anniversaires. Équipement haute gamme fourni, formules à partir de 25€/pers.",
         "cover_image_url": "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=800&q=80",
-        "website": "https://example.com",
     },
     {
         "name": "Karting Indoor Lyon",
@@ -263,7 +262,6 @@ PARTNERS = [
         "short_description": "Circuit indoor 500m, karts électriques 13kW. Sensations garanties toute l'année.",
         "description": "Le plus grand circuit de karting indoor de la région lyonnaise. Karts électriques silencieux et rapides, chronométrage en temps réel, podium, bar et restauration sur place. Sessions de 10 à 30 min.",
         "cover_image_url": "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?w=800&q=80",
-        "website": "https://example.com",
     },
     {
         "name": "Escape Game Enigma Marseille",
@@ -273,7 +271,6 @@ PARTNERS = [
         "short_description": "4 salles immersives, de 60 min chacune. Scénarios horrifique, polar, aventure.",
         "description": "Enigma vous plonge dans des univers inédits : prison médiévale, enquête policière, vaisseau spatial… Groupes de 2 à 6 joueurs. Séances tous les jours de 10h à 23h. Réservation conseillée.",
         "cover_image_url": "https://images.unsplash.com/photo-1590077428593-a55bb07c4665?w=800&q=80",
-        "website": "https://example.com",
     },
     {
         "name": "Bowling King Bordeaux",
@@ -283,7 +280,6 @@ PARTNERS = [
         "short_description": "24 pistes, laser bowl vendredi & samedi, bar, burgers et billard.",
         "description": "Bowling King c'est 24 pistes climatisées, une ambiance laser le week-end, un bar cocktails et une cuisine américaine. Tarifs dégressifs en groupe, privatisation possible pour événements.",
         "cover_image_url": "https://images.unsplash.com/photo-1545809759-afeeb6e6a27e?w=800&q=80",
-        "website": "https://example.com",
     },
     {
         "name": "Laser Game Evolution Paris",
@@ -293,7 +289,6 @@ PARTNERS = [
         "short_description": "Arène de 800m², effets spéciaux, musique immersive. Le laser game nouvelle génération.",
         "description": "Une arène futuriste de 800m² sur 2 niveaux. Équipements dernière génération, capteurs HD, effets de fumée et musique spatiale. Partis de 4 à 20 joueurs. Idéal pour anniversaires & EVG.",
         "cover_image_url": "https://images.unsplash.com/photo-1563198804-b144dfc1661c?w=800&q=80",
-        "website": "https://example.com",
     },
     {
         "name": "Accrobranche & Aventure Nantes",
@@ -303,7 +298,6 @@ PARTNERS = [
         "short_description": "12 parcours dans les arbres, tyrolienne géante 200m, via ferrata.",
         "description": "Parc aventure en forêt avec 12 parcours classés de vert à noir. Tyrolienne panoramique de 200m, mur d'escalade et initiation via ferrata. Ouvert week-ends et vacances scolaires.",
         "cover_image_url": "https://images.unsplash.com/photo-1551632811-561732d1e306?w=800&q=80",
-        "website": "https://example.com",
     },
     {
         "name": "Virtual Room VR Paris",
@@ -313,7 +307,6 @@ PARTNERS = [
         "short_description": "Expériences VR multi-joueurs en free-roaming. Jusqu'à 6 joueurs simultanément.",
         "description": "Virtual Room est le pioneer du jeu VR multi-joueurs en free-roaming à Paris. Casques dernière génération, scénarios coopératifs exclusifs. Sessions de 30 min à 1h. Aucune expérience VR requise.",
         "cover_image_url": "https://images.unsplash.com/photo-1617802690992-15d93263d3a9?w=800&q=80",
-        "website": "https://example.com",
     },
     {
         "name": "Axe Throwing Club Lyon",
@@ -323,7 +316,6 @@ PARTNERS = [
         "short_description": "Lancer de hache encadré par des coachs pros. Apéro bière artisanale inclus.",
         "description": "10 cibles, des haches authentiques, des coachs certifiés et une bière artisanale pour fêter chaque bullseye. Groupes de 2 à 30 personnes. Aucune expérience nécessaire — on vous apprend en 5 min.",
         "cover_image_url": "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?w=800&q=80",
-        "website": "https://example.com",
     },
 ]
 
@@ -600,7 +592,6 @@ class Command(BaseCommand):
                     "short_description": p["short_description"],
                     "description": p["description"],
                     "cover_image_url": p["cover_image_url"],
-                    "website": p.get("website", ""),
                     "status": Partner.Status.ACTIVE,
                     "is_verified": True,
                     "owner": None,

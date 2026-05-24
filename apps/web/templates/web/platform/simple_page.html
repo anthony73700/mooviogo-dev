@@ -2,16 +2,33 @@
 {% load i18n %}
 {% block title %}{{ title }} | Mooviogo{% endblock %}
 
+{% block extra_head %}
+<style>
+  body.pro-white .sp-root h1,
+  body.pro-white .sp-root li {
+    color: #1d4ed8 !important;
+  }
+
+  body.pro-white .sp-root .sp-muted {
+    color: #64748b !important;
+  }
+
+  body.pro-white .sp-root .btn-brand {
+    color: #0f172a !important;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="pg-hdr">
+<div class="pg-hdr sp-root">
   <div class="mx-auto max-w-4xl px-4">
-    <p class="slabel mb-3">{% if subtitle %}{{ subtitle }}{% else %}{% trans "Module" %}{% endif %}</p>
+    <p class="slabel mb-3 sp-muted">{% if subtitle %}{{ subtitle }}{% else %}{% trans "Module" %}{% endif %}</p>
     <h1 style="font-size:2rem;font-weight:900;color:#fff;letter-spacing:-0.03em">{{ title }}</h1>
-    {% if description %}<p style="margin-top:0.55rem;max-width:50rem;font-size:0.9rem;color:rgba(255,255,255,0.46)">{{ description }}</p>{% endif %}
+    {% if description %}<p class="sp-muted" style="margin-top:0.55rem;max-width:50rem;font-size:0.9rem;color:rgba(255,255,255,0.46)">{{ description }}</p>{% endif %}
   </div>
 </div>
 
-<div class="mx-auto max-w-4xl px-4" style="padding-top:2rem;padding-bottom:4rem">
+<div class="mx-auto max-w-4xl px-4 sp-root" style="padding-top:2rem;padding-bottom:4rem">
   <div class="pk" style="padding:1.2rem">
     {% if items %}
     <ul style="display:flex;flex-direction:column;gap:0.45rem;margin:0;padding:0;list-style:none">
@@ -20,7 +37,7 @@
       {% endfor %}
     </ul>
     {% else %}
-    <p style="font-size:0.85rem;color:rgba(255,255,255,0.44)">{% trans "Cette section est active et prete a etre connectee aux modules temps reel (chat, push, webhooks, analytics)." %}</p>
+    <p class="sp-muted" style="font-size:0.85rem;color:rgba(255,255,255,0.44)">{% trans "Cette section est active et prete a etre connectee aux modules temps reel (chat, push, webhooks, analytics)." %}</p>
     {% endif %}
 
     {% if actions %}

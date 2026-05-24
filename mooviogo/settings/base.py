@@ -120,6 +120,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # ─── Custom user model ─────────────────────────────────────────────────────────
 
 AUTH_USER_MODEL = "users.User"
+LOGIN_URL = "/connexion/"
+LOGIN_REDIRECT_URL = "/"
 
 # ─── Password validation ───────────────────────────────────────────────────────
 

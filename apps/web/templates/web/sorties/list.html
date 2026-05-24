@@ -1,7 +1,13 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}{% trans "Sorties" %} | Mooviogo{% endblock %}
-{% block description %}{% trans "Sorties entre membres, soirées, restos, concerts — réservez et rejoignez la nuit." %}{% endblock %}
+{% block title %}{{ page_title|default:_('Sorties') }} | Mooviogo{% endblock %}
+{% block description %}
+  {% if is_activities_page %}
+    {% trans "Activites partenaires uniquement." %}
+  {% else %}
+    {% trans "Sorties entre membres gratuites uniquement." %}
+  {% endif %}
+{% endblock %}
 
 {% block extra_head %}
 <style>
@@ -10,15 +16,21 @@
     --apple-muted: rgba(235, 241, 250, 0.62);
     --apple-glass: rgba(255, 255, 255, 0.045);
     --apple-line: rgba(255, 255, 255, 0.12);
-    --apple-blue: #8ec5ff;
-    --apple-mint: #77e7c6;
-    --apple-rose: #ff9db4;
+    --apple-blue: #6C63FF;
+    --apple-mint: #2ECC71;
+    --apple-rose: #FF8A5B;
     --apple-shell: #f6f7fa;
     --apple-shell-line: rgba(12, 20, 34, 0.09);
     --apple-shadow-soft: 0 26px 70px -42px rgba(13, 18, 28, 0.55);
     --apple-shadow-float: 0 45px 100px -50px rgba(0, 0, 0, 0.9);
+    --tendance-cta-gradient: linear-gradient(135deg,#7C3AED,#2563EB);
   }
-  .store-list-grid { display:grid; grid-template-columns:minmax(0,1.08fr) minmax(300px,.92fr); gap:1rem; }
+  {% if is_activities_page %}
+  :root {
+    --tendance-cta-gradient: linear-gradient(135deg,#2563EB,#06B6D4);
+  }
+  {% endif %}
+  .store-list-grid { display:grid; grid-template-columns:1fr; gap:1rem; }
   .store-list-card { position:relative; overflow:hidden; border:1px solid rgba(255,255,255,.08); border-radius:2rem; box-shadow:0 30px 80px -40px rgba(0,0,0,.82); }
   .store-list-card.light {
     background:
@@ -69,17 +81,27 @@
   }
   .store-list-pill { display:inline-flex; align-items:center; gap:.45rem; border-radius:999px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.05); padding:.48rem .78rem; font-size:.72rem; font-weight:700; }
   .hero-btn-lg {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:100%;
+    max-width:100%;
+    box-sizing:border-box;
     min-height: 52px;
     padding: .88rem 1.35rem;
     border-radius: 16px;
     font-size: .94rem;
     font-weight: 800;
+    line-height:1.25;
+    text-align:center;
+    white-space:normal;
+    overflow-wrap:anywhere;
     border: 1px solid rgba(255,255,255,.2);
     box-shadow: 0 14px 32px -20px rgba(0,0,0,.9);
     transition: transform .24s cubic-bezier(.22,1,.36,1), box-shadow .24s ease, filter .2s ease;
   }
   .hero-btn-lg:hover { transform: translateY(-2px) scale(1.01); box-shadow: 0 22px 42px -24px rgba(0,0,0,.95); filter: saturate(1.06); }
-  .hero-visual { position:relative; min-height:430px; }
+  .hero-visual { position:relative; min-height:520px; }
   .hero-visual-media { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
   .hero-visual::before {
     content:"";
@@ -92,7 +114,7 @@
     z-index:0;
     pointer-events:none;
   }
-  .hero-visual::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(6,10,18,.06) 12%,rgba(6,10,18,.34) 52%,rgba(6,10,18,.95) 100%); }
+  .hero-visual::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(6,10,18,.04) 10%,rgba(6,10,18,.24) 48%,rgba(6,10,18,.82) 100%); }
   .hero-film {
     position:absolute;
     inset:0;
@@ -100,14 +122,14 @@
     pointer-events:none;
     background:
       radial-gradient(130% 82% at 50% 0%, rgba(255,255,255,.12), rgba(255,255,255,0)),
-      linear-gradient(180deg, rgba(8,12,18,0) 0%, rgba(8,12,18,.24) 60%, rgba(8,12,18,.48) 100%);
+      linear-gradient(180deg, rgba(8,12,18,0) 0%, rgba(8,12,18,.16) 60%, rgba(8,12,18,.34) 100%);
     mix-blend-mode:screen;
   }
-  .hero-visual-content { position:relative; z-index:1; padding:1.25rem; display:flex; min-height:430px; flex-direction:column; justify-content:space-between; }
+  .hero-visual-content { position:relative; z-index:1; padding:4.8rem 1.25rem 1.25rem; display:flex; min-height:520px; flex-direction:column; align-items:center; justify-content:center; }
   .hero-glass {
     border:1px solid rgba(255,255,255,.22);
     border-radius:18px;
-    background:linear-gradient(180deg, rgba(11,14,22,.58), rgba(11,14,22,.37));
+    background:linear-gradient(180deg, rgba(11,14,22,.44), rgba(11,14,22,.24));
     backdrop-filter:blur(16px) saturate(125%);
     box-shadow: var(--apple-shadow-float);
     padding:1rem;
@@ -166,6 +188,145 @@
     color:#fff;
     border-color:rgba(255,255,255,.3);
   }
+  .btn-dice {
+    background:linear-gradient(90deg,#6C63FF 0%,#7B61FF 100%);
+    border-color:transparent;
+    color:#fff;
+  }
+  .btn-dice:hover {
+    background:linear-gradient(90deg,#5D55F5 0%,#6C63FF 100%);
+  }
+  .events-hero-wide {
+    position:relative;
+    min-height:460px;
+    border-color:rgba(255,255,255,.14);
+    background:#0a0e14;
+  }
+  .events-hero-media {
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+  }
+  .events-hero-wide::after {
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(180deg,rgba(6,8,12,.12) 15%,rgba(6,8,12,.38) 46%,rgba(6,8,12,.9) 100%);
+    pointer-events:none;
+  }
+  .events-hero-content {
+    position:relative;
+    z-index:1;
+    padding:1.6rem;
+    color:#fff;
+    text-align:center;
+  }
+  .events-hero-content .store-list-copy { color:rgba(255,255,255,.8); max-width:52rem; margin-inline:auto; }
+  .events-hero-content .store-list-meta > div {
+    border:1px solid rgba(255,255,255,.18);
+    background:rgba(8,12,18,.42);
+    backdrop-filter:blur(10px);
+  }
+  .events-hero-content .store-list-meta .text-black\/38 { color:rgba(255,255,255,.52) !important; }
+  .events-hero-content .store-list-meta .text-black\/88 { color:rgba(255,255,255,.96) !important; }
+  .activity-partners-carousel-wrap {
+    margin-top: 1.25rem;
+    border:1px solid rgba(255,255,255,.1);
+    border-radius: 1.5rem;
+    padding: .9rem;
+    background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+    box-shadow: 0 24px 60px -36px rgba(0,0,0,.86);
+    overflow:hidden;
+  }
+  .activity-partners-carousel-track {
+    display:flex;
+    gap:.75rem;
+    width:max-content;
+    will-change: transform;
+    transform: translate3d(0,0,0);
+  }
+  .activity-partner-card {
+    position:relative;
+    flex:0 0 auto;
+    width: 520px;
+    height: 220px;
+    border-radius: 1.1rem;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,.14);
+    box-shadow: 0 22px 48px -30px rgba(0,0,0,.92);
+    background:#111827;
+  }
+  .activity-partner-media {
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+  }
+  .activity-partner-card::after {
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(180deg,rgba(8,12,18,.1) 8%,rgba(8,12,18,.26) 48%,rgba(8,12,18,.9) 100%);
+    pointer-events:none;
+  }
+  .activity-partner-top {
+    position:absolute;
+    top:.65rem;
+    left:50%;
+    transform:translateX(-50%);
+    z-index:1;
+    max-width: 88%;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.25);
+    background:rgba(8,12,18,.58);
+    color:#fff;
+    font-size:.73rem;
+    font-weight:800;
+    letter-spacing:.02em;
+    padding:.34rem .7rem;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    text-align:center;
+  }
+  .activity-partner-bottom {
+    position:absolute;
+    bottom:.7rem;
+    left:50%;
+    transform:translateX(-50%);
+    z-index:1;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.22);
+    background:rgba(8,12,18,.58);
+    color:#fff;
+    font-size:.72rem;
+    font-weight:700;
+    padding:.3rem .66rem;
+    text-align:center;
+  }
+  @media (max-width: 640px) {
+    .activity-partner-card {
+      width: 380px;
+      height: 160px;
+    }
+  }
+  .hero-action-inline {
+    margin-top: .9rem;
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:.65rem;
+  }
+  .hero-action-inline .hero-btn-lg {
+    width:auto;
+    min-height:44px;
+    padding:.62rem 1rem;
+    border-radius:999px;
+    font-size:.82rem;
+  }
   .hero-btn-caption {
     display:block;
     margin-top:.2rem;
@@ -174,11 +335,129 @@
     font-weight:600;
     opacity:.72;
   }
+  .hero-visual-content {
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .hero-top-pills {
+    position:absolute;
+    top:1.25rem;
+    left:50%;
+    transform:translateX(-50%);
+    z-index:2;
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:.5rem;
+  }
+  .hero-glass {
+    width:min(92%, 760px);
+    max-width:760px;
+    padding:1.95rem 1.7rem;
+    text-align:center;
+    position:relative;
+    margin:0 auto;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    min-height:380px;
+    gap:.85rem;
+  }
+  .hero-kicker {
+    font-size:.74rem;
+    padding:.4rem .78rem;
+  }
+  .hero-title {
+    margin-top:0;
+    font-size:clamp(2.35rem,3.4vw,3.45rem);
+  }
+  .hero-sub {
+    margin-top:0;
+    margin-inline:auto;
+    max-width:62ch;
+    font-size:1.08rem;
+    line-height:1.75;
+  }
+  .hero-action-row {
+    margin-top:.2rem;
+    width:100%;
+    max-width:540px;
+    margin-inline:auto;
+    grid-template-columns:1fr;
+    justify-items:stretch;
+    align-items:stretch;
+    gap:.78rem;
+  }
+  .hero-action-row .hero-btn-lg {
+    min-height:72px;
+    padding:.95rem 1rem;
+    font-size:1.03rem;
+    border-radius:18px;
+  }
+  .partner-inline-form {
+    margin-top:.8rem;
+    width:100%;
+    border:1px solid rgba(255,255,255,.2);
+    border-radius:16px;
+    background:linear-gradient(180deg, rgba(11,14,22,.44), rgba(11,14,22,.24));
+    padding:.95rem;
+    display:grid;
+    gap:.62rem;
+  }
+  .partner-inline-form .pi-grid {
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:.6rem;
+  }
+  .partner-inline-form input,
+  .partner-inline-form select,
+  .partner-inline-form textarea {
+    width:100%;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,.18);
+    background:rgba(255,255,255,.07);
+    color:#fff;
+    padding:.62rem .72rem;
+    font-size:.82rem;
+    line-height:1.35;
+  }
+  .partner-inline-form textarea { min-height:76px; resize:vertical; }
+  .partner-inline-form input::placeholder,
+  .partner-inline-form textarea::placeholder { color:rgba(255,255,255,.58); }
+  .partner-inline-form .pi-submit {
+    width:100%;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,.25);
+    background:linear-gradient(180deg, rgba(255,255,255,.96), rgba(236,242,250,.94));
+    color:#0c1420;
+    font-size:.88rem;
+    font-weight:800;
+    padding:.72rem .8rem;
+  }
+  .partner-inline-form .pi-note {
+    margin:0;
+    font-size:.72rem;
+    color:rgba(255,255,255,.66);
+    text-align:left;
+  }
+  @media (max-width: 1024px) {
+    .hero-top-pills {
+      top:1rem;
+      width:calc(100% - 1.2rem);
+    }
+    .hero-glass {
+      width:calc(100% - 1.2rem);
+      margin:0 auto;
+    }
+  }
   .list-hero-grid { display:grid; grid-template-columns:minmax(0,1.15fr) minmax(280px,.85fr); gap:1.25rem; }
   .list-side-panel { border:1px solid rgba(255,255,255,.08); border-radius:30px; background:rgba(255,255,255,.035); padding:1.25rem; box-shadow:0 24px 60px -34px rgba(0,0,0,.82); backdrop-filter:blur(14px); }
   .list-photo-card {
     position:relative;
-    min-height:420px;
+    min-height:430px;
     overflow:hidden;
     border-radius:30px;
     border:1px solid var(--apple-line);
@@ -201,7 +480,314 @@
   .list-photo-media { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; transition:transform .75s cubic-bezier(.22,1,.36,1), filter .35s ease; filter:saturate(.98) contrast(1.02); }
   .group:hover .list-photo-media { transform:scale(1.055); filter:saturate(1.1) contrast(1.05); }
   .list-photo-top { position:absolute; inset:1rem 1rem auto 1rem; z-index:2; display:flex; align-items:flex-start; justify-content:space-between; gap:.75rem; }
+  .list-photo-top.centered-host { justify-content:center; }
+  .list-photo-top.centered-host .save-btn { position:absolute; top:.55rem; right:.55rem; }
+  .host-chip {
+    display:inline-flex;
+    align-items:center;
+    gap:.42rem;
+    padding:.28rem .56rem .28rem .3rem;
+    border-radius:9999px;
+    border:1px solid rgba(255,255,255,.24);
+    background:rgba(12,16,26,.62);
+    color:#fff;
+    font-size:.72rem;
+    font-weight:800;
+    letter-spacing:.05em;
+    text-transform:uppercase;
+    backdrop-filter:blur(8px);
+  }
+  .host-avatar {
+    height:1.42rem;
+    width:1.42rem;
+    border-radius:9999px;
+    object-fit:cover;
+    border:1px solid rgba(255,255,255,.4);
+    box-shadow:0 6px 16px -10px rgba(0,0,0,.8);
+  }
+  .host-avatar-fallback {
+    display:inline-grid;
+    place-items:center;
+    height:1.42rem;
+    width:1.42rem;
+    border-radius:9999px;
+    border:1px solid rgba(255,255,255,.34);
+    background:linear-gradient(135deg, rgba(108,99,255,.95), rgba(123,97,255,.85));
+    color:#fff;
+    font-size:.58rem;
+    font-weight:900;
+    letter-spacing:.04em;
+  }
   .list-photo-bottom { position:absolute; inset:auto 0 0 0; z-index:2; padding:1.1rem; }
+  .sortie-card-date {
+    display:grid;
+    place-items:center;
+    min-width:3.3rem;
+    border-radius:1rem;
+    background:rgba(0,0,0,.62);
+    border:1px solid rgba(255,255,255,.18);
+    padding:.45rem .5rem;
+    line-height:1;
+  }
+  .sortie-card-date strong {
+    font-size:1.18rem;
+    font-weight:900;
+    color:#fff;
+  }
+  .sortie-card-date span {
+    margin-top:.24rem;
+    font-size:.62rem;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:rgba(255,255,255,.72);
+    font-weight:700;
+  }
+  .sortie-card-meta {
+    display:flex;
+    align-items:center;
+    gap:.45rem;
+    margin-top:.55rem;
+    font-size:.78rem;
+    color:rgba(255,255,255,.88);
+    font-weight:700;
+  }
+  .sortie-card-title {
+    margin-top:.7rem;
+    font-family:"SF Pro Display","Geist",Inter,sans-serif;
+    font-size:1.2rem;
+    line-height:1.18;
+    font-weight:900;
+    color:#fff;
+    letter-spacing:-.02em;
+  }
+  .sortie-card-desc {
+    margin-top:.55rem;
+    font-size:.9rem;
+    line-height:1.62;
+    color:rgba(255,255,255,.82);
+  }
+  .sortie-card-footer {
+    margin-top:.85rem;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:.65rem;
+    font-size:.82rem;
+    color:rgba(255,255,255,.9);
+    font-weight:700;
+  }
+  .sortie-card-link {
+    color:#fff;
+    font-weight:900;
+    letter-spacing:.01em;
+  }
+  .tendance-header {
+    display:block;
+  }
+  .tendance-top {
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:flex-start;
+    gap:.55rem;
+    min-height:2rem;
+    position:relative;
+  }
+  .tendance-top-left {
+    display:flex;
+    align-items:center;
+    gap:.45rem;
+    min-width:0;
+  }
+  .tendance-rank {
+    display:inline-flex;
+    align-items:center;
+    gap:.25rem;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.22);
+    background:rgba(8,12,18,.74);
+    color:#fff;
+    padding:.28rem .54rem;
+    font-size:.7rem;
+    font-weight:800;
+    letter-spacing:.02em;
+  }
+  .tendance-save-btn {
+    position:absolute;
+    right:0;
+    top:0;
+    margin-left:0;
+    flex:0 0 auto;
+  }
+  .tendance-user-name {
+    margin-top:.45rem;
+    text-align:center;
+    font-size:.82rem;
+    font-weight:800;
+    letter-spacing:.03em;
+    color:#fff;
+    text-transform:uppercase;
+    text-shadow:0 3px 14px rgba(0,0,0,.45);
+    transform:translateY(-1.02rem);
+  }
+  .tendance-user-inline {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:.45rem;
+    max-width:100%;
+  }
+  .tendance-user-inline span:last-child {
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    max-width:180px;
+  }
+  .activities-top-user {
+    position:absolute;
+    left:50%;
+    top:.02rem;
+    transform:translateX(-50%);
+    z-index:2;
+    display:inline-flex;
+    align-items:center;
+    gap:.42rem;
+    border-radius:9999px;
+    border:1px solid rgba(255,255,255,.24);
+    background:rgba(12,16,26,.62);
+    color:#fff;
+    padding:.28rem .56rem .28rem .3rem;
+    font-size:.72rem;
+    font-weight:800;
+    letter-spacing:.05em;
+    text-transform:uppercase;
+    backdrop-filter:blur(8px);
+    max-width:70%;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .activities-offer-block {
+    margin-top:.35rem;
+    margin-bottom:.5rem;
+    border-radius:1rem;
+    border:1px solid rgba(37,99,235,.5);
+    background:linear-gradient(135deg, rgba(37,99,235,.24), rgba(6,182,212,.2));
+    color:#fff;
+    font-size:.76rem;
+    font-weight:800;
+    letter-spacing:.02em;
+    padding:.5rem .62rem;
+    text-align:center;
+    transform:translateY(-.08rem);
+  }
+  .tendance-top-title {
+    margin-top:.62rem;
+    text-align:center;
+    font-family:"SF Pro Display","Geist",Inter,sans-serif;
+    font-size:1.22rem;
+    line-height:1.14;
+    font-weight:900;
+    color:#fff;
+    letter-spacing:-.01em;
+    text-shadow:0 4px 16px rgba(0,0,0,.52);
+    display:-webkit-box;
+    -webkit-box-orient:vertical;
+    -webkit-line-clamp:2;
+    overflow:hidden;
+  }
+  .tendance-card-bottom {
+    display:flex;
+    flex-direction:column;
+    min-height:252px;
+  }
+  .tendance-stats {
+    margin-top:auto;
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:.42rem;
+    width:100%;
+  }
+  .tendance-stat {
+    border-radius:1rem;
+    background:rgba(0,0,0,.62);
+    border:1px solid rgba(255,255,255,.18);
+    padding:.48rem .62rem;
+    font-size:.74rem;
+    color:rgba(255,255,255,.9);
+    font-weight:700;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:.3rem;
+    min-height:2.1rem;
+    white-space:nowrap;
+    width:100%;
+  }
+  .sortie-card-desc.tendance-desc {
+    margin-top:3.1rem;
+  }
+  .tendance-participants-wrap {
+    display:flex;
+    align-items:center;
+    gap:.55rem;
+    min-width:0;
+    flex:1 1 auto;
+  }
+  .tendance-progress {
+    position:relative;
+    height:.52rem;
+    border-radius:999px;
+    background:rgba(255,255,255,.2);
+    overflow:hidden;
+    flex:1 1 auto;
+    min-width:88px;
+  }
+  .tendance-progress-fill {
+    display:block;
+    height:100%;
+    border-radius:999px;
+    background:var(--tendance-cta-gradient);
+    box-shadow:0 3px 12px -8px rgba(6,182,212,.9);
+  }
+  .tendance-bottom-row {
+    margin-top:.42rem;
+    display:flex;
+    flex-direction:column;
+    align-items:stretch;
+    gap:.65rem;
+  }
+  .tendance-participants {
+    font-size:.8rem;
+    color:rgba(255,255,255,.9);
+    font-weight:700;
+    white-space:nowrap;
+  }
+  .tendance-join-btn {
+    display:inline-flex;
+    justify-content:center;
+    width:min(72%, 220px);
+    margin-left:auto;
+    margin-right:auto;
+  }
+  .btn-primary,
+  .btn-secondary,
+  .hero-btn-primary,
+  .hero-btn-secondary,
+  .tendance-join-btn,
+  .save-btn {
+    background:var(--tendance-cta-gradient) !important;
+    border-color:transparent !important;
+    color:#fff !important;
+  }
+  .btn-primary:hover,
+  .btn-secondary:hover,
+  .hero-btn-primary:hover,
+  .hero-btn-secondary:hover,
+  .tendance-join-btn:hover,
+  .save-btn:hover {
+    filter:brightness(1.06);
+  }
   .split-wrap {
     border:1px solid var(--apple-line);
     border-radius:28px;
@@ -278,8 +864,21 @@
   .rank-badge { position:absolute; top:.7rem; left:.7rem; z-index:2; display:inline-flex; align-items:center; justify-content:center; height:1.9rem; min-width:1.9rem; padding:0 .5rem; border-radius:9999px; background:rgba(0,0,0,0.55); backdrop-filter:blur(8px); color:#fff; font-weight:800; font-size:.75rem; border:1px solid rgba(255,255,255,0.15); }
   .save-btn { position:absolute; top:.55rem; right:.55rem; z-index:2; display:grid; place-items:center; height:2rem; width:2rem; border-radius:9999px; background:rgba(0,0,0,0.36); backdrop-filter:blur(10px); color:#fff; border:1px solid rgba(255,255,255,0.2); transition:all .2s; }
   .save-btn:hover { background:rgba(255,255,255,0.14); border-color:rgba(255,255,255,0.22); }
-  @media (max-width: 1024px) { .list-hero-grid, .store-list-grid, .store-list-meta { grid-template-columns:1fr; } .hero-action-row { grid-template-columns:1fr; } .store-list-title { font-size:clamp(2rem,8vw,3.1rem); } }
-  @media (min-width: 520px) { .hero-action-row { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+  .live-revision-badge {
+    display:inline-flex;
+    align-items:center;
+    gap:.42rem;
+    padding:.32rem .62rem;
+    border-radius:999px;
+    border:1px solid rgba(16,185,129,.45);
+    background:rgba(16,185,129,.16);
+    color:#d1fae5;
+    font-size:.68rem;
+    font-weight:800;
+    letter-spacing:.03em;
+    text-transform:uppercase;
+  }
+  @media (max-width: 1024px) { .list-hero-grid, .store-list-grid, .store-list-meta { grid-template-columns:1fr; } .hero-action-row { grid-template-columns:1fr; } .store-list-title { font-size:clamp(2rem,8vw,3.1rem); } .hero-visual, .hero-visual-content { min-height:460px; } }
 </style>
 {% endblock %}
 
@@ -290,58 +889,73 @@
   <nav class="text-xs text-white/50 mb-3 flex items-center gap-2" aria-label="Breadcrumb">
     <a href="/" class="hover:text-white">{% trans "Accueil" %}</a>
     <span>›</span>
-    <span class="text-white/80">{% trans "Sorties" %}</span>
+    <span class="text-white/80">{% trans "Événements" %}</span>
   </nav>
   <div class="store-list-grid">
-    <div class="store-list-card light">
-      <div class="store-list-body">
-        <span class="store-list-eyebrow">{% trans "Sorties curatées" %}</span>
-        <h1 class="store-list-title mt-3">{% trans "Les sorties à rejoindre ce soir." %}</h1>
-        <p class="store-list-copy">{% trans "Une lecture plus simple et plus éditoriale des sorties communautaires et partenaires, pour comprendre l’ambiance et décider plus vite." %}</p>
-        <div class="store-list-meta">
-          <div><div class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-black/38">{% trans "Résultats" %}</div><div class="mt-2 text-sm font-semibold text-black/88">{{ total_count|default:0 }} {% trans "sorties" %}</div></div>
-          <div><div class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-black/38">{% trans "Lecture" %}</div><div class="mt-2 text-sm font-semibold text-black/88">{% trans "Mood d’abord" %}</div></div>
-          <div><div class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-black/38">{% trans "Action" %}</div><div class="mt-2 text-sm font-semibold text-black/88">{% trans "Rejoindre vite" %}</div></div>
+    <div class="store-list-card events-hero-wide">
+      <img src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1800&q=80" alt="Ambiance evenement nightlife premium" class="events-hero-media" loading="lazy" />
+      <div class="events-hero-content">
+        <div class="flex flex-wrap justify-center gap-2">
+          <span class="store-list-pill">{{ page_kicker|default:_('Sorties curatées') }}</span>
+          <span class="store-list-pill">{% if is_activities_page %}{% trans "Partenaire" %}{% else %}{% trans "Membres" %}{% endif %}</span>
         </div>
-        <form method="get" class="mt-6 flex items-stretch rounded-full border border-black/10 bg-white/60 p-1.5 shadow-[0_12px_26px_-20px_rgba(0,0,0,.5)] max-w-3xl">
-          <input name="q" value="{{ request.GET.q }}" type="search" placeholder="{% trans 'Mot-clé, type de sortie…' %}" class="flex-1 bg-transparent border-0 px-5 text-sm sm:text-base text-black placeholder:text-black/35 focus:ring-0 focus:outline-none" />
-          <input name="city" value="{{ request.GET.city }}" type="text" placeholder="{% trans 'Ville' %}" class="hidden sm:block w-36 bg-transparent border-0 border-l border-black/10 px-5 text-sm text-black placeholder:text-black/35 focus:ring-0 focus:outline-none" />
-          <button type="submit" class="btn-dice hero-btn-lg rounded-full">{% trans "Rechercher" %}</button>
+        <span class="mt-4 inline-flex text-[0.8rem] font-semibold tracking-tight text-white/78">{{ page_title|default:_('Sorties') }}</span>
+        <h1 class="store-list-title mt-3 text-white">{{ page_heading|default:_('Les sorties à rejoindre ce soir.') }}</h1>
+        <p class="store-list-copy">{{ page_description|default:_('Une lecture plus simple et plus éditoriale pour comprendre l’ambiance et décider plus vite.') }}</p>
+        <div class="store-list-meta">
+          <div><div class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-black/38">{% trans "Résultats" %}</div><div class="mt-2 text-sm font-semibold text-black/88">{{ total_count|default:0 }} {% if is_activities_page %}{% trans "activités" %}{% else %}{% trans "sorties" %}{% endif %}</div></div>
+          <div><div class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-black/38">{% trans "Mode" %}</div><div class="mt-2 text-sm font-semibold text-black/88">{% if is_activities_page %}{% trans "Partenaires vérifiés" %}{% else %}{% trans "Communauté gratuite" %}{% endif %}</div></div>
+          <div><div class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-black/38">{% trans "Accès" %}</div><div class="mt-2 text-sm font-semibold text-black/88">{% if is_activities_page %}{% trans "Création partenaire" %}{% else %}{% trans "Création membre" %}{% endif %}</div></div>
+        </div>
+        <form method="get" class="mt-6 flex items-stretch rounded-full border border-white/20 bg-white/[0.08] p-1.5 max-w-3xl mx-auto">
+          <input name="q" value="{{ request.GET.q }}" type="search" placeholder="{% if is_activities_page %}{% trans 'Mot-clé, type d’activité…' %}{% else %}{% trans 'Mot-clé, type de sortie…' %}{% endif %}" class="flex-1 bg-transparent border-0 px-5 text-sm sm:text-base text-white placeholder:text-white/45 focus:ring-0 focus:outline-none" />
+          <input name="city" value="{{ request.GET.city }}" type="text" placeholder="{% trans 'Ville' %}" class="hidden sm:block w-36 bg-transparent border-0 border-l border-white/20 px-5 text-sm text-white placeholder:text-white/45 focus:ring-0 focus:outline-none" />
+          <button type="submit" class="btn-dice btn-sm rounded-full">{% trans "Rechercher" %}</button>
         </form>
+        <div class="hero-action-inline">
+          {% if user.is_authenticated %}
+            {% if not is_partner_only_page %}
+              <a href="{{ create_sortie_base_path|default:'/sorties/creer/' }}?type=COMMUNAUTAIRE" class="hero-btn-lg hero-btn-primary">{% if is_activities_page %}{% trans "Créer une activité entre membres" %}{% else %}{% trans "Créer une sortie entre membres" %}{% endif %}</a>
+            {% endif %}
+            {% if is_partner_only_page or not is_member_only_page %}
+              <a href="{{ create_sortie_base_path|default:'/sorties/creer/' }}?type=PARTENAIRE" class="hero-btn-lg hero-btn-secondary">{% if is_activities_page %}{% trans "Créer une activité chez un partenaire" %}{% else %}{% trans "Créer une sortie chez un partenaire" %}{% endif %}</a>
+            {% endif %}
+          {% else %}
+            {% if not is_partner_only_page %}
+              <a href="/connexion/?next={{ create_sortie_base_path|default:'/sorties/creer/'|urlencode }}%3Ftype%3DCOMMUNAUTAIRE" class="hero-btn-lg hero-btn-primary">{% if is_activities_page %}{% trans "Créer une activité entre membres" %}{% else %}{% trans "Créer une sortie entre membres" %}{% endif %}</a>
+            {% endif %}
+            {% if is_partner_only_page or not is_member_only_page %}
+              <a href="/connexion/?next={{ create_sortie_base_path|default:'/sorties/creer/'|urlencode }}%3Ftype%3DPARTENAIRE" class="hero-btn-lg hero-btn-secondary">{% if is_activities_page %}{% trans "Créer une activité chez un partenaire" %}{% else %}{% trans "Créer une sortie chez un partenaire" %}{% endif %}</a>
+            {% endif %}
+          {% endif %}
+        </div>
       </div>
     </div>
-    <aside class="store-list-card dark hero-visual">
-      {% if hero_sortie and hero_sortie.cover_image_url %}
-      <img src="{{ hero_sortie.cover_image_url }}" alt="{{ hero_sortie.title }}" class="hero-visual-media" />
-      {% else %}
-      <div class="absolute inset-0 bg-grad-brand"></div>
-      {% endif %}
-      <div class="hero-film"></div>
-      <div class="hero-visual-content">
-        <div class="flex flex-wrap gap-2">
-          <span class="hero-pill-minimal">{{ total_count|default:0 }} {% trans "résultats" %}</span>
-          <span class="hero-pill-minimal">{% trans "Social first" %}</span>
-        </div>
-        <div class="hero-glass">
-          <span class="hero-kicker">{% trans "Créer plus vite" %}</span>
-          <h2 class="hero-title">{% trans "Les groupes que tu comprends en un regard" %}</h2>
-          <p class="hero-sub">{% trans "Moins de friction, plus de projection: qui organise, où, combien de monde, et si ça vaut le clic." %}</p>
-          <div class="hero-action-row">
-            {% if user.is_authenticated %}
-            <a href="/sorties/creer/?type=COMMUNAUTAIRE" class="hero-btn-lg hero-btn-primary">{% trans "Créer une sortie entre membres" %}<span class="hero-btn-caption">{% trans "Ambiance communautaire" %}</span></a>
-            <a href="/sorties/creer/?type=PARTENAIRE" class="hero-btn-lg hero-btn-secondary">{% trans "Créer une sortie chez un partenaire" %}<span class="hero-btn-caption">{% trans "Lieu validé par un établissement" %}</span></a>
-            {% else %}
-            <a href="/connexion/?next=/sorties/creer/%3Ftype%3DCOMMUNAUTAIRE" class="hero-btn-lg hero-btn-primary">{% trans "Créer une sortie entre membres" %}<span class="hero-btn-caption">{% trans "Ambiance communautaire" %}</span></a>
-            <a href="/connexion/?next=/sorties/creer/%3Ftype%3DPARTENAIRE" class="hero-btn-lg hero-btn-secondary">{% trans "Créer une sortie chez un partenaire" %}<span class="hero-btn-caption">{% trans "Lieu validé par un établissement" %}</span></a>
-            {% endif %}
-          </div>
-        </div>
-      </div>
-    </aside>
   </div>
 </section>
 
+{% if is_activities_page and activity_partners_carousel %}
+<section class="mx-auto max-w-7xl px-4 pb-2 sm:pb-3">
+  <div class="activity-partners-carousel-wrap" data-activity-partners-carousel>
+    <div class="activity-partners-carousel-track" data-activity-partners-track>
+      {% for p in activity_partners_carousel %}
+      <a href="/partenaires/public/{{ p.slug }}/" class="activity-partner-card" aria-label="{{ p.name }}">
+        {% if p.cover_image_url %}
+        <img src="{{ p.cover_image_url }}" alt="{{ p.name }}" class="activity-partner-media" loading="lazy" />
+        {% else %}
+        <div class="activity-partner-media" style="background:linear-gradient(140deg,#1f2937,#111827);"></div>
+        {% endif %}
+        <span class="activity-partner-top">{{ p.name }}</span>
+        <span class="activity-partner-bottom">{{ p.city }}</span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
 {# ───────── Filter strip sticky ───────── #}
+{% if not is_activities_page and not is_member_only_page %}
 <section class="glass-strong border-y border-white/[0.06]">
   <div class="mx-auto max-w-7xl px-4 py-3">
     <form method="get" id="filtersForm" class="flex flex-wrap items-center gap-2">
@@ -349,23 +963,32 @@
       {% if request.GET.city %}<input type="hidden" name="city" value="{{ request.GET.city }}" />{% endif %}
 
       <span class="text-[0.7rem] uppercase tracking-wider text-white/45 font-semibold mr-2">{% trans "Type" %}</span>
-      <a href="/sorties/?{% if request.GET.q %}q={{ request.GET.q|urlencode }}&{% endif %}{% if request.GET.city %}city={{ request.GET.city|urlencode }}&{% endif %}{% if request.GET.free %}free={{ request.GET.free|urlencode }}&{% endif %}" class="pill-face {% if not request.GET.type %}tab-active-all{% endif %}">🌐 {% trans "Tous" %} ({{ total_count }})</a>
-      <a href="/sorties/?type=COMMUNAUTAIRE{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city|urlencode }}{% endif %}{% if request.GET.free %}&free={{ request.GET.free|urlencode }}{% endif %}" class="pill-face {% if request.GET.type == "COMMUNAUTAIRE" %}tab-active-member{% endif %}">👥 {% trans "Membres" %} ({{ member_count }})</a>
-      <a href="/sorties/?type=PARTENAIRE{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city|urlencode }}{% endif %}{% if request.GET.free %}&free={{ request.GET.free|urlencode }}{% endif %}" class="pill-face {% if request.GET.type == "PARTENAIRE" %}tab-active-partner{% endif %}">🤝 {% trans "Partenaire" %} ({{ partner_count }})</a>
+      {% if is_partner_only_page %}
+      <span class="pill-face tab-active-partner">🤝 {% trans "Partenaire" %} ({{ partner_count }})</span>
+      {% elif is_member_only_page or request.path == '/sorties/' %}
+      <span class="pill-face tab-active-member">👥 {% trans "Membres" %} ({{ member_count }})</span>
+      {% else %}
+      <a href="{{ list_base_path|default:'/sorties/' }}?{% if request.GET.q %}q={{ request.GET.q|urlencode }}&{% endif %}{% if request.GET.city %}city={{ request.GET.city|urlencode }}&{% endif %}{% if request.GET.free %}free={{ request.GET.free|urlencode }}&{% endif %}" class="pill-face {% if not request.GET.type %}tab-active-all{% endif %}">🌐 {% trans "Tous" %} ({{ total_count }})</a>
+      <a href="{{ list_base_path|default:'/sorties/' }}?type=COMMUNAUTAIRE{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city|urlencode }}{% endif %}{% if request.GET.free %}&free={{ request.GET.free|urlencode }}{% endif %}" class="pill-face {% if request.GET.type == "COMMUNAUTAIRE" %}tab-active-member{% endif %}">👥 {% trans "Membres" %} ({{ member_count }})</a>
+      <a href="{{ list_base_path|default:'/sorties/' }}?type=PARTENAIRE{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city|urlencode }}{% endif %}{% if request.GET.free %}&free={{ request.GET.free|urlencode }}{% endif %}" class="pill-face {% if request.GET.type == "PARTENAIRE" %}tab-active-partner{% endif %}">🤝 {% trans "Partenaire" %} ({{ partner_count }})</a>
+      {% endif %}
 
+      {% if not is_member_only_page %}
       <span class="mx-2 h-5 w-px bg-white/10"></span>
 
       <span class="text-[0.7rem] uppercase tracking-wider text-white/45 font-semibold mr-2">{% trans "Prix" %}</span>
       <label class="filter-pill"><input type="radio" name="free" value="" {% if not request.GET.free %}checked{% endif %} onchange="this.form.submit()"><span class="pill-face">💸 {% trans "Tous" %}</span></label>
       <label class="filter-pill"><input type="radio" name="free" value="1" {% if request.GET.free == "1" %}checked{% endif %} onchange="this.form.submit()"><span class="pill-face">✨ {% trans "Gratuit" %}</span></label>
       <label class="filter-pill"><input type="radio" name="free" value="0" {% if request.GET.free == "0" %}checked{% endif %} onchange="this.form.submit()"><span class="pill-face">🎟️ {% trans "Payant" %}</span></label>
+      {% endif %}
 
-      {% if request.GET.type or request.GET.free or request.GET.q or request.GET.city %}
-      <a href="/sorties/" class="ml-auto text-xs text-white/55 hover:text-white underline">{% trans "Effacer" %}</a>
+      {% if request.GET.q or request.GET.city or request.GET.free %}
+      <a href="{{ list_base_path|default:'/sorties/' }}" class="ml-auto text-xs text-white/55 hover:text-white underline">{% trans "Effacer" %}</a>
       {% endif %}
     </form>
   </div>
 </section>
+{% endif %}
 
 {# ───────── Grid ───────── #}
 <section class="mx-auto max-w-7xl px-4 py-10">
@@ -374,87 +997,127 @@
       <div>
         <div class="split-wrap member-wrap reveal-up d2">
         <div class="mb-4 flex items-center justify-between">
-          <h3 class="font-display text-xl font-bold text-white">👥 {% trans "Sorties membres" %}</h3>
+          <h3 class="font-display text-xl font-bold text-white">👥 {% if is_activities_page %}{% trans "Activités membres" %}{% else %}{% trans "Sorties membres" %}{% endif %}</h3>
           <span class="chip chip-dark">{{ member_count }} {% trans "résultats" %}</span>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {% for s in member_sorties %}
-          <a href="/sorties/{{ s.id }}/" class="list-photo-card card-member block group reveal-up d3">
-            <div class="list-photo-top">
-              <div class="flex flex-wrap gap-2"><span class="chip chip-neon">👥 {% trans "Membres" %}</span></div>
-              <button type="button" class="save-btn" aria-label="{% trans 'Enregistrer' %}" onclick="event.preventDefault();this.classList.toggle('text-flamingo-400');"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21s-7-4.534-9.5-9C1.07 9.36 2.5 6 5.5 6c1.74 0 3.41 1 4.5 2.5C11.09 7 12.76 6 14.5 6c3 0 4.43 3.36 3 6-2.5 4.466-9.5 9-9.5 9z" stroke="currentColor" stroke-width="1.5" fill="none"/></svg></button>
+          <a href="{{ sortie_detail_base_path|default:'/sorties/' }}{{ s.id }}/" class="list-photo-card card-member block group reveal-up d3">
+            <div class="list-photo-top tendance-header">
+              <div class="tendance-top">
+                <div class="tendance-top-left">
+                  <span class="tendance-rank">🔥 #{{ forloop.counter }}</span>
+                </div>
+                <button type="button" class="save-btn tendance-save-btn" aria-label="{% trans 'Enregistrer' %}" onclick="event.preventDefault();this.classList.toggle('text-flamingo-400');"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21s-7-4.534-9.5-9C1.07 9.36 2.5 6 5.5 6c1.74 0 3.41 1 4.5 2.5C11.09 7 12.76 6 14.5 6c3 0 4.43 3.36 3 6-2.5 4.466-9.5 9-9.5 9z" stroke="currentColor" stroke-width="1.5" fill="none"/></svg></button>
+              </div>
+              <div class="tendance-user-name">
+                <span class="tendance-user-inline">
+                  {% if s.organizer_avatar_url %}
+                  <img src="{{ s.organizer_avatar_url }}" alt="{{ s.organizer_display }}" class="host-avatar" loading="lazy" />
+                  {% else %}
+                  <span class="host-avatar-fallback">{{ s.organizer_initials|default:"MB" }}</span>
+                  {% endif %}
+                  <span>{% if s.creator %}{{ s.organizer_display }}{% else %}{% trans "Membre" %}{% endif %}</span>
+                </span>
+              </div>
+              <div class="tendance-top-title">{{ s.title }}</div>
             </div>
             {% if s.cover_image_url %}<img src="{{ s.cover_image_url }}" alt="{{ s.title }}" loading="lazy" class="list-photo-media" />{% else %}<div class="absolute inset-0 bg-grad-brand"></div>{% endif %}
-            <div class="list-photo-bottom">
-              <div class="flex items-center gap-2 mb-2 flex-wrap">{% if s.is_free %}<span class="chip chip-green">{% trans "Gratuit" %}</span>{% else %}<span class="chip chip-sunset">{{ s.price|floatformat:0 }}€</span>{% endif %}<span class="chip chip-dark">📍 {{ s.city }}</span></div>
-              <div class="font-display text-2xl font-extrabold tracking-tight text-white">{{ s.title }}</div>
-              <p class="mt-2 text-sm leading-6 text-white/65 line-clamp-2">{{ s.description|default:_('Une sortie sociale pensée pour déclencher une décision rapide.')|truncatechars:100 }}</p>
-              <div class="mt-3 pt-3 border-t border-white/10 flex items-center justify-between text-xs"><span class="text-white/55">👤 {{ s.participant_count|default:0 }}{% if s.max_participants %} / {{ s.max_participants }}{% endif %} {% trans "participants" %}</span><span class="text-flamingo-400 font-semibold group-hover:translate-x-1 transition-transform">{% trans "Voir →" %}</span></div>
+            <div class="list-photo-bottom tendance-card-bottom">
+              <p class="sortie-card-desc tendance-desc">{{ s.description|default:_('Une sortie sociale pensée pour déclencher une décision rapide.')|truncatechars:145 }}</p>
+              <div class="tendance-stats">
+                <div class="tendance-stat">{% if s.starts_at %}{{ s.starts_at|date:"d M" }}{% else %}-- --{% endif %}</div>
+                <div class="tendance-stat">{% if s.starts_at %}{{ s.starts_at|date:"H:i" }}{% else %}--:--{% endif %}</div>
+                <div class="tendance-stat">{{ s.city }}</div>
+                <div class="tendance-stat">{% trans "Gratuit" %}</div>
+              </div>
+              <div class="tendance-bottom-row">
+                <div class="tendance-participants-wrap">
+                  <div class="tendance-progress">
+                    <span class="tendance-progress-fill" style="width:{% if s.max_participants %}{% widthratio s.participant_count|default:0 s.max_participants 100 %}{% else %}0{% endif %}%"></span>
+                  </div>
+                  <span class="tendance-participants">{{ s.participant_count|default:0 }} / {% if s.max_participants %}{{ s.max_participants }}{% else %}∞{% endif %}</span>
+                </div>
+                <span class="btn-primary btn-sm tendance-join-btn">{% trans "Participer" %}</span>
+              </div>
             </div>
           </a>
           {% empty %}
-          <div class="col-span-full panel text-center py-12"><p class="text-white/55">{% trans "Aucune sortie membre selon ces filtres." %}</p></div>
+          <div class="col-span-full panel text-center py-12"><p class="text-white/55">{% if is_activities_page %}{% trans "Aucune activité membre selon ces filtres." %}{% else %}{% trans "Aucune sortie membre selon ces filtres." %}{% endif %}</p></div>
           {% endfor %}
         </div>
         </div>
       </div>
 
-      <div>
-        <div class="split-wrap partner-wrap reveal-up d4">
-        <div class="mb-4 flex items-center justify-between">
-          <h3 class="font-display text-xl font-bold text-white">🤝 {% trans "Sorties partenaires" %}</h3>
-          <span class="chip chip-dark">{{ partner_count }} {% trans "résultats" %}</span>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-          {% for s in partner_sorties %}
-          <a href="/sorties/{{ s.id }}/" class="list-photo-card card-partner block group reveal-up d5">
-            <div class="list-photo-top">
-              <div class="flex flex-wrap gap-2"><span class="chip chip-flamingo">🤝 {% trans "Partenaire" %}</span></div>
-              <button type="button" class="save-btn" aria-label="{% trans 'Enregistrer' %}" onclick="event.preventDefault();this.classList.toggle('text-flamingo-400');"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21s-7-4.534-9.5-9C1.07 9.36 2.5 6 5.5 6c1.74 0 3.41 1 4.5 2.5C11.09 7 12.76 6 14.5 6c3 0 4.43 3.36 3 6-2.5 4.466-9.5 9-9.5 9z" stroke="currentColor" stroke-width="1.5" fill="none"/></svg></button>
-            </div>
-            {% if s.cover_image_url %}<img src="{{ s.cover_image_url }}" alt="{{ s.title }}" loading="lazy" class="list-photo-media" />{% else %}<div class="absolute inset-0 bg-grad-brand"></div>{% endif %}
-            <div class="list-photo-bottom">
-              <div class="flex items-center gap-2 mb-2 flex-wrap">{% if s.is_free %}<span class="chip chip-green">{% trans "Gratuit" %}</span>{% else %}<span class="chip chip-sunset">{{ s.price|floatformat:0 }}€</span>{% endif %}<span class="chip chip-dark">📍 {{ s.city }}</span></div>
-              <div class="font-display text-2xl font-extrabold tracking-tight text-white">{{ s.title }}</div>
-              <p class="mt-2 text-sm leading-6 text-white/65 line-clamp-2">{{ s.description|default:_('Une sortie sociale pensée pour déclencher une décision rapide.')|truncatechars:100 }}</p>
-              <div class="mt-3 pt-3 border-t border-white/10 flex items-center justify-between text-xs"><span class="text-white/55">👤 {{ s.participant_count|default:0 }}{% if s.max_participants %} / {{ s.max_participants }}{% endif %} {% trans "participants" %}</span><span class="text-flamingo-400 font-semibold group-hover:translate-x-1 transition-transform">{% trans "Voir →" %}</span></div>
-            </div>
-          </a>
-          {% empty %}
-          <div class="col-span-full panel text-center py-12"><p class="text-white/55">{% trans "Aucune sortie partenaire selon ces filtres." %}</p></div>
-          {% endfor %}
-        </div>
-        </div>
-      </div>
     </div>
   {% else %}
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
       {% for s in sorties %}
-      <a href="/sorties/{{ s.id }}/" class="list-photo-card {% if s.type == 'COMMUNAUTAIRE' %}card-member{% else %}card-partner{% endif %} block group reveal-up d2">
-        <div class="list-photo-top">
-          <div class="flex flex-wrap gap-2">
-            {% if forloop.counter <= 3 and page_obj and page_obj.number == 1 %}<span class="rank-badge">🔥 #{{ forloop.counter }}</span>{% endif %}
-            {% if s.type == "COMMUNAUTAIRE" %}<span class="chip chip-neon">👥 {% trans "Membres" %}</span>{% else %}<span class="chip chip-flamingo">🤝 {% trans "Partenaire" %}</span>{% endif %}
+      {% if request.path != '/sorties/' or s.type == 'COMMUNAUTAIRE' %}
+      <a href="{{ sortie_detail_base_path|default:'/sorties/' }}{{ s.id }}/" class="list-photo-card {% if is_partner_only_page %}card-partner{% else %}card-member{% endif %} block group reveal-up d2">
+        <div class="list-photo-top tendance-header">
+          <div class="tendance-top">
+            <div class="tendance-top-left">
+              <span class="tendance-rank">🔥 #{{ forloop.counter }}</span>
+            </div>
+            {% if is_activities_page %}
+            <span class="activities-top-user">
+              {% if s.organizer_avatar_url %}
+              <img src="{{ s.organizer_avatar_url }}" alt="{{ s.organizer_display }}" class="host-avatar" loading="lazy" />
+              {% else %}
+              <span class="host-avatar-fallback">{{ s.organizer_initials|default:"MB" }}</span>
+              {% endif %}
+              <span>{% if s.creator %}{{ s.organizer_display }}{% else %}{% trans "Membre" %}{% endif %}</span>
+            </span>
+            {% endif %}
+            <button type="button" class="save-btn tendance-save-btn" aria-label="{% trans 'Enregistrer' %}" onclick="event.preventDefault();this.classList.toggle('text-flamingo-400');"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21s-7-4.534-9.5-9C1.07 9.36 2.5 6 5.5 6c1.74 0 3.41 1 4.5 2.5C11.09 7 12.76 6 14.5 6c3 0 4.43 3.36 3 6-2.5 4.466-9.5 9-9.5 9z" stroke="currentColor" stroke-width="1.5" fill="none"/></svg></button>
           </div>
-          <button type="button" class="save-btn" aria-label="{% trans 'Enregistrer' %}" onclick="event.preventDefault();this.classList.toggle('text-flamingo-400');"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21s-7-4.534-9.5-9C1.07 9.36 2.5 6 5.5 6c1.74 0 3.41 1 4.5 2.5C11.09 7 12.76 6 14.5 6c3 0 4.43 3.36 3 6-2.5 4.466-9.5 9-9.5 9z" stroke="currentColor" stroke-width="1.5" fill="none"/></svg></button>
+          {% if not is_activities_page %}
+          <div class="tendance-user-name">
+            <span class="tendance-user-inline">
+              {% if s.organizer_avatar_url %}
+              <img src="{{ s.organizer_avatar_url }}" alt="{{ s.organizer_display }}" class="host-avatar" loading="lazy" />
+              {% else %}
+              <span class="host-avatar-fallback">{{ s.organizer_initials|default:"MB" }}</span>
+              {% endif %}
+              <span>{% if s.creator %}{{ s.organizer_display }}{% else %}{% trans "Membre" %}{% endif %}</span>
+            </span>
+          </div>
+          {% endif %}
+          <div class="tendance-top-title">{% if is_activities_page %}{{ s.partner.name|default:_('Partenaire') }}{% else %}{{ s.title }}{% endif %}</div>
         </div>
         {% if s.cover_image_url %}<img src="{{ s.cover_image_url }}" alt="{{ s.title }}" loading="lazy" class="list-photo-media" />{% else %}<div class="absolute inset-0 bg-grad-brand"></div>{% endif %}
-        <div class="list-photo-bottom">
-          <div class="flex items-center gap-2 mb-2 flex-wrap">{% if s.is_free %}<span class="chip chip-green">{% trans "Gratuit" %}</span>{% else %}<span class="chip chip-sunset">{{ s.price|floatformat:0 }}€</span>{% endif %}<span class="chip chip-dark">📍 {{ s.city }}</span></div>
-          <div class="font-display text-2xl font-extrabold tracking-tight text-white">{{ s.title }}</div>
-          <p class="mt-2 text-sm leading-6 text-white/65 line-clamp-2">{{ s.description|default:_('Une sortie sociale pensée pour déclencher une décision rapide.')|truncatechars:100 }}</p>
-          <div class="mt-3 flex flex-wrap items-center gap-2 text-xs text-white/72">{% if s.starts_at %}<span>•</span><time>{{ s.starts_at|date:"d M, H:i" }}</time>{% endif %}</div>
-          <div class="mt-3 pt-3 border-t border-white/10 flex items-center justify-between text-xs"><span class="text-white/55">👤 {{ s.participant_count|default:0 }}{% if s.max_participants %} / {{ s.max_participants }}{% endif %} {% trans "participants" %}</span><span class="text-flamingo-400 font-semibold group-hover:translate-x-1 transition-transform">{% trans "Voir →" %}</span></div>
+        <div class="list-photo-bottom tendance-card-bottom">
+          <p class="sortie-card-desc tendance-desc">{{ s.description|default:_('Une sortie sociale pensée pour déclencher une décision rapide.')|truncatechars:145 }}</p>
+          {% if is_activities_page %}
+          <div class="activities-offer-block">{{ s.title|default:_('Offre partenaire') }}</div>
+          {% endif %}
+          <div class="tendance-stats">
+            <div class="tendance-stat">{% if s.starts_at %}{{ s.starts_at|date:"d M" }}{% else %}-- --{% endif %}</div>
+            <div class="tendance-stat">{% if is_activities_page %}{% trans "Début" %} {% if s.starts_at %}{{ s.starts_at|date:"H:i" }}{% else %}--:--{% endif %}{% else %}{% if s.starts_at %}{{ s.starts_at|date:"H:i" }}{% else %}--:--{% endif %}{% endif %}</div>
+            <div class="tendance-stat">{% if is_activities_page %}{% trans "Fin" %} {% if s.ends_at %}{{ s.ends_at|date:"H:i" }}{% else %}--:--{% endif %}{% else %}{{ s.city }}{% endif %}</div>
+            <div class="tendance-stat">{% if is_activities_page %}{% if s.is_free %}{% trans "Gratuit" %}{% else %}{{ s.price|floatformat:0 }}€{% endif %}{% else %}{% trans "Gratuit" %}{% endif %}</div>
+          </div>
+          <div class="tendance-bottom-row">
+            <div class="tendance-participants-wrap">
+              <div class="tendance-progress">
+                <span class="tendance-progress-fill" style="width:{% if s.max_participants %}{% widthratio s.participant_count|default:0 s.max_participants 100 %}{% else %}0{% endif %}%"></span>
+              </div>
+              <span class="tendance-participants">{{ s.participant_count|default:0 }} / {% if s.max_participants %}{{ s.max_participants }}{% else %}∞{% endif %}</span>
+            </div>
+            <span class="btn-primary btn-sm tendance-join-btn">{% if is_activities_page %}{% trans "Rejoignez" %}{% else %}{% trans "Participer" %}{% endif %}</span>
+          </div>
         </div>
       </a>
+      {% endif %}
       {% empty %}
       <div class="col-span-full panel text-center py-16">
         <div class="text-5xl mb-4">🌙</div>
-        <h3 class="font-display text-xl font-bold text-white">{% trans "Aucune sortie ne correspond à ta recherche" %}</h3>
-        <p class="text-white/55 mt-2">{% trans "Essaie d'autres filtres ou crée la première !" %}</p>
+        <h3 class="font-display text-xl font-bold text-white">{% if is_activities_page %}{% trans "Aucune activité ne correspond à ta recherche" %}{% else %}{% trans "Aucune sortie ne correspond à ta recherche" %}{% endif %}</h3>
+        <p class="text-white/55 mt-2">{% if is_activities_page %}{% trans "Essaie d'autres filtres ou crée la première activité !" %}{% else %}{% trans "Essaie d'autres filtres ou crée la première !" %}{% endif %}</p>
         <div class="mt-6 flex gap-2 justify-center">
-          <a href="/sorties/" class="btn-secondary btn-sm">{% trans "Réinitialiser" %}</a>
-          {% if user.is_authenticated %}<a href="/sorties/creer/" class="btn-primary btn-sm">+ {% trans "Créer une sortie" %}</a>{% endif %}
+          <a href="{{ list_base_path|default:'/sorties/' }}" class="btn-secondary btn-sm">{% trans "Réinitialiser" %}</a>
+          {% if user.is_authenticated %}<a href="{{ create_sortie_base_path|default:'/sorties/creer/' }}" class="btn-primary btn-sm">+ {% if is_activities_page %}{% trans "Créer une activité" %}{% else %}{% trans "Créer une sortie" %}{% endif %}</a>{% endif %}
         </div>
       </div>
       {% endfor %}
@@ -474,5 +1137,39 @@
   </nav>
   {% endif %}
 </section>
+
+{% if is_activities_page and activity_partners_carousel %}
+<script>
+  (function () {
+    const root = document.querySelector('[data-activity-partners-carousel]');
+    if (!root) return;
+    const track = root.querySelector('[data-activity-partners-track]');
+    if (!track) return;
+
+    const originals = Array.from(track.children);
+    if (!originals.length) return;
+
+    const frag = document.createDocumentFragment();
+    originals.forEach((node) => frag.appendChild(node.cloneNode(true)));
+    track.appendChild(frag);
+
+    let x = 0;
+    const speedPxPerMs = 0.055;
+    const originalWidth = track.scrollWidth / 2;
+    let last = performance.now();
+
+    function tick(now) {
+      const dt = now - last;
+      last = now;
+      x += dt * speedPxPerMs;
+      if (x >= originalWidth) x -= originalWidth;
+      track.style.transform = 'translate3d(' + (-x) + 'px,0,0)';
+      requestAnimationFrame(tick);
+    }
+
+    requestAnimationFrame(tick);
+  })();
+</script>
+{% endif %}
 
 {% endblock %}

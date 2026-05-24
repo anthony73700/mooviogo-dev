@@ -3,28 +3,21 @@ URL configuration for the Mooviogo Django project.
 """
 
 from django.contrib import admin
+from django.conf import settings
+from django.conf.urls.static import static
 from django.urls import include, path
-from rest_framework import permissions
-from rest_framework.renderers import JSONOpenAPIRenderer
 from rest_framework.schemas import get_schema_view
 
 from apps.web.views import api_docs_page
 from apps.web.views import set_language_and_preference
 
 API_PREFIX = "api/v1/"
-schema_view = get_schema_view(
-    title="Mooviogo API",
-    description="Documentation OpenAPI de la plateforme Mooviogo.",
-    version="1.0.0",
-    permission_classes=[permissions.AllowAny],
-    renderer_classes=[JSONOpenAPIRenderer],
-)
 
 urlpatterns = [
     path("django-admin/", admin.site.urls),
     path("i18n/setlang/", set_language_and_preference, name="set_language"),
     path("i18n/", include("django.conf.urls.i18n")),
-    path("api/schema/", schema_view, name="api-schema"),
+    path("api/schema/", get_schema_view(title="Mooviogo API"), name="api-schema"),
     path("api/docs/", api_docs_page, name="api-docs"),
     # Health (before web catch-all)
     path("health/", include("apps.health.urls")),
@@ -49,3 +42,6 @@ urlpatterns = [
     # Web frontend (must be last — contains a catch-all <slug> route)
     path("", include("apps.web.urls")),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

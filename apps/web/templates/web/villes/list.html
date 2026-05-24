@@ -2,24 +2,84 @@
 {% block title %}Villes | Mooviogo{% endblock %}
 {% block description %}Explore les sorties et restaurants Mooviogo dans toutes les villes de France.{% endblock %}
 
+{% block extra_head %}
+<style>
+  .villes-page .villes-eyebrow { color:#2ECC71; }
+  .villes-page .villes-grad {
+    background:linear-gradient(90deg,#2ECC71 0%,#2ECC71 100%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+  .villes-page .villes-card:hover { border-color:rgba(46,204,113,.4); }
+  .villes-page .villes-card-glow { background:rgba(46,204,113,.22); }
+  .villes-page .villes-card:hover .villes-card-glow { background:rgba(46,204,113,.35); }
+  .villes-page .villes-arrow-hover:hover { color:#2ECC71; }
+  .villes-page .city-card {
+    min-height: 320px;
+    border-radius: 1.6rem;
+  }
+  .villes-page .city-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .45rem;
+    margin-top: .8rem;
+  }
+  .villes-page .city-metrics span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255,255,255,.22);
+    border-radius: 999px;
+    background: rgba(0,0,0,.34);
+    padding: .22rem .46rem;
+    font-size: .62rem;
+    font-weight: 700;
+    letter-spacing: .02em;
+    color: rgba(255,255,255,.95);
+    white-space: nowrap;
+  }
+  .villes-page .city-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .35rem;
+    margin-top: .8rem;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.26);
+    background: rgba(0,0,0,.38);
+    color: #fff;
+    padding: .36rem .72rem;
+    font-size: .72rem;
+    font-weight: 800;
+  }
+  .villes-page .city-cta::after {
+    content: "→";
+    line-height: 1;
+    font-size: .82rem;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
 
+<div class="villes-page">
 <section class="relative overflow-hidden border-b border-white/5">
   <div class="absolute inset-0 bg-grad-aurora opacity-25"></div>
   <div class="absolute -top-32 -left-24 h-96 w-96 rounded-full bg-neon-500/30 blur-3xl"></div>
   <div class="absolute -bottom-32 -right-24 h-96 w-96 rounded-full bg-electric-400/20 blur-3xl"></div>
   <div class="relative mx-auto max-w-6xl px-4 py-16 text-center">
-    <p class="h-eyebrow text-electric-300">Partout en France</p>
-    <h1 class="mt-3 font-display text-4xl sm:text-5xl font-extrabold text-white tracking-tight">Choisis ta <span class="grad-text">ville</span></h1>
+    <p class="h-eyebrow villes-eyebrow">Partout en France</p>
+    <h1 class="mt-3 font-display text-4xl sm:text-5xl font-extrabold text-white tracking-tight">Choisis ta <span class="villes-grad">ville</span></h1>
     <p class="mt-3 text-white/65 max-w-xl mx-auto">Trouve sorties, restos et events là où tu vis.</p>
   </div>
 </section>
 
 <div class="mx-auto max-w-6xl px-4 py-12">
   {% if cities %}
-  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
     {% for city in cities %}
-    <a href="/ville/{{ city.slug }}/" class="group relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-night-800 to-night-900 p-5 aspect-square flex flex-col justify-between hover:border-flamingo-500/40 hover:shadow-neon-sm transition-all">
+    <a href="/ville/{{ city.slug }}/" class="city-card villes-card group relative overflow-hidden border border-white/10 bg-gradient-to-br from-night-800 to-night-900 p-5 flex flex-col justify-between hover:shadow-neon-sm transition-all">
       {% if city.slug == "marseille" %}
       <img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80" alt="Marseille - Notre-Dame de la Garde" class="absolute inset-0 h-full w-full object-cover" loading="lazy" />
       {% elif city.slug == "paris" %}
@@ -36,24 +96,24 @@
       <img src="https://images.unsplash.com/photo-1593014109523-22d3e0dbe58d?auto=format&fit=crop&w=1200&q=80" alt="Nantes - centre-ville" class="absolute inset-0 h-full w-full object-cover" loading="lazy" />
       {% elif city.slug == "lille" %}
       <img src="https://images.unsplash.com/photo-1608052875385-37e04714b9de?auto=format&fit=crop&w=1200&q=80" alt="Lille - Grand Place" class="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+      {% else %}
+      <img src="https://images.unsplash.com/photo-1444723121867-7a241cacace9?auto=format&fit=crop&w=1200&q=80" alt="{{ city.name }}" class="absolute inset-0 h-full w-full object-cover" loading="lazy" />
       {% endif %}
       <div class="absolute inset-0 bg-gradient-to-b from-night-900/40 via-night-900/52 to-night-900/88"></div>
       <div class="absolute inset-0 bg-grad-brand opacity-0 group-hover:opacity-15 transition-opacity"></div>
-      <div class="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-flamingo-500/20 blur-3xl group-hover:bg-neon-500/40 transition-colors"></div>
+      <div class="villes-card-glow absolute -top-10 -right-10 h-32 w-32 rounded-full blur-3xl transition-colors"></div>
       <div class="relative">
-        <p class="text-[0.65rem] uppercase tracking-wider text-white/45 font-bold">Ville</p>
+        <p class="text-[0.65rem] uppercase tracking-wider text-white/45 font-bold">Ville active</p>
         <p class="mt-1 font-display text-xl font-extrabold text-white">{{ city.name }}</p>
+        <p class="mt-1 text-[0.73rem] text-white/72">Découvre les meilleures adresses et sorties du moment.</p>
       </div>
-      <div class="relative flex items-end justify-between">
-        {% if city.sortie_count %}
-        <div>
-          <p class="font-display text-2xl font-extrabold grad-text">{{ city.sortie_count }}</p>
-          <p class="text-[0.65rem] uppercase tracking-wider text-white/55 font-semibold">sortie{{ city.sortie_count|pluralize }}</p>
+      <div class="relative">
+        <div class="city-metrics">
+          <span>🎉 {{ city.event_count }} événement{{ city.event_count|pluralize }}</span>
+          <span>🍽 {{ city.restaurant_count }} restaurant{{ city.restaurant_count|pluralize }}</span>
+          <span>👥 {{ city.sortie_count }} sortie{{ city.sortie_count|pluralize }}</span>
         </div>
-        {% else %}
-        <span class="chip chip-neutral text-[0.65rem]">À découvrir</span>
-        {% endif %}
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-white/30 group-hover:text-flamingo-300 group-hover:translate-x-1 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+        <span class="city-cta">Explorer {{ city.name }}</span>
       </div>
     </a>
     {% endfor %}
@@ -63,5 +123,6 @@
     <p class="text-white/55">Aucune ville disponible pour le moment.</p>
   </div>
   {% endif %}
+</div>
 </div>
 {% endblock %}

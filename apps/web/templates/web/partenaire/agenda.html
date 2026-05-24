@@ -1,0 +1,798 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ title }} | Mooviogo{% endblock %}
+
+{% block extra_head %}
+<style>
+  :root {
+    --ag-bg: #f5f5f7;
+    --ag-ink: #1d1d1f;
+    --ag-sub: #6e6e73;
+    --ag-line: #d2d2d7;
+    --ag-primary: #0071e3;
+    --ag-success: #2e9f67;
+    --ag-danger: #d83d3d;
+    --ag-soft: #fbfbfd;
+    --ag-section-activity: #3b82f6;
+  }
+
+  body {
+    background: var(--ag-bg) !important;
+    background-image: radial-gradient(circle at 12% -4%, #ffffff 0%, transparent 34%), radial-gradient(circle at 88% 3%, #ececf1 0%, transparent 28%) !important;
+    color: var(--ag-ink);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "Segoe UI", sans-serif;
+  }
+
+  nav {
+    background: rgba(255, 255, 255, 0.78) !important;
+    border-bottom-color: var(--ag-line) !important;
+    backdrop-filter: saturate(165%) blur(22px);
+  }
+
+  nav a,
+  nav button,
+  nav span,
+  nav select {
+    color: var(--ag-ink) !important;
+  }
+
+  footer {
+    display: none;
+  }
+
+  .ag-shell {
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 2.7rem 1rem 4.6rem;
+  }
+
+  .ag-hero {
+    border: 1px solid var(--ag-line);
+    border-radius: 34px;
+    background: linear-gradient(145deg, #ffffff 0%, #f7f7fa 70%, #f1f1f6 100%);
+    padding: 1.65rem;
+    box-shadow: 0 18px 46px rgba(13, 17, 23, 0.08);
+  }
+
+  .ag-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    border: 1px solid #d9d9df;
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: 999px;
+    padding: 0.34rem 0.66rem;
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: #3a3a3c;
+  }
+
+  .ag-hero-grid {
+    margin-top: 1rem;
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: 1fr;
+    align-items: center;
+  }
+
+  .ag-headline {
+    font-size: clamp(1.65rem, 4.8vw, 2.7rem);
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+    font-weight: 700;
+    color: var(--ag-ink);
+  }
+
+  .ag-subline {
+    margin-top: 0.7rem;
+    color: var(--ag-sub);
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  .ag-trust {
+    margin-top: 0.7rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+
+  .ag-trust-item {
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: #4b4b50;
+    border: 1px solid #d9d9df;
+    background: rgba(255, 255, 255, 0.82);
+    border-radius: 999px;
+    padding: 0.25rem 0.56rem;
+  }
+
+  .ag-public-link {
+    margin-top: 0.8rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    border: 1px solid #0ea5e9;
+    background: #e0f2fe;
+    color: #075985;
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 800;
+    padding: 0.48rem 0.82rem;
+  }
+
+  .ag-integration {
+    border: 1px solid #d8d8de;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.82);
+    padding: 1rem;
+    backdrop-filter: blur(16px);
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.07);
+  }
+
+  .ag-int-title {
+    font-size: 0.86rem;
+    color: var(--ag-sub);
+    font-weight: 600;
+  }
+
+  .ag-int-pills {
+    margin-top: 0.7rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+
+  .ag-pill {
+    border-radius: 999px;
+    border: 1px solid #dbdbe1;
+    padding: 0.28rem 0.56rem;
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: #4a4a50;
+    background: #ffffff;
+  }
+
+  .ag-usecases {
+    margin-top: 0.9rem;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.55rem;
+  }
+
+  .ag-usecase {
+    border-radius: 16px;
+    border: 1px solid #ddddE4;
+    background: #ffffff;
+    padding: 0.65rem 0.75rem;
+  }
+
+  .ag-usecase strong {
+    display: block;
+    font-size: 0.78rem;
+    color: #1d1d1f;
+  }
+
+  .ag-usecase span {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 0.73rem;
+    color: #6e6e73;
+  }
+
+  .ag-layout {
+    margin-top: 1.2rem;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .ag-panel {
+    border: 1px solid var(--ag-line);
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.92);
+    padding: 1.02rem;
+    box-shadow: 0 10px 26px rgba(17, 24, 39, 0.05);
+  }
+
+  .ag-title {
+    font-size: 1.03rem;
+    font-weight: 800;
+    color: var(--ag-ink);
+    letter-spacing: -0.01em;
+  }
+
+  .ag-sub {
+    font-size: 0.83rem;
+    color: var(--ag-sub);
+    margin-top: 0.25rem;
+  }
+
+  .ag-kpis {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.6rem;
+    margin-top: 0.85rem;
+  }
+
+  .ag-kpi {
+    border-radius: 14px;
+    border: 1px solid var(--ag-line);
+    padding: 0.62rem;
+    background: linear-gradient(180deg, #ffffff 0%, #f7f7fa 100%);
+  }
+
+  .ag-kpi-num {
+    font-size: 1.32rem;
+    line-height: 1;
+    font-weight: 850;
+    color: var(--ag-ink);
+  }
+
+  .ag-kpi-label {
+    margin-top: 0.22rem;
+    font-size: 0.67rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ag-sub);
+  }
+
+  .ag-form {
+    display: grid;
+    gap: 0.62rem;
+    margin-top: 0.9rem;
+  }
+
+  .ag-form-row {
+    display: grid;
+    gap: 0.58rem;
+    grid-template-columns: 1fr;
+  }
+
+  .ag-input,
+  .ag-select,
+  .ag-textarea {
+    width: 100%;
+    border-radius: 11px;
+    border: 1px solid #d5d5dc;
+    background: #fff;
+    color: var(--ag-ink);
+    padding: 0.65rem 0.74rem;
+    font-size: 0.82rem;
+  }
+
+  .ag-input:focus,
+  .ag-select:focus,
+  .ag-textarea:focus {
+    outline: none;
+    border-color: #8cbef5;
+    box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.13);
+  }
+
+  .ag-textarea {
+    min-height: 90px;
+    resize: vertical;
+  }
+
+  .ag-btn {
+    border-radius: 10px;
+    padding: 0.56rem 0.82rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+  }
+
+  .ag-btn-primary {
+    background: var(--ag-primary);
+    color: #fff;
+  }
+
+  .ag-list {
+    display: grid;
+    gap: 0.72rem;
+    margin-top: 0.95rem;
+  }
+
+  .ag-examples {
+    margin-top: 0.95rem;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.58rem;
+  }
+
+  .ag-example {
+    border: 1px solid #d8d8de;
+    border-radius: 14px;
+    background: #fff;
+    padding: 0.68rem;
+  }
+
+  .ag-example-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+  }
+
+  .ag-example-label {
+    font-size: 0.76rem;
+    color: #6e6e73;
+    font-weight: 600;
+  }
+
+  .ag-example-badge {
+    border-radius: 999px;
+    border: 1px solid #d6d6dd;
+    padding: 0.16rem 0.46rem;
+    font-size: 0.64rem;
+    font-weight: 700;
+    color: #505058;
+  }
+
+  .ag-example-badge.activity {
+    border-color: rgba(59, 130, 246, 0.45);
+    background: rgba(59, 130, 246, 0.12);
+    color: #1d4ed8;
+  }
+
+  .ag-example-title {
+    margin-top: 0.34rem;
+    font-size: 0.84rem;
+    color: #1d1d1f;
+    font-weight: 700;
+  }
+
+  .ag-example-meta {
+    margin-top: 0.18rem;
+    font-size: 0.72rem;
+    color: #6e6e73;
+  }
+
+  .ag-cal-toolbar {
+    margin-top: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+
+  .ag-cal-nav {
+    display: inline-flex;
+    gap: 0.45rem;
+  }
+
+  .ag-cal-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #d6d6dd;
+    background: #fff;
+    color: #1d1d1f;
+    border-radius: 999px;
+    padding: 0.36rem 0.62rem;
+    font-size: 0.73rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .ag-cal-range {
+    font-size: 0.78rem;
+    color: #6e6e73;
+    font-weight: 600;
+  }
+
+  .ag-calendar {
+    margin-top: 0.95rem;
+    border: 1px solid #d7d7dc;
+    border-radius: 16px;
+    overflow: auto;
+    background: #fff;
+  }
+
+  .ag-cal-head,
+  .ag-cal-row {
+    min-width: 780px;
+    display: grid;
+    grid-template-columns: 72px repeat(7, minmax(100px, 1fr));
+  }
+
+  .ag-cal-head {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid #dadadf;
+  }
+
+  .ag-cal-head-cell {
+    padding: 0.6rem 0.5rem;
+    text-align: center;
+    border-left: 1px solid #efeff3;
+    color: #3a3a3c;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .ag-cal-head-cell.today {
+    color: #0058b8;
+    font-weight: 700;
+  }
+
+  .ag-cal-time {
+    border-top: 1px solid #efeff3;
+    padding: 0.5rem 0.4rem;
+    text-align: right;
+    font-size: 0.69rem;
+    color: #8e8e93;
+    font-weight: 600;
+    background: #fafafc;
+  }
+
+  .ag-cal-cell {
+    min-height: 64px;
+    border-top: 1px solid #efeff3;
+    border-left: 1px solid #efeff3;
+    padding: 0.25rem;
+    display: grid;
+    align-content: start;
+    gap: 0.24rem;
+    background: #fff;
+  }
+
+  .ag-cal-event {
+    border-radius: 10px;
+    padding: 0.3rem 0.38rem;
+    font-size: 0.67rem;
+    line-height: 1.3;
+    border: 1px solid #d9e2f3;
+    background: #eef4ff;
+  }
+
+  .ag-cal-event.activity {
+    border-color: rgba(59, 130, 246, 0.45);
+    background: rgba(59, 130, 246, 0.12);
+  }
+
+  .ag-cal-event.pending {
+    border-color: #f0d596;
+    background: #fff8e8;
+  }
+
+  .ag-cal-event.confirmed {
+    border-color: #9ed9bf;
+    background: #ecfff4;
+  }
+
+  .ag-cal-event.cancelled {
+    border-color: #f2b9b9;
+    background: #fff1f1;
+  }
+
+  .ag-cal-event-time {
+    color: #6e6e73;
+    font-weight: 700;
+  }
+
+  .ag-cal-event-title {
+    margin-top: 0.08rem;
+    color: #1d1d1f;
+    font-weight: 700;
+  }
+
+  .ag-cal-event-sub {
+    color: #6e6e73;
+    margin-top: 0.06rem;
+  }
+
+  .ag-item {
+    border: 1px solid #dadade;
+    border-radius: 16px;
+    background: #fff;
+    padding: 0.84rem;
+  }
+
+  .ag-item-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.8rem;
+  }
+
+  .ag-item-title {
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: var(--ag-ink);
+  }
+
+  .ag-item-meta {
+    margin-top: 0.23rem;
+    font-size: 0.76rem;
+    color: var(--ag-sub);
+  }
+
+  .ag-badge {
+    border-radius: 999px;
+    border: 1px solid #d6d6dd;
+    padding: 0.21rem 0.54rem;
+    font-size: 0.67rem;
+    font-weight: 700;
+    background: #fff;
+  }
+
+  .ag-badge.pending {
+    color: #9a6a00;
+    border-color: #f4db95;
+    background: #fff8e6;
+  }
+
+  .ag-badge.confirmed {
+    color: #0e6b4a;
+    border-color: #95e2c1;
+    background: #ebfff5;
+  }
+
+  .ag-badge.cancelled {
+    color: #991b1b;
+    border-color: #f7b7b7;
+    background: #fff0f0;
+  }
+
+  .ag-actions {
+    display: flex;
+    gap: 0.45rem;
+    margin-top: 0.6rem;
+  }
+
+  .ag-btn-ok {
+    background: var(--ag-success);
+    color: #fff;
+  }
+
+  .ag-btn-no {
+    background: var(--ag-danger);
+    color: #fff;
+  }
+
+  .ag-source {
+    color: var(--ag-sub);
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 0.34rem;
+  }
+
+  .ag-source-pill {
+    margin-top: 0.3rem;
+    display: inline-flex;
+    border-radius: 999px;
+    border: 1px solid #d6d6dd;
+    padding: 0.14rem 0.44rem;
+    font-size: 0.63rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .ag-source-pill.activity {
+    color: #1d4ed8;
+    border-color: rgba(59, 130, 246, 0.45);
+    background: rgba(59, 130, 246, 0.12);
+  }
+
+  @media (min-width: 900px) {
+    .ag-hero-grid {
+      grid-template-columns: 1.25fr 0.75fr;
+    }
+
+    .ag-layout {
+      grid-template-columns: 370px 1fr;
+    }
+
+    .ag-usecases {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .ag-form-row {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .ag-examples {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ag-shell">
+  <section class="ag-hero">
+    <span class="ag-chip">{% trans "Apple Calendar style" %} · {% trans "Agenda Mooviogo" %}</span>
+    <div class="ag-hero-grid">
+      <div>
+        <h1 class="ag-headline">{% trans "Un agenda inspire d'Apple, clair, net et concentre sur l'essentiel." %}</h1>
+        <p class="ag-subline">{{ subtitle }}</p>
+        {% if public_page_url %}
+        <a href="{{ public_page_url }}" target="_blank" rel="noopener" class="ag-public-link">{{ public_page_label|default:"Voir ma page publique" }}</a>
+        {% endif %}
+        <div class="ag-trust">
+          <span class="ag-trust-item">{% trans "Vue quotidienne" %}</span>
+          <span class="ag-trust-item">{% trans "Synchronisation simple" %}</span>
+          <span class="ag-trust-item">{% trans "Validation rapide" %}</span>
+        </div>
+      </div>
+      <aside class="ag-integration">
+        <p class="ag-int-title">{% trans "Ton centre de planning quotidien" %}</p>
+        <div class="ag-int-pills">
+          <span class="ag-pill">{% trans "Vue Jour" %}</span>
+          <span class="ag-pill">{% trans "Vue Semaine" %}</span>
+          <span class="ag-pill">{% trans "Appels" %}</span>
+          <span class="ag-pill">{% trans "Reservations" %}</span>
+          <span class="ag-pill">{% trans "Rappels" %}</span>
+          <span class="ag-pill">{% trans "Clients" %}</span>
+        </div>
+      </aside>
+    </div>
+    <div class="ag-usecases">
+      <div class="ag-usecase">
+        <strong>{% trans "Aujourd'hui" %}</strong>
+        <span>{% trans "Une lecture immediate des prochaines actions" %}</span>
+      </div>
+      <div class="ag-usecase">
+        <strong>{% trans "Appels clients" %}</strong>
+        <span>{% trans "Planifie tes appels avec horaire et contact" %}</span>
+      </div>
+      <div class="ag-usecase">
+        <strong>{% trans "Confirmations" %}</strong>
+        <span>{% trans "Valide rapidement chaque reservation en attente" %}</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="ag-layout">
+    <aside class="ag-panel">
+      <div class="ag-title">{% trans "Ajouter une réservation directe" %}</div>
+      <p class="ag-sub">{% trans "Saisis les réservations reçues hors Mooviogo." %} · {{ account_section_label }}</p>
+
+      <div class="ag-examples">
+        {% for sample in example_items %}
+        <article class="ag-example">
+          <div class="ag-example-head">
+            <div class="ag-example-label">{{ sample.label }}</div>
+            <span class="ag-example-badge {{ sample.data.section }}">{{ sample.data.section|upper }}</span>
+          </div>
+          <div class="ag-example-title">{{ sample.data.title }}</div>
+          <div class="ag-example-meta">{{ sample.data.time }} · {{ sample.data.customer }}</div>
+          <span class="ag-badge {% if sample.data.status == 'PENDING' %}pending{% elif sample.data.status == 'CONFIRMED' %}confirmed{% else %}cancelled{% endif %}" style="margin-top:0.32rem;display:inline-flex">
+            {{ sample.data.status }}
+          </span>
+        </article>
+        {% endfor %}
+      </div>
+
+      <div class="ag-kpis">
+        <div class="ag-kpi">
+          <div class="ag-kpi-num">{{ pending_count }}</div>
+          <div class="ag-kpi-label">{% trans "En attente" %}</div>
+        </div>
+        <div class="ag-kpi">
+          <div class="ag-kpi-num">{{ activity_offer.features|length }}</div>
+          <div class="ag-kpi-label">{% trans "Fonctionnalités Activité 2" %}</div>
+        </div>
+      </div>
+
+      <div class="ag-examples" style="margin-top:0.7rem">
+        {% for item in activity_offer.features|slice:":3" %}
+        <article class="ag-example">
+          <div class="ag-example-label">{% trans "Inclus" %}</div>
+          <div class="ag-example-title">{{ item }}</div>
+        </article>
+        {% endfor %}
+      </div>
+
+      <form method="post" class="ag-form">
+        {% csrf_token %}
+        <input name="title" class="ag-input" placeholder="{% trans 'Titre de la réservation' %}" required />
+
+        <div class="ag-form-row">
+          <select name="reservation_kind" class="ag-select">
+            <option value="ACTIVITY" selected>{% trans "Activité" %}</option>
+          </select>
+          <input type="datetime-local" name="starts_at" class="ag-input" required />
+        </div>
+
+        <div class="ag-form-row">
+          <input name="customer_name" class="ag-input" placeholder="{% trans 'Nom client' %}" />
+          <input name="customer_contact" class="ag-input" placeholder="{% trans 'Email ou téléphone' %}" />
+        </div>
+
+        <div class="ag-form-row">
+          <input type="number" min="1" name="party_size" class="ag-input" placeholder="{% trans 'Participants' %}" />
+          <button type="submit" class="ag-btn ag-btn-primary">{% trans "Ajouter à l'agenda" %}</button>
+        </div>
+
+        <textarea name="notes" class="ag-textarea" placeholder="{% trans 'Notes internes (optionnel)' %}"></textarea>
+      </form>
+    </aside>
+
+    <section class="ag-panel">
+      <div class="ag-title">{% trans "Planning des réservations" %}</div>
+      <p class="ag-sub">{% trans "Mooviogo + direct, triés par date." %}</p>
+
+      <div class="ag-cal-toolbar">
+        <div class="ag-cal-nav">
+          <a class="ag-cal-link" href="/partner/agenda/?week_offset={{ previous_week_offset }}">{% trans "Semaine précédente" %}</a>
+          <a class="ag-cal-link" href="/partner/agenda/?week_offset=0">{% trans "Cette semaine" %}</a>
+          <a class="ag-cal-link" href="/partner/agenda/?week_offset={{ next_week_offset }}">{% trans "Semaine suivante" %}</a>
+        </div>
+        <div class="ag-cal-range">{{ week_range_label }}</div>
+      </div>
+
+      <div class="ag-calendar">
+        <div class="ag-cal-head">
+          <div class="ag-cal-head-cell"></div>
+          {% for day in week_days %}
+          <div class="ag-cal-head-cell {% if day.is_today %}today{% endif %}">
+            {{ day.weekday_label }}<br />{{ day.day_label }}
+          </div>
+          {% endfor %}
+        </div>
+        {% for row_data in week_rows %}
+        <div class="ag-cal-row">
+          <div class="ag-cal-time">{{ row_data.hour_label }}</div>
+          {% for cell in row_data.cells %}
+          <div class="ag-cal-cell">
+            {% for ev in cell.events %}
+            <div class="ag-cal-event {{ ev.section }}">
+              <div class="ag-cal-event-time">{{ ev.time }}</div>
+              <div class="ag-cal-event-title">{{ ev.title }}</div>
+              <div class="ag-cal-event-sub">{{ ev.subtitle }}</div>
+            </div>
+            {% endfor %}
+          </div>
+          {% endfor %}
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="ag-list">
+        {% for row in items %}
+        <article class="ag-item">
+          <div class="ag-item-head">
+            <div>
+              <div class="ag-item-title">{{ row.entry.title }}</div>
+              <div class="ag-item-meta">{{ row.entry.starts_at|date:"d/m/Y H:i" }} · {{ row.entry.get_reservation_kind_display }}</div>
+              <div class="ag-item-meta">{% trans "Client" %}: {{ row.entry.customer_name|default:"-" }} {% if row.entry.party_size %}· {{ row.entry.party_size }} {% trans "pers." %}{% endif %}</div>
+              <div class="ag-source-pill {{ row.section }}">{{ row.section|upper }}</div>
+            </div>
+            <span class="ag-badge {% if row.status == 'PENDING' %}pending{% elif row.status == 'CONFIRMED' %}confirmed{% else %}cancelled{% endif %}">
+              {{ row.entry.get_status_display }}
+            </span>
+          </div>
+
+          {% if row.kind == "entry" and row.entry.status == 'PENDING' %}
+          <div class="ag-actions">
+            <form method="post" action="/partner/agenda/{{ row.entry.id }}/decision/">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="confirm" />
+              <button type="submit" class="ag-btn ag-btn-ok">{% trans "Valider" %}</button>
+            </form>
+            <form method="post" action="/partner/agenda/{{ row.entry.id }}/decision/">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="reject" />
+              <button type="submit" class="ag-btn ag-btn-no">{% trans "Refuser" %}</button>
+            </form>
+          </div>
+          {% endif %}
+        </article>
+        {% empty %}
+        <p class="ag-sub">{% trans "Aucune réservation dans l'agenda." %}</p>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}
